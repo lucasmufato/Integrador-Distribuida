@@ -69,9 +69,9 @@ public class ClienteJFrame extends JFrame {
 		lblUsuario.setBounds(61, 80, 114, 15);
 		jpanel_logeo.add(lblUsuario);
 		
-		JLabel lblContrasea = new JLabel("Contraseña");
-		lblContrasea.setBounds(61, 126, 114, 15);
-		jpanel_logeo.add(lblContrasea);
+		JLabel lblPassword = new JLabel("password");
+		lblPassword.setBounds(61, 126, 114, 15);
+		jpanel_logeo.add(lblPassword);
 		
 		jtext_usuario = new JTextField();
 		jtext_usuario.setBounds(193, 78, 158, 19);

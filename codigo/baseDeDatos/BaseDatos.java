@@ -23,26 +23,24 @@ public class BaseDatos {
 		try {
 	         Class.forName("org.postgresql.Driver");
 	         c = DriverManager.getConnection("jdbc:postgresql://"+host+":"+puertoBD+"/"+nombreBD,user, password);
-	         System.out.println("LectorBD-: conexión exitosa con la BD");
 	         return true;
 	      } catch (Exception e) {
-	    	 System.out.println("LectorBD-: error al conectar con la BD");
 	         e.printStackTrace();
 	         return false;
 	      }
 	}
 	
-	public Integer autenticar(String usuario, String contraseña){
-		//este metodo recibe el nombre de usuario y la contraseÃ±a para hacer el logeo
+	public Integer autenticar(String usuario, String password){
+		//este metodo recibe el nombre de usuario y la password para hacer el logeo
 		//si el logeo no funciona (error de user y password) devuelve nulo, sino crea y devuelve un ID_SESION
 		PreparedStatement query;
 		ResultSet rs;
 		try {
 			//A LA  QUERY ME PEDIA PONERLE { PORQUE ES UN ARRAY, SI NO NO ME DEJABA
-			query = c.prepareStatement("SELECT * FROM USUARIO S WHERE S.NOMBRE = "+ "'{" + usuario + "}'" +" AND S.CONTRASENIA = "+ "'{" + contraseña + "}'");
+			query = c.prepareStatement("SELECT * FROM USUARIO S WHERE S.NOMBRE = "+ "'{" + usuario + "}'" +" AND S.CONTRASENIA = "+ "'{" + password + "}'");
 			rs = query.executeQuery();
 			if (rs.next() == false) {
-				//si la primer respuesta ya es nulo es por que el user y contraseÃ±a son incorrectos
+				//si la primer respuesta ya es nulo es por que el user y password son incorrectos
 				return null;
 			}else{
 				//tendria q ver como crear el ID_SESION

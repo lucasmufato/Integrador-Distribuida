@@ -3,17 +3,17 @@ package mensajes;
 public class MensajeLogeo extends Mensaje {
 	
 	//clase que se usara para el logeo
-	//el cliente envia este mensaje con id_sesion = null, codigo = logeo, y su usuario y contraseÃ±a
-	//el servidor si autentica bien, responde con este mensaje, con contraseÃ±a =null y con numero de id_sesion
+	//el cliente envia este mensaje con id_sesion = null, codigo = logeo, y su usuario y password
+	//el servidor si autentica bien, responde con este mensaje, con password =null y con numero de id_sesion
 	
 	private static final long serialVersionUID = 1L;
 	protected String usuario;
-	protected String contraseña;
+	protected String password;
 	
-	public MensajeLogeo(CodigoMensaje codigo,Integer ID_Sesion,String usuario,String contraseña){
+	public MensajeLogeo(CodigoMensaje codigo,Integer ID_Sesion,String usuario,String password){
 		super(codigo,ID_Sesion);
 		this.usuario=usuario;
-		this.contraseña=contraseña;
+		this.password=password;
 	}
 
 	public String getUsuario() {
@@ -24,12 +24,12 @@ public class MensajeLogeo extends Mensaje {
 		this.usuario = usuario;
 	}
 
-	public String getContraseña() {
-		return contraseña;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setContraseña(String contraseña) {
-		this.contraseña = contraseña;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 	

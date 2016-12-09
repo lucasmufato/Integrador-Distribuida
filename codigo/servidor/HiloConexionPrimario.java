@@ -12,12 +12,12 @@ public class HiloConexionPrimario implements Runnable {
 		this.bd = new BaseDatos();
 		bd.conectarse();
 		String nombre = "usuario";
-		String contraseña = "usuario123";
-		Integer resultado = bd.autenticar(nombre, contraseña); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+		String password = "usuario123";
+		Integer resultado = bd.autenticar(nombre, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
 		if(resultado != null){
-			System.out.println("Autenticación de usuario correcta, el número de la sesión es: " + resultado);
+			System.out.println("Autenticaciï¿½n de usuario correcta, el nï¿½mero de la sesiï¿½n es: " + resultado);
 		}else{
-			System.out.println("Error en autenticación de usuario.");
+			System.out.println("Error en autenticaciï¿½n de usuario.");
 		}
 	}
 
