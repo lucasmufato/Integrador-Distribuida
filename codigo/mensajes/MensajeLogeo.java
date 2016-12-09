@@ -8,12 +8,12 @@ public class MensajeLogeo extends Mensaje {
 	
 	private static final long serialVersionUID = 1L;
 	protected String usuario;
-	protected String contraseÃ±a;
+	protected String contraseña;
 	
-	public MensajeLogeo(CodigoMensaje codigo,Integer ID_Sesion,String usuario,String contraseÃ±a){
+	public MensajeLogeo(CodigoMensaje codigo,Integer ID_Sesion,String usuario,String contraseña){
 		super(codigo,ID_Sesion);
 		this.usuario=usuario;
-		this.contraseÃ±a=contraseÃ±a;
+		this.contraseña=contraseña;
 	}
 
 	public String getUsuario() {
@@ -24,12 +24,12 @@ public class MensajeLogeo extends Mensaje {
 		this.usuario = usuario;
 	}
 
-	public String getContraseÃ±a() {
-		return contraseÃ±a;
+	public String getContraseña() {
+		return contraseña;
 	}
 
-	public void setContraseÃ±a(String contraseÃ±a) {
-		this.contraseÃ±a = contraseÃ±a;
+	public void setContraseña(String contraseña) {
+		this.contraseña = contraseña;
 	}
 	
 	
