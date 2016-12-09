@@ -126,4 +126,8 @@ public class ClienteJFrame extends JFrame {
 		String password = this.jpassword.getText();
 		this.cliente.conectarseServidorPrimario(ip,puerto,usuario,password);
 	}
+	
+	public void mostrarMsjPorConsola(String msj){
+		this.textPaneConsola.setText(msj+ textPaneConsola.getText());
+	}
 }

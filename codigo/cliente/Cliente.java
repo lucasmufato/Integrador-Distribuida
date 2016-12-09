@@ -6,6 +6,7 @@ public class Cliente {
 
 	private ClienteJFrame vista;
 	private HiloConexion hiloConexion;
+	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
 	
 	public static void main(String[] args) {
 		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
@@ -32,10 +33,17 @@ public class Cliente {
 	}
 	
 	public boolean conectarseServidorPrimario(String ip, Integer puerto, String usuario, String password){
-		this.hiloConexion = new HiloConexion();
-		this.hiloConexion.conectarse(ip, puerto, usuario, password);
 		// a este metodo lo llamaria la vista
-		return false;
+		this.hiloConexion = new HiloConexion();
+		if (this.hiloConexion.conectarse(ip, puerto, usuario, password) ){
+			hilo = new Thread(hiloConexion);
+			hilo.start();
+			vista.mostrarMsjPorConsola("conexion exitosa");
+			return true;
+		}else{
+			vista.mostrarMsjPorConsola("");
+			return false;
+		}
 	}
 	
 	public boolean conectarseServidorBackup(){
