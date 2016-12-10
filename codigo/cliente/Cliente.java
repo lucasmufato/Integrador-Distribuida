@@ -4,6 +4,7 @@ import cliente.vista.ClienteJFrame;
 
 public class Cliente {
 
+	private EstadoCliente estado;
 	private ClienteJFrame vista;
 	private HiloConexion hiloConexion;
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
@@ -34,7 +35,7 @@ public class Cliente {
 	
 	public boolean conectarseServidorPrimario(String ip, Integer puerto, String usuario, String password){
 		// a este metodo lo llamaria la vista
-		this.hiloConexion = new HiloConexion();
+		this.hiloConexion = new HiloConexion(this);
 		if (this.hiloConexion.conectarse(ip, puerto, usuario, password) ){
 			hilo = new Thread(hiloConexion);
 			hilo.start();
@@ -64,6 +65,14 @@ public class Cliente {
 	public boolean trabajar(){
 		// es llamado por el hilo y le pide resolver la tarea
 		return false;
+	}
+
+	public EstadoCliente getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoCliente estado) {
+		this.estado = estado;
 	}
 	
 }

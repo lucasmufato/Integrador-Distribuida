@@ -11,26 +11,43 @@ import mensajes.*;
 
 public class HiloConexion implements Runnable {
 	
+	protected Cliente cliente;
+	
 	protected Socket socket;
+	protected ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
+	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	
+	public HiloConexion(Cliente cliente){
+		this.cliente=cliente;
+	}
 	
 	public boolean conectarse(String ip, Integer puerto, String usuario, String password){
 		//hecho rapido para probar que algo ande
 		//La idea es que no sea asi
 		
-		ObjectOutputStream flujoSaliente; //RECIBIR OBJETOS
-		ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 		Mensaje msj = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
 
 		try {
 			this.socket = new Socket(ip,puerto);
-			
-			//ENVIO EL OBJETO MSJ (PARA MAS ADELANTE CUANDO VEAMOS COMO HACEMOS LO DE LOS MSJs
-			/*flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
-			flujoSaliente.writeObject(msj);*/
-			
+			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
+			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
+			this.flujoSaliente.writeObject(msj);
+			MensajeLogeo respuesta = (MensajeLogeo) this.flujoEntrante.readObject();
+			if(respuesta.getID_Sesion() == null){
+				//error de logeo
+				//TODO informar a la vista
+				return false;
+			}
+			cliente.setEstado(EstadoCliente.logueado);
+			return true;
 		} catch (UnknownHostException e) {
+			//no me pude conectar al servidor
 			e.printStackTrace();
 		} catch (IOException e) {
+			//otro tipo de error, ya sea de comunicacion o al crear los flujos
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			//me mandaron algo que no era un objeto de la clase mensaje
 			e.printStackTrace();
 		}
 		return false;
@@ -38,8 +55,35 @@ public class HiloConexion implements Runnable {
 	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		while(cliente.getEstado()!=EstadoCliente.desconectado){
+			//mientras no este desconectado
+			//leo y recibo mensajes
+			
+			try {
+				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
+				
+				switch(mensajeRecibido.getCodigo()){
+				case tarea:
+					tarea();
+					break;
+				default:
+					//aca entran los casos de un mensaje con codigo=logeo y codigo respuestaTarea
+					//ambos no deberian suceder
+					break;
+				
+				}
+				
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 	}
 
+	private boolean tarea(){
+		return false;
+	}
+	
 }
