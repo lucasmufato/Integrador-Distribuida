@@ -51,13 +51,13 @@ class HiloMineroCPU extends HiloMinero {
 				encontrado = true;
 				this.notificarResultado (n_seq);
 
-				/* DEBUG: */
+				// DEBUG:
 				System.out.println ("[DEBUG] FINAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
 
 				/* TODO: setear estado a cliente */
 			} else {
-				/* DEBUG: */
-				System.out.println ("[DEBUG] PARCIAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
+				// DEBUG:
+				// System.out.println ("[DEBUG] PARCIAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
 
 				/* sumamos uno a la parte correspondiente al numero de secuencia en la concatencacion */
 				int pos = concatenacion.length -1; //Ponemos el puntero en el bit menos significativo
@@ -76,7 +76,6 @@ class HiloMineroCPU extends HiloMinero {
 
 					/* Si llegamos a la parte de la tarea, significa que ya probamos todas los numeros de secuencia con esa cantidad de bits */
 					if ((pos+1) <= tarea.length) {
-						System.out.println("pos+1="+(pos+1)+" tarea.length="+tarea.length);
 						/* Aumentamos el tamanio del numero de secuencia */	
 						n_seq = new byte [n_seq.length+1];
 						Arrays.fill (n_seq, (byte) 0x00);

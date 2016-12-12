@@ -42,6 +42,9 @@ abstract class HiloMinero implements Runnable {
 	public void notificarParcial (byte[] parcial) {
 		if (this.cliente != null && this.tarea != null) {
 			this.cliente.notificarParcial (this.tarea, parcial);
+		} else {
+			/* Si no hay un cliente, lo mostramos por pantalla */
+			System.out.println ("PARCIAL: " + hashToString(parcial));
 		}
 		
 	}
@@ -49,6 +52,9 @@ abstract class HiloMinero implements Runnable {
 	public void notificarResultado (byte[] resultado) {
 		if (this.cliente != null && this.tarea != null) {
 			this.cliente.notificarResultado (this.tarea, resultado);
+		} else {
+			/* Si no hay un cliente, lo mostramos por pantalla */
+			System.out.println ("FINAL: " + hashToString(resultado));
 		}
 	}
 
