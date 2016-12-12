@@ -22,13 +22,10 @@ public class Servidor {
 	}
 	
 	public boolean crearServidorPrimario(){
-		//crea una instancia de primario
-		//le dice que arranque su GUI
-		
+		//crea una instancia de primario		
 		/** por ahora queda asi **/
 		Primario primario = new Primario();
-		primario.crearGUI();
-		return false;
+		return true;
 	}
 	
 	public boolean crearServidorBackup(){

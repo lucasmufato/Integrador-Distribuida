@@ -1,7 +1,7 @@
 /* creo el usuario con permiso para crear BD */
 CREATE ROLE distribuido LOGIN ENCRYPTED PASSWORD 'sistemas' CREATEDB VALID UNTIL 'infinity';
 
-CREATE DATABASE finalDistribuido;
+CREATE DATABASE finaldistribuido;
 
 /* creo la tabla usuario para la version 0.1	*/
 CREATE TABLE usuario(
