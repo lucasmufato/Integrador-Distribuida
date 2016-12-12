@@ -42,7 +42,7 @@ public class Cliente {
 			vista.mostrarMsjPorConsola("conexion exitosa");
 			return true;
 		}else{
-			vista.mostrarMsjPorConsola("");
+			vista.mostrarMsjPorConsola("error en el logueo! :O");
 			return false;
 		}
 	}
