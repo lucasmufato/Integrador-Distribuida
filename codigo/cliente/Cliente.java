@@ -8,6 +8,7 @@ public class Cliente {
 	private ClienteJFrame vista;
 	private HiloConexion hiloConexion;
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
+	private HiloMinero hiloMinero;
 	
 	public static void main(String[] args) {
 		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
@@ -62,17 +63,44 @@ public class Cliente {
 		return false;
 	}
 	
-	public boolean trabajar(){
+	public boolean trabajar(byte[] tarea, byte[] parcial, byte[] limite_superior){
 		// es llamado por el hilo y le pide resolver la tarea
+		synchronized (this.estado) {
+			switch (this.estado) {
+				case trabajando:
+					return false;
+				case desconectado:
+					return false;
+				case logueado:
+					return false;
+				case esperandoTrabajo:
+					if (this.hiloMinero == null) {
+						this.hiloMinero = new HiloMineroCPU(this, tarea, parcial, limite_superior);
+						this.estado = EstadoCliente.trabajando;
+						return true;
+					}
+					break;
+			}
+		}
 		return false;
 	}
 
 	public EstadoCliente getEstado() {
-		return estado;
+		synchronized (this.estado) {
+			return estado;
+		}
 	}
 
 	public void setEstado(EstadoCliente estado) {
-		this.estado = estado;
+		synchronized (this.estado) {
+			this.estado = estado;
+		}
+	}
+
+	public void notificarParcial (byte[] tarea, byte[] parcial) {
+	}
+
+	public void notificarResultado (byte[] tarea, byte[] resultado) {
 	}
 	
 }
