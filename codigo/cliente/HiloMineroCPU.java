@@ -10,6 +10,7 @@ class HiloMineroCPU extends HiloMinero {
 	public HiloMineroCPU (Cliente cliente, byte[] tarea, byte[] parcial, byte[] limite_superior) {
 		this.setCliente (cliente);
 		this.setTarea (tarea);
+		this.setInicio (parcial);
 		this.setLimiteSuperior (limite_superior);
 		try {
 			this.sha256 = MessageDigest.getInstance("SHA-256");
@@ -44,11 +45,20 @@ class HiloMineroCPU extends HiloMinero {
 
 		while (!encontrado) {
 			hash = this.sha256.digest(concatenacion);
+
 			if (esMenor (hash, limite)) {
+				System.arraycopy(concatenacion, tarea.length, n_seq, 0, n_seq.length);
 				encontrado = true;
 				this.notificarResultado (n_seq);
+
+				/* DEBUG: */
+				System.out.println ("[DEBUG] FINAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
+
 				/* TODO: setear estado a cliente */
 			} else {
+				/* DEBUG: */
+				System.out.println ("[DEBUG] PARCIAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
+
 				/* sumamos uno a la parte correspondiente al numero de secuencia en la concatencacion */
 				int pos = concatenacion.length -1; //Ponemos el puntero en el bit menos significativo
 				boolean seguir = true;
@@ -56,7 +66,7 @@ class HiloMineroCPU extends HiloMinero {
 				/* Este bucle aumenta el numero de secuencia en la concatenacion */
 				/* Nota: para mejorar la performance, solo se vuelca en la variable n_seq cuando se envia notificacion, o cuando se aumenta el tamanio del array. */
 				while (seguir) {
-					if (concatenacion[pos] < 0xFF) {
+					if (concatenacion[pos] != (byte)0xFF) {
 						concatenacion[pos]++;
 						seguir = false;
 					} else {
@@ -66,6 +76,7 @@ class HiloMineroCPU extends HiloMinero {
 
 					/* Si llegamos a la parte de la tarea, significa que ya probamos todas los numeros de secuencia con esa cantidad de bits */
 					if ((pos+1) <= tarea.length) {
+						System.out.println("pos+1="+(pos+1)+" tarea.length="+tarea.length);
 						/* Aumentamos el tamanio del numero de secuencia */	
 						n_seq = new byte [n_seq.length+1];
 						Arrays.fill (n_seq, (byte) 0x00);

@@ -59,14 +59,13 @@ abstract class HiloMinero implements Runnable {
 			return false;
 		}
 
-		boolean seguir = true;
 		int posicion_comparar = 0;
 
-		while (seguir) {
-			if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
+		while (posicion_comparar < limite_superior.length) {
+			if ((hash[posicion_comparar]&0xFF) < (limite_superior[posicion_comparar]&0xFF)) {
 				/* Si es menor, devolvemos true */
 				return true;
-			} else if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
+			} else if ((hash[posicion_comparar]&0xFF) > (limite_superior[posicion_comparar]&0xFF)) {
 				/* Si es mayor, devolvemos false */
 				return false;
 			} else {
@@ -77,6 +76,14 @@ abstract class HiloMinero implements Runnable {
 
 		/* Si llegamos hasta aca es porque son iguales */
 		return false;
+	}
+
+	public static String hashToString(byte[] hash) {
+    	StringBuilder builder = new StringBuilder();
+    	for(byte b : hash) {
+    	    builder.append(String.format("%02x ", b));
+    	}
+    	return builder.toString();
 	}
 
 }
