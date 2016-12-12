@@ -99,18 +99,24 @@ public class Primario implements Runnable {
 			throw new Exception ("No se puede comparar hash con limite superior, longitudes incompatibles.");
 		}
 
-		boolean es_menor = true;
+		boolean seguir = true;
 		int posicion_comparar = 0;
 
-		while (posicion_comparar < hash.length && es_menor) {
+		while (seguir) {
 			if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
-				posicion_comparar++;
+				/* Si es menor, devolvemos true */
+				return true;
+			} else if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
+				/* Si es mayor, devolvemos false */
+				return false;
 			} else {
-				es_menor = false;
+				/* Si es igual, pasamos al proximo byte */
+				posicion_comparar++;
 			}
 		}
 
-		return es_menor;
+		/* Si llegamos hasta aca es porque son iguales */
+		return false;
 	}
 
 	@Override
