@@ -16,8 +16,7 @@ public class ServidorVista extends JFrame {
 		this.servidor=servidor;
 		
 		//esto va aca hasta que haya una interfaz usable
-		this.servidor.setPuerto(5555);
-		if( this.servidor.pedirPuerto() ){
+		if( this.servidor.pedirPuerto(5555) ){
 			this.IniciarServidor();
 		}
 		

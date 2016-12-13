@@ -72,8 +72,9 @@ public class Primario implements Runnable {
 		return false;
 	}
 	
-	public boolean pedirPuerto(){
+	public boolean pedirPuerto(Integer puerto){
 		try {
+			this.puerto=puerto;
 			this.serverSO = new ServerSocket(this.puerto);
 			this.serverSO.setSoTimeout(this.tiempoEspera);
 			return true;

@@ -59,6 +59,8 @@ public class HiloConexionPrimario implements Runnable {
 		
 		//si esto anterior sale bien le tendria que mandar una tarea.
 		
+		//CREO UN MSJ TAREA
+		//LEO LA TAREA DE LA BD Y SE LA MANDO AL HILO DEL CLIENTE POR EL MISMO SOCKET
 		
 	}
 

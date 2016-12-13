@@ -13,8 +13,8 @@ public class BaseDatos {
 	protected final static String host="localhost";
 	protected final static String nombreBD="finaldistribuido";
 	protected final static Integer puertoBD=5432;
-	protected final static String user="lucas";
-	protected final static String password="lucas";
+	protected final static String user="postgres";
+	protected final static String password="jasmin";
 	
 	public BaseDatos(){
 	}
@@ -37,7 +37,7 @@ public class BaseDatos {
 		ResultSet rs;
 		try {
 			//A LA  QUERY ME PEDIA PONERLE { PORQUE ES UN ARRAY, SI NO NO ME DEJABA
-			query = c.prepareStatement("SELECT * FROM USUARIO S WHERE S.NOMBRE = "+ "'{" + usuario + "}'" +" AND S.CONTRASENIA = "+ "'{" + password + "}'");
+			query = c.prepareStatement("SELECT * FROM USUARIO S WHERE S.NOMBRE = "+ "'" + usuario + "'" +" AND S.CONTRASENIA = "+ "'" + password + "'");
 			rs = query.executeQuery();
 			if (rs.next() == false) {
 				//si la primer respuesta ya es nulo es por que el user y password son incorrectos
@@ -62,4 +62,35 @@ public class BaseDatos {
 			return false;
 		}
 	}
+	
+	public synchronized Tarea getTarea(Integer idUsuario){
+		//VA A HACER UN SELECT A LA BD PARA OBTENER UNA TAREA, VA A HACER UN INSERT CON PROCESAMINETO_TAREA CARGANDO EL ID USUARIO
+		//LA TAREA A BUSCAR VA A SE ALGUNA QUE NO ESTE SIENDO USADA O COMPLETADA
+		
+		//HAGO NEW TAREA
+	
+		return null;
+		
+	}
+	
+	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
+		return false;
+	}
+	
+	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
+		//SETEA EL RESULTADO FINAL EN LA BD
+		//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
+		return false;
+	}	
+	
+	public synchronized boolean detenerTarea(Tarea tarea, Integer idUsuario){
+		return false;
+	}
+	
+	private synchronized boolean estaFinalizadoBloque(){
+		//CHEQUEA QUE TODAS LAS TAREAS DEL BLOQUE ESTEN COMPLETAS
+		return false;
+	}
+	
+	
 }

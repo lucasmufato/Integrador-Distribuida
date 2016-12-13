@@ -83,6 +83,8 @@ public class HiloConexion implements Runnable {
 	}
 
 	private boolean tarea(){
+		//VA A RECIBIR LA TAREA, Y VA A LLAMAR AL METODO TRABAJARDEL CLIENTE, PRIMERO VA A PONER EL ESTADO DEL CLIENTE
+		//EN ESPERANDO TRABAJO
 		return false;
 	}
 	
