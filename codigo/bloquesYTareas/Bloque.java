@@ -1,4 +1,4 @@
-package baseDeDatos;
+package bloquesYTareas;
 
 import java.util.ArrayList;
 

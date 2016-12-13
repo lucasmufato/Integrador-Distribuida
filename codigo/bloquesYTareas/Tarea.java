@@ -1,4 +1,4 @@
-package baseDeDatos;
+package bloquesYTareas;
 
 public class Tarea {
 	private Bloque bloque;
