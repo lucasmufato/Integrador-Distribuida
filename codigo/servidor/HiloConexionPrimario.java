@@ -6,17 +6,22 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import baseDeDatos.BaseDatos;
+import bloquesYTareas.Tarea;
 import mensajes.*;
 
 
 public class HiloConexionPrimario implements Runnable {
 	
-	private BaseDatos bd;
-	private Socket socket;	
+	protected Primario servidor;
+	protected BaseDatos bd;
+	protected Socket socket;	
 	protected ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
 	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	//necesitaria ya sea un objeto usuario o el id de sesion para saber a que usuario estoy atendiendo
+	protected Tarea tareaEnTrabajo;
 	
-	public HiloConexionPrimario(Socket s) {
+	public HiloConexionPrimario(Primario servidor,Socket s) {
+		this.servidor=servidor;
 		this.socket=s;
 		try {
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
@@ -26,42 +31,113 @@ public class HiloConexionPrimario implements Runnable {
 			e.printStackTrace();
 		}
 		this.bd = new BaseDatos();
-		bd.conectarse();
+		//bd.conectarse();
 		
 	}
 
 	@Override
 	public void run() {
-		//UNA VEZ QUE EL SE CONECTO UN CLIENTE (Y SE CREO SU HILO) SE VA A CONECTAR CON LA BD, PARA AUTENTICAR
-		MensajeLogeo msj=null;
-		try {
-			msj=(MensajeLogeo)this.flujoEntrante.readObject();
-		} catch (ClassNotFoundException | IOException e) {
-			//exploto todooo
-			e.printStackTrace();
-		}
-		String usuario = msj.getUsuario();
-		String password = msj.getPassword();
-		Integer resultado = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
-		MensajeLogeo mensaje;
-		if(resultado != null){
-			System.out.println("Autenticaci�n de usuario correcta, el n�mero de la sesi�n es: " + resultado);
-			mensaje  = new MensajeLogeo(CodigoMensaje.logeo,resultado,usuario,password);
+		//hago el logeo
+		if(this.clienteLogeo() ){
+			//si el cliente se logra autenticar
+			this.intercambioDeTarea();
 		}else{
-			System.out.println("Error en autenticaci�n de usuario.");
-			mensaje  = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
+			// si no se logeo muero como hilo
 		}
-		try {
-			this.flujoSaliente.writeObject(mensaje);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		//si esto anterior sale bien le tendria que mandar una tarea.
-		
-		//CREO UN MSJ TAREA
-		//LEO LA TAREA DE LA BD Y SE LA MANDO AL HILO DEL CLIENTE POR EL MISMO SOCKET
 		
 	}
 
+	protected boolean clienteLogeo(){
+		//metodo que se encarga de intercambiar mensajes hasta que el usuario se logee con exito
+		MensajeLogeo msj=null;
+		boolean logeado=false;
+		try {
+			//mientras el usuario no se logee correctamente
+			while(!logeado){
+				try {
+					//leo lo que me manda (el usuario es el primero en mandar algo)
+					msj=(MensajeLogeo)this.flujoEntrante.readObject();
+				} catch (ClassNotFoundException | IOException e) {
+					//exploto todooo
+					e.printStackTrace();
+					return false;
+				}
+				//obtengo los datos para la autenticacion
+				String usuario = msj.getUsuario();
+				String password = msj.getPassword();
+				Integer resultado = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+				MensajeLogeo mensaje;	//mensaje de respuesta
+				if(resultado != null){
+					System.out.println("Autenticaci�n de usuario correcta, el n�mero de la sesi�n es: " + resultado);
+					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,resultado,usuario,password);
+					logeado=true;	//bandera para salir del bucle
+				}else{
+					System.out.println("Error en autenticaci�n de usuario.");
+					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
+				}
+				try {
+					this.flujoSaliente.writeObject(mensaje);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return false;
+				}
+			}	
+		}catch (Exception e1){
+			//si explota por algo que lo muestre y sale por falso
+			e1.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	protected boolean intercambioDeTarea(){
+		//este metodo se encarga de enviar la primer tarea a realizar, y despues de eso
+		//entra en un bucle en el cual lee respuestas del cliente y las responde conforme sea necesario
+		this.enviarNuevaTarea();
+		boolean conectado=true;
+		while(conectado){
+			try {
+				Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
+				switch(msj.getCodigo()){
+				case logeo:
+					//
+					break;
+				case respuestaTarea:
+					//tranformo el mensaje leido al tipo de mensaje que necesito
+					MensajeTarea mensaje= (MensajeTarea)msj;
+					if(mensaje.getTarea().getResultado()!=null){
+						//si el mensaje tiene el resultado final
+						this.resultadoFinalTarea(mensaje.getTarea());
+					}else{
+						//si no tiene resultado final entonces tiene un resultado parcial
+						this.resultadoParcialTarea(mensaje.getTarea());
+					}
+					break;
+				default:
+					new IOException("tipo de mensaje indevido");
+					break;
+				
+				}
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return false;
+	}
+	
+	protected boolean resultadoFinalTarea(Tarea tarea){
+		
+		return false;
+	}
+	
+	protected boolean resultadoParcialTarea(Tarea tarea){
+		
+		return false;
+	}
+	
+	protected boolean enviarNuevaTarea(){
+		
+		return false;
+	}
 }

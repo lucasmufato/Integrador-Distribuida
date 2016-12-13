@@ -7,8 +7,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import mensajes.MensajeLogeo;
 
+import bloquesYTareas.*;
 import servidor.vista.ServidorVista;
 
 public class Primario implements Runnable {
@@ -48,14 +48,15 @@ public class Primario implements Runnable {
 	}
 	
 	protected boolean esperarClientes(){
-		//metodo que se queda esperando conexiones
+		//metodo que se queda esperando conexiones, cuando llegan crea una HiloConexionPrimario, lo agrega a la lista
+		// y lo inicia como Thread.
 		this.estado=EstadoServidor.esperandoClientes;
 		this.vista.mostrarMsjConsola("esperando conexiones");
 		while (this.estado.equals( EstadoServidor.esperandoClientes) ){
 			try {
 				Socket s = this.serverSO.accept();
 				//this.vista.mostrarMsjConsola("Se me conectaron "+s);
-				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(s);
+				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
 				hilo.start();				
@@ -88,26 +89,24 @@ public class Primario implements Runnable {
 		return false;
 	}
 
-	protected boolean verificarResultado(byte[] tarea, byte[] n_sequencia, byte[] limite_superior) throws Exception {
+	protected boolean verificarResultado(Tarea tarea) throws Exception {
 		/* Comprueba que el hash de la concatenacion de tarea con n_sequencia es menor a limite_superior */
 		/* NO PROBADO */
-		byte[] concatenacion = new byte[tarea.length + n_sequencia.length];	
-		System.arraycopy(tarea, 0, concatenacion, 0, tarea.length);
-		System.arraycopy(n_sequencia, 0, concatenacion, tarea.length, n_sequencia.length);
+		byte[] concatenacion = tarea.getTareaRespuesta();
 		byte[] hash = this.sha256.digest (concatenacion);
 
-		if (hash.length != limite_superior.length) {
+		if (hash.length != tarea.getLimiteSuperior().length) {
 			throw new Exception ("No se puede comparar hash con limite superior, longitudes incompatibles.");
 		}
 
 		boolean seguir = true;
-		int posicion_comparar = 0;
+		int posicion_comparar = 0;	//TODO acomodar
 
 		while (seguir) {
-			if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
+			if (hash[posicion_comparar] < tarea.getLimiteSuperior()[posicion_comparar]) {
 				/* Si es menor, devolvemos true */
 				return true;
-			} else if (hash[posicion_comparar] < limite_superior[posicion_comparar]) {
+			} else if (hash[posicion_comparar] < tarea.getLimiteSuperior()[posicion_comparar]) {
 				/* Si es mayor, devolvemos false */
 				return false;
 			} else {

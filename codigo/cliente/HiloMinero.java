@@ -1,11 +1,28 @@
 package cliente;
 
+import bloquesYTareas.Tarea;
+
 abstract class HiloMinero implements Runnable {
 	protected static long LAPSO_NOTIFICACION = 2000; //Enviar una notificacion de progreso parcial cada 2 segundos
 	private Cliente cliente; //Cliente al que se notificaran los resultados parciales y finales
+	
 	private byte[] tarea; //tarea asignada
 	private byte[] limite_superior; //limite contra el cual comparar para saber si el resultado es el que esperamos
 	private byte[] inicio; //Puede ser el resultado parcial de otro proceso que no termino
+	
+	private Tarea tareaNueva;	//tiene este nombre para que no se solape con la otra "tarea"
+	
+	//
+	public HiloMinero(Tarea tarea){
+		this.tareaNueva=tarea;
+		this.tarea = this.tareaNueva.getTarea();
+		this.limite_superior = this.tareaNueva.getLimiteSuperior();
+		this.inicio=this.tareaNueva.getParcial();
+	}
+	
+	public HiloMinero() {
+		// me lo pedia por la herencia por crear el constructor de arriba
+	}
 
 	public Cliente getCliente () {
 		return this.cliente;
@@ -14,7 +31,7 @@ abstract class HiloMinero implements Runnable {
 	public void setCliente (Cliente cliente) {
 		this.cliente = cliente;
 	}
-
+	
 	public byte[] getTarea () {
 		return this.tarea;
 	}
@@ -38,7 +55,7 @@ abstract class HiloMinero implements Runnable {
 	public void setInicio (byte[] inicio) {
 		this.inicio = inicio;
 	}
-
+	
 	public void notificarParcial (byte[] parcial) {
 		if (this.cliente != null && this.tarea != null) {
 			this.cliente.notificarParcial (this.tarea, parcial);

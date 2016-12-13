@@ -1,6 +1,9 @@
 package cliente;
 import java.util.Arrays;
 import java.util.Date;
+
+import bloquesYTareas.Tarea;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -8,10 +11,21 @@ class HiloMineroCPU extends HiloMinero {
 	private MessageDigest sha256;
 
 	public HiloMineroCPU (Cliente cliente, byte[] tarea, byte[] parcial, byte[] limite_superior) {
+		super();
 		this.setCliente (cliente);
 		this.setTarea (tarea);
 		this.setInicio (parcial);
 		this.setLimiteSuperior (limite_superior);
+		try {
+			this.sha256 = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println ("ERROR FATAL: No se puede inicializar el minero");
+			/* TODO: Abortar */
+		}
+	}
+
+	public HiloMineroCPU(Tarea tarea) {
+		super(tarea);
 		try {
 			this.sha256 = MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
