@@ -34,8 +34,8 @@ public class ClienteJFrame extends JFrame {
 		this.cliente=c;
 		this.setTitle("Cliente BitCoin Mining");
 		this.setVisible(true);
-		this.setBounds(250, 250, 500, 250);
 		this.setResizable(false);
+		this.setBounds(250, 250, 500, 250);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
