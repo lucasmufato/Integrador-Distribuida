@@ -93,11 +93,11 @@ public class HiloConexionPrimario implements Runnable {
 				this.idSesion = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
 				MensajeLogeo mensaje;	//mensaje de respuesta
 				if(this.idSesion != null){
-					System.out.println("Autenticaci�n de usuario correcta, el n�mero de la sesi�n es: " + this.idSesion);
+					System.out.println("Autenticacion de usuario correcta, el numero de la sesion es: " + this.idSesion);
 					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,this.idSesion,usuario,password);
 					logeado=true;	//bandera para salir del bucle
 				}else{
-					System.out.println("Error en autenticaci�n de usuario.");
+					System.out.println("Error en autenticacion de usuario.");
 					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
 				}
 				try {

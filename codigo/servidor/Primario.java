@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import bloquesYTareas.*;
 import servidor.vista.ServidorVista;
+import servidor.vista.ServidorVista2;
 
 public class Primario implements Runnable {
 	
@@ -23,9 +24,11 @@ public class Primario implements Runnable {
 	
 	//variables para la vista
 	private ServidorVista vista;
+	private ServidorVista2 vista2;
 	
 	//variables de control
 	private EstadoServidor estado;
+	
 	
 	public Primario(){
 		//algo
@@ -47,15 +50,25 @@ public class Primario implements Runnable {
 		return false;
 	}
 	
+	private boolean crearGUI2(){
+		//creo la GUI 2
+		this.vista2 = new ServidorVista2(this);
+		return false;
+	}
+	
 	protected boolean esperarClientes(){
 		//metodo que se queda esperando conexiones, cuando llegan crea una HiloConexionPrimario, lo agrega a la lista
 		// y lo inicia como Thread.
 		this.estado=EstadoServidor.esperandoClientes;
-		this.vista.mostrarMsjConsola("esperando conexiones");
+		this.vista.mostrarMsjConsola("Esperando conexiones");
+		//CUANDO EMPIEZO A ESPERAR CLIENTES, CREO LA GUI2
+		this.crearGUI2();
 		while (this.estado.equals( EstadoServidor.esperandoClientes) ){
 			try {
 				Socket s = this.serverSO.accept();
-				//this.vista.mostrarMsjConsola("Se me conectaron "+s);
+				//UNA VEZ QUE YA SE CONECTO UN CLIENTE, OCULTO LA GRUI1
+				this.vista.setVisible(false);
+				//this.vista.mostrarMsjConsola("Se me conecto "+s);
 				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
@@ -78,9 +91,10 @@ public class Primario implements Runnable {
 			this.puerto=puerto;
 			this.serverSO = new ServerSocket(this.puerto);
 			this.serverSO.setSoTimeout(this.tiempoEspera);
+			this.vista.MostrarPopUp("Servidor conectado con exito");
 			return true;
 		} catch (IOException e) {
-			this.vista.MostrarPopUp("el puerto ya esta siendo utilizado, ingrese otro");
+			this.vista.MostrarPopUp("El puerto ya esta siendo utilizado, ingrese otro");
 			return false;
 		}
 	}

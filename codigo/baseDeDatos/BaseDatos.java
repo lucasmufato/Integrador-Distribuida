@@ -16,8 +16,8 @@ public class BaseDatos {
 	protected final static String host="localhost";
 	protected final static String nombreBD="finaldistribuido";
 	protected final static Integer puertoBD=5432;
-	protected final static String user="lucas";
-	protected final static String password="lucas";
+	protected final static String user="postgres";
+	protected final static String password="jasmin";
 	
 	public BaseDatos(){
 	}
