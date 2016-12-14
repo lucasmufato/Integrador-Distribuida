@@ -1,8 +1,12 @@
 package bloquesYTareas;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Bloque {
+public class Bloque implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
+	
 	protected Integer id;
 	protected EstadoBloque estado;
 	protected ArrayList<Tarea> tareas;

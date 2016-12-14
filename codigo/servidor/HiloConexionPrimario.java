@@ -12,13 +12,20 @@ import mensajes.*;
 
 public class HiloConexionPrimario implements Runnable {
 	
+	//conexion con otras clases
 	protected Primario servidor;
 	protected BaseDatos bd;
+	
+	//variables para la comunicacion con el cliente
 	protected Socket socket;	
 	protected ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
 	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	
+	//variables relacionadas con el cliente
 	//necesitaria ya sea un objeto usuario o el id de sesion para saber a que usuario estoy atendiendo
 	protected Tarea tareaEnTrabajo;
+	protected Integer idSesion;
+	protected Integer idUsuario=10;	//por el momento para completar los metodos
 	
 	public HiloConexionPrimario(Primario servidor,Socket s) {
 		this.servidor=servidor;
@@ -31,7 +38,7 @@ public class HiloConexionPrimario implements Runnable {
 			e.printStackTrace();
 		}
 		this.bd = new BaseDatos();
-		//bd.conectarse();
+		bd.conectarse();
 		
 	}
 
@@ -42,11 +49,29 @@ public class HiloConexionPrimario implements Runnable {
 			//si el cliente se logra autenticar
 			this.intercambioDeTarea();
 		}else{
-			// si no se logeo muero como hilo
+			this.cerrarConexion();
+			this.morir();
 		}
 		
 	}
+	
+	protected void morir(){
+		//metodo que borra la relacion entre el servidor y el HiloConexionPrimario y despues llama al garbage colector
+		this.servidor.eliminarHiloConexion(this);
+		this.servidor=null;
+		try {	this.finalize();	} catch (Throwable e) {	}
+	}
 
+	protected void cerrarConexion(){
+		//metodo que libera recursos y se desconecta
+		this.bd=null;
+		this.idUsuario=null;
+		this.tareaEnTrabajo=null;
+		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
+		try {	this.socket.close();			} catch (IOException e) {}
+	}
+	
 	protected boolean clienteLogeo(){
 		//metodo que se encarga de intercambiar mensajes hasta que el usuario se logee con exito
 		MensajeLogeo msj=null;
@@ -65,11 +90,11 @@ public class HiloConexionPrimario implements Runnable {
 				//obtengo los datos para la autenticacion
 				String usuario = msj.getUsuario();
 				String password = msj.getPassword();
-				Integer resultado = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+				this.idSesion = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
 				MensajeLogeo mensaje;	//mensaje de respuesta
-				if(resultado != null){
-					System.out.println("Autenticaci�n de usuario correcta, el n�mero de la sesi�n es: " + resultado);
-					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,resultado,usuario,password);
+				if(this.idSesion != null){
+					System.out.println("Autenticaci�n de usuario correcta, el n�mero de la sesi�n es: " + this.idSesion);
+					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,this.idSesion,usuario,password);
 					logeado=true;	//bandera para salir del bucle
 				}else{
 					System.out.println("Error en autenticaci�n de usuario.");
@@ -93,7 +118,10 @@ public class HiloConexionPrimario implements Runnable {
 	protected boolean intercambioDeTarea(){
 		//este metodo se encarga de enviar la primer tarea a realizar, y despues de eso
 		//entra en un bucle en el cual lee respuestas del cliente y las responde conforme sea necesario
-		this.enviarNuevaTarea();
+		if(this.enviarNuevaTarea() == false ){
+			//si se produjo algun error al enviar la tarea
+			return false;
+		}
 		boolean conectado=true;
 		while(conectado){
 			try {
@@ -120,6 +148,9 @@ public class HiloConexionPrimario implements Runnable {
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
+				this.bd.detenerTarea(this.tareaEnTrabajo, this.idUsuario);
+				this.cerrarConexion();
+				this.morir();
 				return false;
 			}
 		}
@@ -127,17 +158,57 @@ public class HiloConexionPrimario implements Runnable {
 	}
 	
 	protected boolean resultadoFinalTarea(Tarea tarea){
-		
+		System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
+		if (this.servidor.verificarResultado(tarea) == true){
+			if (this.bd.setResultado(tarea, idUsuario) == true){
+				this.enviarNuevaTarea();
+				return true;
+			}else{
+				//TODO si la BD no lo pudo guardar que hago?
+			}
+		}else{
+			//TODO si no se verifica bien que hago?
+		}
 		return false;
 	}
 	
 	protected boolean resultadoParcialTarea(Tarea tarea){
-		
-		return false;
+		//creo q no haria mas que eso
+		System.out.println ("[DEBUG] PARCIAL:  -> " + hashToString (tarea.getParcial()));
+		if(this.bd.setParcial(tarea, idUsuario) == true){
+			
+			return true;
+		}else{
+			//TODO si sale mal que hago?
+			return false;
+		}
 	}
 	
 	protected boolean enviarNuevaTarea(){
-		
-		return false;
+		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
+		Tarea tarea = this.bd.getTarea(idUsuario);		//por ahora es un numero inventado lo que le paso
+		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
+		try {
+			this.flujoSaliente.writeObject(mensaje);
+			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo.
+			return true;
+		} catch (IOException e) {
+			//TODO si sale mal q hago?
+			e.printStackTrace();
+			return false;
+		}
 	}
-}
+	
+	public static String hashToString(byte[] hash) {
+		if(hash==null){
+			return "";
+		}
+    	StringBuilder builder = new StringBuilder();
+    	for(byte b : hash) {
+    	    builder.append(String.format("%02x ", b));
+    	}
+    	return builder.toString();
+	}
+	
+	
+}//fin de la clase

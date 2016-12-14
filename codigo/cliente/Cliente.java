@@ -1,5 +1,6 @@
 package cliente;
 
+import bloquesYTareas.Tarea;
 import cliente.vista.ClienteJFrame;
 
 public class Cliente {
@@ -63,7 +64,7 @@ public class Cliente {
 		return false;
 	}
 	
-	public boolean trabajar(byte[] tarea, byte[] parcial, byte[] limite_superior){
+	public boolean trabajar(Tarea tarea){
 		// es llamado por el hilo y le pide resolver la tarea
 		synchronized (this.estado) {
 			switch (this.estado) {
@@ -75,8 +76,10 @@ public class Cliente {
 					return false;
 				case esperandoTrabajo:
 					if (this.hiloMinero == null) {
-						this.hiloMinero = new HiloMineroCPU(this, tarea, parcial, limite_superior);
+						this.hiloMinero = new HiloMineroCPU(this, tarea);
 						this.estado = EstadoCliente.trabajando;
+						Thread hilo = new Thread(this.hiloMinero);
+						hilo.start();
 						return true;
 					}
 					break;
@@ -92,15 +95,17 @@ public class Cliente {
 	}
 
 	public void setEstado(EstadoCliente estado) {
+		/*	ME TIRO ERROR AL USARLO PROBARLO CON SOCKETS
 		synchronized (this.estado) {
 			this.estado = estado;
 		}
+		*/
+		this.estado=estado;
 	}
 
-	public void notificarParcial (byte[] tarea, byte[] parcial) {
-	}
-
-	public void notificarResultado (byte[] tarea, byte[] resultado) {
+	public void notificar (Tarea tarea){
+		System.out.println("Envio el resultado: PARCIAL "+ HiloMinero.hashToString( tarea.getParcial() )+"  FINAL: " +HiloMinero.hashToString(tarea.getResultado()) );
+		this.hiloConexion.enviarResultado(tarea);
 	}
 	
 }

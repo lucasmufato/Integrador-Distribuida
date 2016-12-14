@@ -1,8 +1,12 @@
 package bloquesYTareas;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Tarea {
+public class Tarea implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
+	
 	protected Bloque bloque;
 	protected byte[] tarea;
 	protected byte[] parcial;

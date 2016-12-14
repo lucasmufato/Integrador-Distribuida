@@ -89,14 +89,16 @@ public class Primario implements Runnable {
 		return false;
 	}
 
-	protected boolean verificarResultado(Tarea tarea) throws Exception {
+	protected boolean verificarResultado(Tarea tarea) {
 		/* Comprueba que el hash de la concatenacion de tarea con n_sequencia es menor a limite_superior */
 		/* NO PROBADO */
 		byte[] concatenacion = tarea.getTareaRespuesta();
 		byte[] hash = this.sha256.digest (concatenacion);
 
 		if (hash.length != tarea.getLimiteSuperior().length) {
-			throw new Exception ("No se puede comparar hash con limite superior, longitudes incompatibles.");
+			//throw new Exception ("No se puede comparar hash con limite superior, longitudes incompatibles.");
+			/** le saco la excepcion ya que es mas facil tratarlo como que da distinto y listo **/
+			return false;
 		}
 
 		boolean seguir = true;
@@ -124,6 +126,10 @@ public class Primario implements Runnable {
 		this.esperarClientes();		
 	}
 
+	public void eliminarHiloConexion(HiloConexionPrimario hiloConexionPrimario) {
+		// metodo que saca a un hilo de la lista de conexiones
+		this.hilosConexiones.remove(hiloConexionPrimario);
+	}
 	
 	/** 	SETTERS Y GETTERS		**/
 	public Integer getPuerto() {
@@ -161,4 +167,6 @@ public class Primario implements Runnable {
 	public String getIP() {
 		return IP;
 	}
+
+	
 }

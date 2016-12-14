@@ -34,6 +34,17 @@ class HiloMineroCPU extends HiloMinero {
 		}
 	}
 
+	public HiloMineroCPU(Cliente cliente, Tarea tarea) {
+		super(tarea);
+		this.setCliente(cliente);
+		try {
+			this.sha256 = MessageDigest.getInstance("SHA-256");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println ("ERROR FATAL: No se puede inicializar el minero");
+			/* TODO: Abortar */
+		}
+	}
+
 	@Override
 	public void run() {
 		byte[] limite = this.getLimiteSuperior();

@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import bloquesYTareas.*;
 
@@ -15,8 +16,8 @@ public class BaseDatos {
 	protected final static String host="localhost";
 	protected final static String nombreBD="finaldistribuido";
 	protected final static Integer puertoBD=5432;
-	protected final static String user="postgres";
-	protected final static String password="jasmin";
+	protected final static String user="lucas";
+	protected final static String password="lucas";
 	
 	public BaseDatos(){
 	}
@@ -35,6 +36,12 @@ public class BaseDatos {
 	public Integer autenticar(String usuario, String password){
 		//este metodo recibe el nombre de usuario y la password para hacer el logeo
 		//si el logeo no funciona (error de user y password) devuelve nulo, sino crea y devuelve un ID_SESION
+		if(usuario == null || password == null){
+			return null;
+		}
+		if(usuario.equals("") || password.equals("")){
+			return null;
+		}
 		PreparedStatement query;
 		ResultSet rs;
 		try {
@@ -70,8 +77,18 @@ public class BaseDatos {
 		//LA TAREA A BUSCAR VA A SE ALGUNA QUE NO ESTE SIENDO USADA O COMPLETADA
 		
 		//HAGO NEW TAREA
-	
-		return null;
+		
+		/** PARA PROBAR	**/
+		byte[] tareaResolver = {0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F, 0x0B ,0x0A, 0x03, 0x0F,0x0B, 0x0A, 0x03, 0x0F,0x0B, 0x0A, 0x03, 0x0F,0x0B, 0x0A, 0x03, 0x0F,0x0B, 0x0A, 0x03, 0x0F,0x0B};
+		byte[] parcial = {0x00};
+		byte[] limite_superior = new byte[32];
+		Arrays.fill (limite_superior, (byte) 0x00);
+		limite_superior[3] = (byte) 0x80; // Esto va a buscar algo que empiece con 3 ceros
+		
+		Tarea tarea = new Tarea(null,tareaResolver,parcial);
+		tarea.SetLimite(3,(byte) 0x80);
+		
+		return tarea;
 		
 	}
 	

@@ -58,7 +58,9 @@ abstract class HiloMinero implements Runnable {
 	
 	public void notificarParcial (byte[] parcial) {
 		if (this.cliente != null && this.tarea != null) {
-			this.cliente.notificarParcial (this.tarea, parcial);
+			this.tareaNueva.setParcial(parcial);
+			this.tareaNueva.setResultado(null);
+			this.cliente.notificar(this.tareaNueva);
 		} else {
 			/* Si no hay un cliente, lo mostramos por pantalla */
 			System.out.println ("PARCIAL: " + hashToString(parcial));
@@ -68,7 +70,8 @@ abstract class HiloMinero implements Runnable {
 
 	public void notificarResultado (byte[] resultado) {
 		if (this.cliente != null && this.tarea != null) {
-			this.cliente.notificarResultado (this.tarea, resultado);
+			this.tareaNueva.setResultado(resultado);
+			this.cliente.notificar (this.tareaNueva);
 		} else {
 			/* Si no hay un cliente, lo mostramos por pantalla */
 			System.out.println ("FINAL: " + hashToString(resultado));
@@ -102,6 +105,9 @@ abstract class HiloMinero implements Runnable {
 	}
 
 	public static String hashToString(byte[] hash) {
+		if(hash==null){
+			return "";
+		}
     	StringBuilder builder = new StringBuilder();
     	for(byte b : hash) {
     	    builder.append(String.format("%02x ", b));

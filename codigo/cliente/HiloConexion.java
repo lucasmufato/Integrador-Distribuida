@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import bloquesYTareas.Tarea;
 import mensajes.CodigoMensaje;
 import mensajes.*;
 
@@ -16,6 +17,8 @@ public class HiloConexion implements Runnable {
 	protected Socket socket;
 	protected ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
 	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	
+	protected Integer idSesion;
 	
 	public HiloConexion(Cliente cliente){
 		this.cliente=cliente;
@@ -38,7 +41,8 @@ public class HiloConexion implements Runnable {
 				//TODO informar a la vista
 				return false;
 			}
-			cliente.setEstado(EstadoCliente.logueado);
+			this.idSesion=respuesta.getID_Sesion();
+			cliente.setEstado(EstadoCliente.esperandoTrabajo);
 			return true;
 		} catch (UnknownHostException e) {
 			//no me pude conectar al servidor
@@ -64,7 +68,8 @@ public class HiloConexion implements Runnable {
 				
 				switch(mensajeRecibido.getCodigo()){
 				case tarea:
-					tarea();
+					MensajeTarea mensaje = (MensajeTarea) mensajeRecibido;
+					this.tarea(mensaje.getTarea());
 					break;
 				default:
 					//aca entran los casos de un mensaje con codigo=logeo y codigo respuestaTarea
@@ -82,10 +87,22 @@ public class HiloConexion implements Runnable {
 
 	}
 
-	private boolean tarea(){
+	private boolean tarea(Tarea tarea){
 		//VA A RECIBIR LA TAREA, Y VA A LLAMAR AL METODO TRABAJARDEL CLIENTE, PRIMERO VA A PONER EL ESTADO DEL CLIENTE
 		//EN ESPERANDO TRABAJO
+		this.cliente.setEstado(EstadoCliente.esperandoTrabajo);
+		this.cliente.trabajar(tarea);
 		return false;
+	}
+
+	public void enviarResultado(Tarea tarea) {
+		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,tarea);
+		try {
+			this.flujoSaliente.writeObject(mensaje);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
