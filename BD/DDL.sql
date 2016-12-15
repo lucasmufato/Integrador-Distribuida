@@ -1,7 +1,14 @@
+DROP DATABASE IF EXISTS finaldistribuido;
+DROP ROLE IF EXISTS distribuido;
+
 /* creo el usuario con permiso para crear BD */
 CREATE ROLE distribuido LOGIN ENCRYPTED PASSWORD 'sistemas' CREATEDB VALID UNTIL 'infinity';
 
 CREATE DATABASE finaldistribuido;
+
+GRANT ALL PRIVILEGES ON DATABASE finaldistribuido TO distribuido;
+
+\connect finaldistribuido;
 
 /* creo la tabla usuario para la version 0.1	*/
 CREATE TABLE usuario(
@@ -15,12 +22,16 @@ CREATE TABLE usuario(
  
 );
 
+GRANT ALL PRIVILEGES ON TABLE usuario TO distribuido;
+
 CREATE TABLE estado_bloque(
 	id_estado_bloque SERIAL NOT NULL,
 	estado varchar(20),
 	
 	PRIMARY KEY (id_estado_bloque)
 );
+
+GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
 
 CREATE TABLE bloque(
 	id_bloque SERIAL NOT NULL,
@@ -30,12 +41,16 @@ CREATE TABLE bloque(
 	FOREIGN KEY (estado_bloque) REFERENCES estado_bloque (id_estado_bloque)
 );
 
+GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
+
 CREATE TABLE estado_tarea(
 	id_estado_tarea SERIAL NOT NULL,
 	estado varchar(20),
 	
 	PRIMARY KEY (id_estado_tarea)
 );
+
+GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
 
 CREATE TABLE tarea(
 	id_tarea SERIAL NOT NULL,
@@ -47,6 +62,8 @@ CREATE TABLE tarea(
 	FOREIGN KEY (bloque) REFERENCES bloque (id_bloque),
 	FOREIGN KEY (estado) REFERENCES estado_tarea (id_estado_tarea)
 );
+
+GRANT ALL PRIVILEGES ON TABLE tarea TO distribuido;
 
 CREATE TABLE procesamiento_tarea(
 	id_procesamiento_tarea SERIAL NOT NULL,
@@ -61,3 +78,5 @@ CREATE TABLE procesamiento_tarea(
 	FOREIGN KEY (tarea) REFERENCES tarea (id_tarea),
 	FOREIGN KEY (estado) REFERENCES estado_tarea (id_estado_tarea)
 );
+
+GRANT ALL PRIVILEGES ON TABLE tarea TO distribuido;
