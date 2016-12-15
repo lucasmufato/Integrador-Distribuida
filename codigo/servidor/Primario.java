@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import bloquesYTareas.*;
 import servidor.vista.ServidorVista;
-import servidor.vista.ServidorVista2;
+
 
 public class Primario implements Runnable {
 	
@@ -19,12 +19,11 @@ public class Primario implements Runnable {
 	private MessageDigest sha256;
 	private ArrayList<HiloConexionPrimario> hilosConexiones;
 	private Integer puerto;
-	private String IP;
+	private String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
 	private Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
 	
 	//variables para la vista
 	private ServidorVista vista;
-	private ServidorVista2 vista2;
 	
 	//variables de control
 	private EstadoServidor estado;
@@ -52,7 +51,7 @@ public class Primario implements Runnable {
 	
 	private boolean crearGUI2(){
 		//creo la GUI 2
-		this.vista2 = new ServidorVista2(this);
+		this.vista.crearPanelTrabajo();
 		return false;
 	}
 	
@@ -61,18 +60,16 @@ public class Primario implements Runnable {
 		// y lo inicia como Thread.
 		this.estado=EstadoServidor.esperandoClientes;
 		this.vista.mostrarMsjConsola("Esperando conexiones");
-		//CUANDO EMPIEZO A ESPERAR CLIENTES, CREO LA GUI2
+		//CREO LA GUI2
 		this.crearGUI2();
 		while (this.estado.equals( EstadoServidor.esperandoClientes) ){
 			try {
 				Socket s = this.serverSO.accept();
-				//UNA VEZ QUE YA SE CONECTO UN CLIENTE, OCULTO LA GRUI1
-				this.vista.setVisible(false);
-				//this.vista.mostrarMsjConsola("Se me conecto "+s);
+				this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
 				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
-				hilo.start();				
+				hilo.start();	
 			} catch (SocketTimeoutException e) {
 				//si sale por timeout no hay problema
 			} catch (IOException e) {
@@ -182,5 +179,4 @@ public class Primario implements Runnable {
 		return IP;
 	}
 
-	
 }
