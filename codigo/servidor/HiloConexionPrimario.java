@@ -8,10 +8,11 @@ import java.net.Socket;
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.Tarea;
 import mensajes.*;
+import servidor.vista.ServidorVista;
 
 
 public class HiloConexionPrimario implements Runnable {
-	
+
 	//conexion con otras clases
 	protected Primario servidor;
 	protected BaseDatos bd;
@@ -122,6 +123,7 @@ public class HiloConexionPrimario implements Runnable {
 			//si se produjo algun error al enviar la tarea
 			return false;
 		}
+		//DESPUES DEL ENVIARNUEVATAREA EN TAREAENTRABAJO VOY A TENER LA TAREA QUE ME ASIGNARON
 		boolean conectado=true;
 		while(conectado){
 			try {
@@ -208,6 +210,16 @@ public class HiloConexionPrimario implements Runnable {
     	    builder.append(String.format("%02x ", b));
     	}
     	return builder.toString();
+	}
+	
+	//PARA LA VISTA DEL SERVIDOR, LE PASO EL ID Y LA TAREA DE ESTA CONEXION
+	public Integer getIdUsuario(){
+		return this.idUsuario;
+	}
+	
+	public String getTarea(){
+		byte[] tarea = this.tareaEnTrabajo.getTarea();
+		return this.hashToString(tarea);
 	}
 	
 	
