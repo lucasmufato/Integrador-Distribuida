@@ -22,8 +22,6 @@ CREATE TABLE usuario(
  
 );
 
-GRANT ALL PRIVILEGES ON TABLE usuario TO distribuido;
-
 CREATE TABLE estado_bloque(
 	id_estado_bloque SERIAL NOT NULL,
 	estado varchar(20),
@@ -31,17 +29,13 @@ CREATE TABLE estado_bloque(
 	PRIMARY KEY (id_estado_bloque)
 );
 
-GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
-
 CREATE TABLE bloque(
 	id_bloque SERIAL NOT NULL,
-	estado_bloque INTEGER,
+	estado INTEGER,
 	
 	PRIMARY KEY (id_bloque),
-	FOREIGN KEY (estado_bloque) REFERENCES estado_bloque (id_estado_bloque)
+	FOREIGN KEY (estado) REFERENCES estado_bloque (id_estado_bloque)
 );
-
-GRANT ALL PRIVILEGES ON TABLE bloque TO distribuido;
 
 CREATE TABLE estado_tarea(
 	id_estado_tarea SERIAL NOT NULL,
@@ -49,8 +43,6 @@ CREATE TABLE estado_tarea(
 	
 	PRIMARY KEY (id_estado_tarea)
 );
-
-GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
 
 CREATE TABLE tarea(
 	id_tarea SERIAL NOT NULL,
@@ -62,8 +54,6 @@ CREATE TABLE tarea(
 	FOREIGN KEY (bloque) REFERENCES bloque (id_bloque),
 	FOREIGN KEY (estado) REFERENCES estado_tarea (id_estado_tarea)
 );
-
-GRANT ALL PRIVILEGES ON TABLE tarea TO distribuido;
 
 CREATE TABLE procesamiento_tarea(
 	id_procesamiento_tarea SERIAL NOT NULL,
@@ -79,4 +69,6 @@ CREATE TABLE procesamiento_tarea(
 	FOREIGN KEY (estado) REFERENCES estado_tarea (id_estado_tarea)
 );
 
-GRANT ALL PRIVILEGES ON TABLE tarea TO distribuido;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO distribuido;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO distribuido;
+
