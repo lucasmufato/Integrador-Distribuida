@@ -41,7 +41,7 @@ CREATE TABLE bloque(
 	FOREIGN KEY (estado_bloque) REFERENCES estado_bloque (id_estado_bloque)
 );
 
-GRANT ALL PRIVILEGES ON TABLE estado_bloque TO distribuido;
+GRANT ALL PRIVILEGES ON TABLE bloque TO distribuido;
 
 CREATE TABLE estado_tarea(
 	id_estado_tarea SERIAL NOT NULL,
