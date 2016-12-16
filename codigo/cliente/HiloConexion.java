@@ -62,7 +62,7 @@ public class HiloConexion implements Runnable {
 		while(cliente.getEstado()!=EstadoCliente.desconectado){
 			//mientras no este desconectado
 			//leo y recibo mensajes
-			
+			cliente.crearGUITrabajo();
 			try {
 				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
 				
