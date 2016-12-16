@@ -8,13 +8,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Observable;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
 
 import bloquesYTareas.*;
 
-public class BaseDatos {
+public class BaseDatos extends Observable {
 
 	protected Connection c;
 	protected final static String host="localhost";
@@ -117,7 +118,14 @@ public class BaseDatos {
 				res_tarea.getBytes("parcial")
 			);
 			tarea.setId(res_tarea.getInt("id"));
+			tarea.setEstado(EstadoTarea.enProceso);
 
+			//CUANDO SE HAYA ASIGNADO CORRECTAMENTE UN TAREA AL USUARIO SE AVISA AL OBSERVADOR DEL CAMBIO
+			//MARCO QUE CAMBIO EL OBJETO
+	        setChanged();
+	        //NOTIFICO EL CAMBIO
+	        notifyObservers(tarea);
+	        
 			/* TODO: Esto deberia establecerlo el servidor primario, no la base de datos */
 			tarea.SetLimite(3, (byte) 0x80);
 
@@ -389,6 +397,7 @@ public class BaseDatos {
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
 				System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
+
 			} else {
 				System.err.println ("Error al asignar una tarea al usuario");
 				return false;

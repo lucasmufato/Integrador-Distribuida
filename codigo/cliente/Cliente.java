@@ -27,6 +27,7 @@ public class Cliente {
 	}
 	
 	public boolean crearGUITrabajo(){
+		this.vista.crearPanelTrabajo();
 		return false;
 	}
 	
@@ -41,10 +42,10 @@ public class Cliente {
 		if (this.hiloConexion.conectarse(ip, puerto, usuario, password) ){
 			hilo = new Thread(hiloConexion);
 			hilo.start();
-			vista.mostrarMsjPorConsola("conexion exitosa");
+			vista.mostrarMsjPorConsola("Conexion exitosa");
 			return true;
 		}else{
-			vista.mostrarMsjPorConsola("error en el logueo! :O");
+			vista.mostrarMsjPorConsola("Error en el logueo, datos incorrectos");
 			return false;
 		}
 	}
@@ -104,6 +105,7 @@ public class Cliente {
 	}
 
 	public void notificar (Tarea tarea){
+		vista.escribirResultado("Envio el resultado: PARCIAL " + HiloMinero.hashToString(tarea.getParcial()) + "  FINAL: " +HiloMinero.hashToString(tarea.getResultado()));
 		System.out.println("Envio el resultado: PARCIAL "+ HiloMinero.hashToString( tarea.getParcial() )+"  FINAL: " +HiloMinero.hashToString(tarea.getResultado()) );
 		this.hiloConexion.enviarResultado(tarea);
 	}

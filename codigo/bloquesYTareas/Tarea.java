@@ -3,6 +3,8 @@ package bloquesYTareas;
 import java.io.Serializable;
 import java.util.Arrays;
 
+import cliente.EstadoCliente;
+
 public class Tarea implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
@@ -13,6 +15,7 @@ public class Tarea implements Serializable{
 	protected byte[] parcial;
 	protected byte[] resultado;
 	protected byte[] limiteSuperior;
+	protected EstadoTarea estado;
 	
 	public Tarea(Bloque bloque, byte[] tarea, byte[] parcial){
 		this.bloque= bloque;
@@ -85,6 +88,14 @@ public class Tarea implements Serializable{
 		Arrays.fill (this.limiteSuperior, (byte) 0x00);
 		this.limiteSuperior[posicionByte] = byteLimite;
 	}
-	
+	public EstadoTarea getEstado() {
+		synchronized (this.estado) {
+			return estado;
+		}
+	}
+
+	public void setEstado(EstadoTarea estado) {
+		this.estado=estado;
+	}
 	
 }

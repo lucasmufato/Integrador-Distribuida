@@ -12,18 +12,25 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.util.Observable;
+import java.util.Observer;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 
+import bloquesYTareas.Bloque;
+import bloquesYTareas.EstadoTarea;
 import bloquesYTareas.Tarea;
 
 import java.awt.Color;
+import java.awt.Rectangle;
+
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JScrollBar;
+import java.awt.SystemColor;
 
 
-public class ServidorVista extends JFrame {
+public class ServidorVista extends JFrame implements Observer{
 	
 	//variables de la clase
 	private static final long serialVersionUID = 1L;
@@ -39,14 +46,13 @@ public class ServidorVista extends JFrame {
 	private JTextPane textPaneConsolaTrabajo;
 	private JLabel lblIPServidor;
 	private JLabel lblPuertoServidor;
-	private JTextPane textPaneClientes;
 	
 	public ServidorVista(Primario servidor){
 		setTitle("Servidor BitCoin Mining");
 		this.servidor=servidor;
 		this.setVisible(true);
 		this.setResizable(false);
-		this.setBounds(250, 250, 500, 250);
+		this.setBounds(250, 250, 538, 321);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -63,12 +69,12 @@ public class ServidorVista extends JFrame {
 		//LABEL PUERTO DE ESCUCHA
 		JLabel lblPuertoDeEscucha = new JLabel("Puerto de escucha:");
 		lblPuertoDeEscucha.setForeground(Color.WHITE);
-		lblPuertoDeEscucha.setBounds(89, 27, 144, 14);
+		lblPuertoDeEscucha.setBounds(78, 43, 144, 14);
 		jpanel_servidor.add(lblPuertoDeEscucha);
 		
 		//TEXFIELD DEL PUERTO
 		textFieldPuerto = new JTextField();
-		textFieldPuerto.setBounds(228, 23, 172, 23);
+		textFieldPuerto.setBounds(281, 39, 172, 23);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
 		
@@ -81,18 +87,19 @@ public class ServidorVista extends JFrame {
 				}
 			}
 		});
-		btnConectarServidor.setBounds(192, 89, 144, 23);
+		btnConectarServidor.setBounds(217, 168, 144, 23);
 		jpanel_servidor.add(btnConectarServidor);
 		
 		//TEXT PANE EN DONDE SE VAN A IR MOSTRANDO MSJs
 		textPaneConsola = new JTextPane();
 		textPaneConsola.setForeground(Color.GREEN);
 		textPaneConsola.setBackground(Color.DARK_GRAY);
-		textPaneConsola.setBounds(0, 202, 494, 20);
+		textPaneConsola.setBounds(0, 273, 676, 20);
 		jpanel_servidor.add(textPaneConsola);
 		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
 		jpanel_trabajo = new JPanel();
+		jpanel_trabajo.setForeground(Color.BLACK);
 		jpanel_trabajo.setBackground(Color.BLACK);
 		panel.add(jpanel_trabajo, "");
 		jpanel_trabajo.setLayout(null);
@@ -100,17 +107,17 @@ public class ServidorVista extends JFrame {
 		textPaneConsolaTrabajo = new JTextPane();
 		textPaneConsolaTrabajo.setBackground(Color.DARK_GRAY);
 		textPaneConsolaTrabajo.setForeground(Color.GREEN);
-		textPaneConsolaTrabajo.setBounds(0, 202, 494, 20);
+		textPaneConsolaTrabajo.setBounds(0, 273, 533, 20);
 		jpanel_trabajo.add(textPaneConsolaTrabajo);
 		
 		lblIPServidor = new JLabel("");
 		lblIPServidor.setForeground(Color.RED);
-		lblIPServidor.setBounds(92, 0, 95, 14);
+		lblIPServidor.setBounds(10, 0, 148, 14);
 		jpanel_trabajo.add(lblIPServidor);
 		
 		lblPuertoServidor = new JLabel("");
 		lblPuertoServidor.setForeground(Color.RED);
-		lblPuertoServidor.setBounds(290, 0, 76, 14);
+		lblPuertoServidor.setBounds(199, 0, 139, 14);
 		jpanel_trabajo.add(lblPuertoServidor);
 		
 		JButton btnDesconectar = new JButton("X");
@@ -120,15 +127,13 @@ public class ServidorVista extends JFrame {
 				//LAMARA A UN METODO DESCONECTAR EN LA CLASE PRIMARIO
 			}
 		});
-		btnDesconectar.setBounds(435, 0, 59, 20);
+		btnDesconectar.setBounds(474, 0, 59, 20);
 		jpanel_trabajo.add(btnDesconectar);
 		
-		textPaneClientes = new JTextPane();
-		textPaneClientes.setForeground(Color.WHITE);
-		textPaneClientes.setBackground(Color.BLACK);
-		textPaneClientes.setBounds(0, 38, 494, 153);
-		jpanel_trabajo.add(textPaneClientes);
-		
+		JLabel lblBloquesYTareas = new JLabel("Bloques y sus tareas :");
+		lblBloquesYTareas.setForeground(Color.WHITE);
+		lblBloquesYTareas.setBounds(10, 37, 132, 14);
+		jpanel_trabajo.add(lblBloquesYTareas); 
 		
 		this.revalidate();
 		this.repaint();
@@ -175,12 +180,14 @@ public class ServidorVista extends JFrame {
 		
 	}
 
-	//ESTE METODO LO LLAMARIA DESDE PRIMARIO, CADA VEZ QUE CREE UN HILO O DESDE EL HILO MISMO Y LE PASO DIRECTAMENTE ID Y TAREA
-	//NO LO LLAMO DE NINGUN LADO PORQUE EXPLOTABA
-	public void setNuevaConexion(HiloConexionPrimario nuevaConexion) {
-		//MUESTRO EN EL TEXTPANE EL CLIENTE Y LA TAREA DE LA NUEVA CONEXION
-		textPaneClientes.setText("ID Cliente :" + String.valueOf(nuevaConexion.getIdUsuario()) + " ---> " + nuevaConexion.getTarea());
+	@Override
+	public void update(Observable o, Object arg) {
+		Tarea tarea = (Tarea) arg;
+		//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
+		int id_tarea = tarea.getId();
+		Bloque bloque = tarea.getBloque();
+		int idBloque = bloque.getId();
+		EstadoTarea estado = tarea.getEstado();
 	}
 
-	
 }

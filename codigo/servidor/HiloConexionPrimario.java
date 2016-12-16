@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Observable;
+import java.util.Observer;
 
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.Tarea;
@@ -11,7 +13,7 @@ import mensajes.*;
 import servidor.vista.ServidorVista;
 
 
-public class HiloConexionPrimario implements Runnable {
+public class HiloConexionPrimario implements Runnable{
 
 	//conexion con otras clases
 	protected Primario servidor;
@@ -192,7 +194,7 @@ public class HiloConexionPrimario implements Runnable {
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
-			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo.
+			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo.       
 			return true;
 		} catch (IOException e) {
 			//TODO si sale mal q hago?
