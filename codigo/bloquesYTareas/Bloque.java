@@ -13,7 +13,7 @@ public class Bloque implements Serializable {
 	
 	public Bloque(Integer id){
 		this.id=id;
-		this.estado=EstadoBloque.noTerminado;
+		this.estado=EstadoBloque.pendiente;
 		this.tareas = new ArrayList<Tarea>();
 	}
 	

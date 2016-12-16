@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Random;
 
 import bloquesYTareas.*;
@@ -55,6 +56,7 @@ public class BaseDatos {
 		PreparedStatement query;
 		ResultSet rs;
 		try {
+			/* WARNING: Esto permite inyeccion SQL */
 			query = c.prepareStatement("SELECT * FROM USUARIO S WHERE S.NOMBRE = "+ "'" + usuario + "'" +" AND S.CONTRASENIA = "+ "'" + password + "'");
 			rs = query.executeQuery();
 			if (rs.next() == false) {
@@ -109,12 +111,12 @@ public class BaseDatos {
 
 			this.asignarTareaUsuario(res_tarea.getInt("id"), idUsuario);
 
-
 			tarea = new Tarea (
 				this.getBloque (res_tarea.getInt("bloque")),
 				res_tarea.getBytes("h_bytes"),
 				res_tarea.getBytes("parcial")
 			);
+			tarea.setId(res_tarea.getInt("id"));
 
 			/* TODO: Esto deberia establecerlo el servidor primario, no la base de datos */
 			tarea.SetLimite(3, (byte) 0x80);
@@ -129,6 +131,50 @@ public class BaseDatos {
 
 	public synchronized Bloque getBloque(int id_bloque) {
 		/* Busca en la cache, o en la base de datos el bloque con el id especificado */
+		Bloque bloque = null;
+		bloque = this.cacheBloques.get(id_bloque);
+		if (bloque == null)	{
+			try {
+				/* Select bloque */
+				PreparedStatement stm_bloque = c.prepareStatement (
+					"SELECT " +
+						"estado_bloque.estado AS estado" +
+					"FROM " +
+						"bloque " +
+						"JOIN estado_bloque ON bloque.estado = estado_bloque " +
+					"WHERE " +
+						"bloque.id_bloque = ?"
+				);
+				stm_bloque.setInt(1, id_bloque);
+				stm_bloque.execute();
+				ResultSet res_bloque = stm_bloque.getResultSet();
+		
+				if (res_bloque.next()) {
+					bloque = new Bloque(id_bloque);
+					String str_estado = res_bloque.getString ("estado");
+					switch (str_estado) {
+						case "pendiente":
+							bloque.setEstado(EstadoBloque.pendiente);
+							break;
+						case "en proceso":
+							bloque.setEstado(EstadoBloque.enProceso);
+							break;
+						case "completado":
+							bloque.setEstado(EstadoBloque.completado);
+							break;
+					}
+					bloque.setTareas(this.getTareasPorBloque(id_bloque));
+					this.cacheBloques.put(id_bloque, bloque);
+				}
+			} catch (Exception e) {
+				System.err.println ("Error al recuperar bloque: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		return bloque;
+	}
+
+	public synchronized ArrayList<Tarea> getTareasPorBloque(int id_bloque) {
 		return null;
 	}
 
