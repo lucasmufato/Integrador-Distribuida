@@ -8,12 +8,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Observable;
 import java.util.HashMap;
 import java.util.Random;
 
 import bloquesYTareas.*;
 
-public class BaseDatos {
+public class BaseDatos extends Observable {
 
 	protected Connection c;
 	protected final static String host="localhost";
@@ -107,15 +108,14 @@ public class BaseDatos {
 				}
 			}
 
-			this.asignarTareaUsuario(res_tarea.getInt("id"), idUsuario);
-
-
 			tarea = new Tarea (
 				this.getBloque (res_tarea.getInt("bloque")),
 				res_tarea.getBytes("h_bytes"),
 				res_tarea.getBytes("parcial")
 			);
-
+			
+			this.asignarTareaUsuario(tarea,res_tarea.getInt("id"), idUsuario);
+			
 			/* TODO: Esto deberia establecerlo el servidor primario, no la base de datos */
 			tarea.SetLimite(3, (byte) 0x80);
 
@@ -305,7 +305,7 @@ public class BaseDatos {
 	}
 	
 	
-	private synchronized boolean asignarTareaUsuario (int id_tarea, int id_usuario) {
+	private synchronized boolean asignarTareaUsuario (Tarea tarea, int id_tarea, int id_usuario) {
 		try {
 			/* Insertamos el procesamiento */
 			PreparedStatement stm_procesamiento = c.prepareStatement(
@@ -343,6 +343,12 @@ public class BaseDatos {
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
 				System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
+				tarea.setEstado(EstadoTarea.enProceso);
+				//CUANDO SE HAYA ASIGNADO CORRECTAMENTE UN TAREA AL USUARIO SE AVISA AL OBSERVADOR DEL CAMBIO
+				//MARCO QUE CAMBIO EL OBJETO
+		        setChanged();
+		        //NOTIFICO EL CAMBIO
+		        notifyObservers(tarea);
 			} else {
 				System.err.println ("Error al asignar una tarea al usuario");
 				return false;

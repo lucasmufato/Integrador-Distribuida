@@ -7,7 +7,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
+import baseDeDatos.BaseDatos;
 import bloquesYTareas.*;
 import servidor.vista.ServidorVista;
 
@@ -66,7 +69,7 @@ public class Primario implements Runnable {
 			try {
 				Socket s = this.serverSO.accept();
 				this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
-				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
+				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);			
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
 				hilo.start();	
@@ -178,5 +181,6 @@ public class Primario implements Runnable {
 	public String getIP() {
 		return IP;
 	}
+
 
 }
