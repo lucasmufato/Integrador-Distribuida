@@ -7,6 +7,7 @@ public class Tarea implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
+	protected int id;
 	protected Bloque bloque;
 	protected byte[] tarea;
 	protected byte[] parcial;
@@ -39,6 +40,14 @@ public class Tarea implements Serializable{
 		System.arraycopy(this.tarea, 0, todo, 0, this.tarea.length);
 		System.arraycopy(this.resultado, 0, todo, this.tarea.length, this.resultado.length);
 		return todo;
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public Bloque getBloque() {
