@@ -84,6 +84,51 @@ public class BaseDatos extends Observable {
 		}
 	}
 
+	public synchronized Tarea getTareaById(int id_tarea) {
+		/* Deberia llamarse solo getTarea, pero ya hay un metodo que se llama asi y hace otra cosa */
+		Tarea tarea;
+		tarea = this.cacheTareas.get(id_tarea);
+		if (tarea == null) {
+		
+			ResultSet res_tarea = null;
+			try {
+				PreparedStatement stm_tarea = c.prepareStatement(
+				"SELECT " +
+					"tarea.id_tarea AS id, "+
+					"tarea.bloque as bloque, "+
+					"tarea.header_bytes as h_bytes, "+
+					"E'\\\\x00' AS parcial, "+
+					"estado_tarea.estado as estado "+
+				"FROM tarea " +
+					"JOIN estado_tarea ON tarea.estado = estado_tarea.id_estado_tarea " +
+					"JOIN bloque ON tarea.bloque = bloque.id_bloque " +
+					"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque "+
+				"WHERE " +
+					"tarea.id_tarea = ? "
+				); 
+				stm_tarea.setInt(1, id_tarea);
+				stm_tarea.execute();
+				res_tarea = stm_tarea.getResultSet ();
+
+				if (res_tarea.next()) {
+					tarea = new Tarea (
+						this.getBloque (res_tarea.getInt("bloque")),
+						res_tarea.getBytes("h_bytes"),
+						res_tarea.getBytes("parcial")
+					);
+					tarea.setId (id_tarea);
+				
+					this.cacheTareas.put(id_tarea, tarea);
+				}
+				
+			} catch (Exception e) {
+				System.err.println ("Error al recuperar tarea no iniciada");
+				e.printStackTrace();
+			}
+		}
+		return tarea;
+	}
+
 	public synchronized Tarea getTarea(Integer idUsuario){
 		Tarea tarea = null;
 		ResultSet res_tarea = null;
