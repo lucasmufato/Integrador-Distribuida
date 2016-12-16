@@ -28,7 +28,7 @@ public class ClienteJFrame extends JFrame {
 	Cliente cliente;
 	
 	private JTextField jtext_IP;
-	private JTextField Jtext_puerto;
+	private JTextField jtext_puerto;
 	private JTextField jtext_usuario;
 	private JPasswordField jpassword;
 	private JPanel jpanel_trabajo;
@@ -57,7 +57,7 @@ public class ClienteJFrame extends JFrame {
 		panel.add(jpanel_logeo, "name_26541168277457");
 		jpanel_logeo.setLayout(null);
 		
-		JLabel lblIpServidor = new JLabel("IP Servidor:");
+		JLabel lblIpServidor = new JLabel("IP Servidor: ");
 		lblIpServidor.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblIpServidor.setForeground(new java.awt.Color(189, 187, 185));
 		lblIpServidor.setBounds(25, 45, 114, 15);
@@ -67,25 +67,29 @@ public class ClienteJFrame extends JFrame {
 		jtext_IP.setBounds(129, 42, 150, 19);
 		jpanel_logeo.add(jtext_IP);
 		jtext_IP.setColumns(10);
+		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
+		jtext_IP.setText("127.0.0.1");
 		
-		JLabel lblPuertoServidor = new JLabel("Puerto Servidor:");
+		JLabel lblPuertoServidor = new JLabel("Puerto Servidor: ");
 		lblPuertoServidor.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPuertoServidor.setForeground(new java.awt.Color(189, 187, 185));
 		lblPuertoServidor.setBounds(305, 45, 142, 15);
 		jpanel_logeo.add(lblPuertoServidor);
 		
-		Jtext_puerto = new JTextField();
-		Jtext_puerto.setBounds(445, 42, 86, 19);
-		jpanel_logeo.add(Jtext_puerto);
-		Jtext_puerto.setColumns(10);
+		jtext_puerto = new JTextField();
+		jtext_puerto.setBounds(445, 42, 86, 19);
+		jpanel_logeo.add(jtext_puerto);
+		jtext_puerto.setColumns(10);
+		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
+		jtext_puerto.setText("5555");
 		
-		JLabel lblUsuario = new JLabel("Usuario:");
+		JLabel lblUsuario = new JLabel("Usuario: ");
 		lblUsuario.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblUsuario.setForeground(new java.awt.Color(189, 187, 185));
 		lblUsuario.setBounds(25, 133, 114, 15);
 		jpanel_logeo.add(lblUsuario);
 		
-		JLabel lblPassword = new JLabel("Password:");
+		JLabel lblPassword = new JLabel("Password: ");
 		lblPassword.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPassword.setForeground(new java.awt.Color(189, 187, 185));
 		lblPassword.setBounds(25, 176, 114, 15);
@@ -94,11 +98,15 @@ public class ClienteJFrame extends JFrame {
 		jtext_usuario = new JTextField();
 		jtext_usuario.setBounds(129, 130, 150, 20);
 		jpanel_logeo.add(jtext_usuario);
-		jtext_usuario.setColumns(10);
+		jtext_usuario.setColumns(20);
+		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
+		jtext_usuario.setText("usuario");
 		
 		jpassword = new JPasswordField();
 		jpassword.setBounds(129, 173, 150, 20);
 		jpanel_logeo.add(jpassword);
+		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
+		jpassword.setText("usuario123");
 		
 		JButton btnConectarse = new JButton("Conectarse");
 		btnConectarse.addActionListener(new ActionListener() {
@@ -126,7 +134,7 @@ public class ClienteJFrame extends JFrame {
 		jpanel_trabajo.add(lblUsuario_1);
 		lblUsuario_1.setForeground(new java.awt.Color(189, 187, 185));
 		
-		JLabel lblPuntos = new JLabel("Puntos:");
+		JLabel lblPuntos = new JLabel("Puntos: ");
 		lblPuntos.setBounds(354, 15, 161, 14);
 		jpanel_trabajo.add(lblPuntos);
 		lblUsuario_1.setForeground(new java.awt.Color(189, 187, 185));
@@ -136,31 +144,31 @@ public class ClienteJFrame extends JFrame {
 		desktopPane.setBounds(10, 49, 191, 221);
 		jpanel_trabajo.add(desktopPane);
 		
-		JLabel lblConexinA = new JLabel("Conexi\u00F3n a:");
+		JLabel lblConexinA = new JLabel("Conexi\u00F3n a: ");
 		lblConexinA.setBounds(10, 11, 171, 14);
 		desktopPane.add(lblConexinA);
 		
-		JLabel lblServidorPrimario = new JLabel("Servidor Primario:");
+		JLabel lblServidorPrimario = new JLabel("Servidor Primario: ");
 		lblServidorPrimario.setBounds(10, 44, 171, 14);
 		desktopPane.add(lblServidorPrimario);
 		
-		JLabel lblDireccinIp = new JLabel("Direcci\u00F3n IP:");
+		JLabel lblDireccinIp = new JLabel("Direcci\u00F3n IP: ");
 		lblDireccinIp.setBounds(10, 69, 171, 14);
 		desktopPane.add(lblDireccinIp);
 		
-		JLabel lblPuerto = new JLabel("Puerto:");
+		JLabel lblPuerto = new JLabel("Puerto: ");
 		lblPuerto.setBounds(10, 94, 171, 14);
 		desktopPane.add(lblPuerto);
 		
-		JLabel lblServidorBackup = new JLabel("Servidor Backup:");
+		JLabel lblServidorBackup = new JLabel("Servidor Backup: ");
 		lblServidorBackup.setBounds(10, 136, 171, 14);
 		desktopPane.add(lblServidorBackup);
 		
-		JLabel lblDireccinIp_1 = new JLabel("Direcci\u00F3n IP:");
+		JLabel lblDireccinIp_1 = new JLabel("Direcci\u00F3n IP: ");
 		lblDireccinIp_1.setBounds(10, 161, 171, 14);
 		desktopPane.add(lblDireccinIp_1);
 		
-		JLabel lblPuerto_1 = new JLabel("Puerto:");
+		JLabel lblPuerto_1 = new JLabel("Puerto: ");
 		lblPuerto_1.setBounds(10, 186, 171, 14);
 		desktopPane.add(lblPuerto_1);
 		
@@ -174,12 +182,11 @@ public class ClienteJFrame extends JFrame {
 		
 		textPane = new JTextPane();
 		textPane.setBounds(211, 49, 353, 221);
-		jpanel_trabajo.add(textPane);
+		//jpanel_trabajo.add(textPane);
 		
-		//DESPUES RESUELVO LO DEL SCROLL
-		/*JScrollPane scrollBar = new JScrollPane(textPane);
-		scrollBar.setBounds(547, 45, 17, 225);
-		jpanel_trabajo.add(scrollBar);*/
+		JScrollPane scrollBar = new JScrollPane(textPane);
+		scrollBar.setBounds(211, 49, 353, 221);
+		jpanel_trabajo.add(scrollBar);
 		textPaneConsola = new JTextPane();
 		getContentPane().add(textPaneConsola, BorderLayout.SOUTH);
 		textPaneConsola.setBackground(new java.awt.Color(209, 218, 225));
@@ -190,7 +197,7 @@ public class ClienteJFrame extends JFrame {
 	
 	private void conectarse(){
 		String ip = this.jtext_IP.getText().trim();
-		Integer puerto = Integer.parseInt( this.Jtext_puerto.getText().trim() );
+		Integer puerto = Integer.parseInt( this.jtext_puerto.getText().trim() );
 		String usuario = this.jtext_usuario.getText().trim();
 		String password = this.jpassword.getText();
 		this.cliente.conectarseServidorPrimario(ip, puerto, usuario, password);
@@ -203,7 +210,7 @@ public class ClienteJFrame extends JFrame {
 	
 	public void crearPanelTrabajo() {
 		//LUEGO DEL LOGUEO AUTOMATICAMENTE SE ABRE LA SEGUNDA PANTALLA
-		String usuario = this.jtext_usuario.getText().trim();
+		String usuario = this.jtext_usuario.getText();
 		jpanel_logeo.setVisible(false);
 		jpanel_trabajo.setVisible(true);
 		
