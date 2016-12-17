@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Observable;
 import java.util.HashMap;
@@ -524,9 +523,14 @@ public class BaseDatos extends Observable {
 		return true;
 	}
 
-	public Usuario getUsuario(String usuario) {
-		// puede devuelve los datos 
-		return null;
+	public synchronized Usuario getUsuario(String nombreUsuario) {
+		// por ahora devuelve el primer usuario nomas
+		Usuario u = new Usuario();
+		u.setId(1);
+		u.setNombre("usuario");
+		u.setPassword("usuario123");
+		u.setPuntos(0);
+		return u;
 	}
 	
 	private synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {

@@ -26,12 +26,7 @@ import bloquesYTareas.Tarea;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.SystemColor;
-
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
-
-
 
 public class ServidorVista extends JFrame implements Observer{
 	
@@ -103,9 +98,19 @@ public class ServidorVista extends JFrame implements Observer{
 		btnConectarServidor = new JButton("Conectar Servidor");
 		btnConectarServidor.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(servidor.pedirPuerto(Integer.parseInt(textFieldPuerto.getText()))){
-					iniciarServidor();
+				try{
+					Integer puerto =Integer.parseInt(textFieldPuerto.getText());
+					if(puerto<1024){
+						throw new NumberFormatException();
+					}
+					if(servidor.pedirPuerto(puerto)){
+						iniciarServidor();
+					}
+				}catch(NumberFormatException e1){
+					//si el numero es muy grande tirar error al parsearlo a Integer
+					MostrarPopUp("el numero de puerto no es correcto");
 				}
+				
 			}
 		});
 		btnConectarServidor.setBounds(217, 168, 144, 23);
@@ -170,7 +175,7 @@ public class ServidorVista extends JFrame implements Observer{
 		lbl1.setBounds(10, 62, 20, 20);
 		jpanel_trabajo.add(lbl1);
 		lbl1.setOpaque(true);
-		tareas.put("11",lbl1); //AÑADE EL LBL AL BLOQUE 1 CON TAREA 1
+		tareas.put("11",lbl1); //Aï¿½ADE EL LBL AL BLOQUE 1 CON TAREA 1
 		
 		lbl2 = new JLabel("");
 		lbl2.setOpaque(true);
@@ -353,6 +358,8 @@ public class ServidorVista extends JFrame implements Observer{
 			case completada:
 				//PASA A COLOR VERDE
 				tareas.get(clave).setBackground(Color.green);
+				break;
+			default:
 				break;
 			}
 			

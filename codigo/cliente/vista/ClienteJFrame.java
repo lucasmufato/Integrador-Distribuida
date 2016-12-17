@@ -1,10 +1,8 @@
 package cliente.vista;
 
 import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
-import javax.swing.JLayeredPane;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
@@ -16,7 +14,8 @@ import cliente.Cliente;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.CardLayout;
-import javax.swing.JScrollBar;
+import java.awt.Color;
+
 import javax.swing.JScrollPane;
 
 import java.awt.SystemColor;
@@ -27,6 +26,8 @@ import javax.swing.SwingConstants;
 
 public class ClienteJFrame extends JFrame {
 	
+	private static final long serialVersionUID = 1L;
+
 	Cliente cliente;
 	
 	private JTextField jtext_IP;
@@ -128,7 +129,12 @@ public class ClienteJFrame extends JFrame {
 		jpanel_logeo.add(btnConectarse);
 		
 		JLabel lblAcaVaEl = new JLabel("");
-		lblAcaVaEl.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/icono.jpg")));
+		try{
+			lblAcaVaEl.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/icono.jpg")));
+		}catch(Exception e){
+			lblAcaVaEl.setBackground(Color.WHITE);
+			System.out.println("no se encontro la imagen ");
+		}
 		lblAcaVaEl.setHorizontalAlignment(SwingConstants.CENTER);
 		lblAcaVaEl.setBounds(305, 71, 228, 187);
 		jpanel_logeo.add(lblAcaVaEl);
@@ -142,7 +148,12 @@ public class ClienteJFrame extends JFrame {
 		jpanel_trabajo.setBackground(new java.awt.Color(23, 26, 33));
 		
 		JButton btnSalir = new JButton("");
-		btnSalir.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/logout.jpg")));
+		try{
+			btnSalir.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/logout.jpg")));
+		}catch(Exception e){
+			btnSalir.setBackground(Color.WHITE);
+			System.out.println("no se encontro la imagen ");
+		}
 		btnSalir.setBounds(534, 11, 30, 30);
 		jpanel_trabajo.add(btnSalir);
 		btnSalir.setBackground(new java.awt.Color(23, 26, 33));
@@ -212,11 +223,33 @@ public class ClienteJFrame extends JFrame {
 	}
 	
 	private void conectarse(){
-		String ip = this.jtext_IP.getText().trim();
-		Integer puerto = Integer.parseInt( this.jtext_puerto.getText().trim() );
-		String usuario = this.jtext_usuario.getText().trim();
-		String password = this.jpassword.getText();
-		this.cliente.conectarseServidorPrimario(ip, puerto, usuario, password);
+		try{
+			String ip = this.jtext_IP.getText().trim();
+			Integer puerto = Integer.parseInt( this.jtext_puerto.getText().trim() );
+			String usuario = this.jtext_usuario.getText().trim();
+			String password = this.jpassword.getText();
+			if(ip.equals("")){
+				throw new java.lang.NumberFormatException();
+			}
+			if(usuario.equals("")){
+				throw new java.lang.NumberFormatException();
+			}
+			if(password.equals("")){
+				throw new java.lang.NumberFormatException();
+			}
+			
+			this.cliente.conectarseServidorPrimario(ip, puerto, usuario, password);
+		}catch(java.lang.NumberFormatException e){
+			//error al leer de los campos
+			this.mostrarMsjPorConsola("alguno de los campos contiene un error");
+		}
+		
+		
+	}
+	
+	public void mostrarPanelLogeo(){
+		jpanel_trabajo.setVisible(false);
+		jpanel_logeo.setVisible(true);
 	}
 	
 	public void mostrarMsjPorConsola(String msj){
@@ -249,17 +282,17 @@ public class ClienteJFrame extends JFrame {
 		if (primario) {
 			lblServidorPrimario.setText("Servidor Primario: Conectado");
 			lblServidorBackup.setText("Servidor Backup: - ");
-			lblDireccionIp.setText("Dirección IP: " + ip);
+			lblDireccionIp.setText("Direcciï¿½n IP: " + ip);
 			lblPuerto.setText("Puerto: " + puerto);
-			lblDireccionIp_1.setText("Dirección IP: - ");
+			lblDireccionIp_1.setText("Direcciï¿½n IP: - ");
 			lblPuerto_1.setText("Puerto: - ");
 		} else {
 			lblServidorPrimario.setText("Servidor Primario: - ");
 			lblServidorBackup.setText("Servidor Backup: Conectado");
-			lblDireccionIp_1.setText("Dirección IP: " + ip);
+			lblDireccionIp_1.setText("Direcciï¿½n IP: " + ip);
 			lblPuerto_1.setText("Puerto: " + puerto);
 			lblPuerto.setText("Puerto: - ");
-			lblDireccionIp.setText("Dirección IP: - ");
+			lblDireccionIp.setText("Direcciï¿½n IP: - ");
 		}
 	}
 

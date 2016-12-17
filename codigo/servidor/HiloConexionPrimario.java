@@ -86,6 +86,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 					msj=(MensajeLogeo)this.flujoEntrante.readObject();
 				} catch (ClassNotFoundException | IOException e) {
 					//exploto todooo
+					System.out.println("Error de logeo :(");
 					e.printStackTrace();
 					return false;
 				}
@@ -93,6 +94,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 				String usuario = msj.getUsuario();
 				String password = msj.getPassword();
 				this.idSesion = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+				
 				this.usuario = bd.getUsuario(usuario);
 				MensajeLogeo mensaje;	//mensaje de respuesta
 				if(this.idSesion != null){
@@ -146,12 +148,12 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 					}
 					break;
 				default:
-					new IOException("tipo de mensaje indevido");
-					break;
+					throw new IOException("tipo de mensaje indevido");
 				
 				}
 			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				System.out.println("hubo un error en la conexion con el usuario: "+this.usuario.getNombre()+". Desconectandolo.");
 				this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
 				this.cerrarConexion();
 				this.morir();
@@ -190,6 +192,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
+		System.out.println("el usuario es: "+this.usuario);
 		Tarea tarea = this.bd.getTarea(this.usuario.getId());		//por ahora es un numero inventado lo que le paso
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		try {

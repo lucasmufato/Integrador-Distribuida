@@ -79,13 +79,14 @@ public class Cliente {
 				case esperandoTrabajo:
 					if (this.hiloMinero == null) {
 						this.hiloMinero = new HiloMineroCPU(this, tarea);
-						this.estado = EstadoCliente.trabajando;
-						this.mostrarEstadoCliente("Trabajando en tarea...");
-						Thread hilo = new Thread(this.hiloMinero);
-						hilo.start();
-						return true;
+					}else{
+						this.hiloMinero.setTarea(tarea);
 					}
-					break;
+					this.estado = EstadoCliente.trabajando;
+					this.mostrarEstadoCliente("Trabajando en tarea...");
+					Thread hilo = new Thread(this.hiloMinero);
+					hilo.start();
+					return true;
 			}
 		}
 		return false;
@@ -107,7 +108,7 @@ public class Cliente {
 	}
 
 	public void mostrarEstadoCliente(String texto){
-		vista.escribirResultado(texto);
+		this.vista.escribirResultado(texto);
 	}
 	
 	public void notificar (Tarea tarea){
