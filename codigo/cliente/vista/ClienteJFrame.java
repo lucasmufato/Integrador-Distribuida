@@ -22,6 +22,8 @@ import javax.swing.JScrollPane;
 import java.awt.SystemColor;
 import java.awt.Font;
 import javax.swing.JDesktopPane;
+import javax.swing.ImageIcon;
+import javax.swing.SwingConstants;
 
 public class ClienteJFrame extends JFrame {
 	
@@ -35,6 +37,14 @@ public class ClienteJFrame extends JFrame {
 	private JPanel jpanel_logeo;
 	private JTextPane textPaneConsola;
 	private JLabel lblUsuario_1;
+	private JLabel lblPuntos;
+	private JLabel lblServidorPrimario;
+	private JLabel lblDireccionIp;
+	private JLabel lblPuerto;
+	private JLabel lblServidorBackup; 
+	private JLabel lblDireccionIp_1;
+	private JLabel lblPuerto_1;
+	
 	private JTextPane textPane;
 
 	public ClienteJFrame(Cliente c) {
@@ -117,6 +127,12 @@ public class ClienteJFrame extends JFrame {
 		btnConectarse.setBounds(148, 228, 117, 25);
 		jpanel_logeo.add(btnConectarse);
 		
+		JLabel lblAcaVaEl = new JLabel("");
+		lblAcaVaEl.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/icono.jpg")));
+		lblAcaVaEl.setHorizontalAlignment(SwingConstants.CENTER);
+		lblAcaVaEl.setBounds(305, 71, 228, 187);
+		jpanel_logeo.add(lblAcaVaEl);
+		
 		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
 		
@@ -125,60 +141,60 @@ public class ClienteJFrame extends JFrame {
 		jpanel_trabajo.setLayout(null);
 		jpanel_trabajo.setBackground(new java.awt.Color(23, 26, 33));
 		
-		JButton btnNewButton = new JButton("X");
-		btnNewButton.setBounds(525, 11, 39, 23);
-		jpanel_trabajo.add(btnNewButton);
+		JButton btnSalir = new JButton("");
+		btnSalir.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/logout.jpg")));
+		btnSalir.setBounds(534, 11, 30, 30);
+		jpanel_trabajo.add(btnSalir);
+		btnSalir.setBackground(new java.awt.Color(23, 26, 33));
+		btnSalir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.exit(0);
+			}
+		});
 		
-		lblUsuario_1 = new JLabel("Usuario: ");
-		lblUsuario_1.setBounds(10, 15, 283, 14);
+		lblUsuario_1 = new JLabel("");
+		lblUsuario_1.setBounds(21, 15, 283, 14);
 		jpanel_trabajo.add(lblUsuario_1);
 		lblUsuario_1.setForeground(new java.awt.Color(189, 187, 185));
 		
-		JLabel lblPuntos = new JLabel("Puntos: ");
+		lblPuntos = new JLabel("");
 		lblPuntos.setBounds(354, 15, 161, 14);
 		jpanel_trabajo.add(lblPuntos);
-		lblUsuario_1.setForeground(new java.awt.Color(189, 187, 185));
+		lblPuntos.setForeground(new java.awt.Color(189, 187, 185));
 		
 		JDesktopPane desktopPane = new JDesktopPane();
 		desktopPane.setBackground(SystemColor.activeCaptionBorder);
 		desktopPane.setBounds(10, 49, 191, 221);
 		jpanel_trabajo.add(desktopPane);
 		
-		JLabel lblConexinA = new JLabel("Conexi\u00F3n a: ");
-		lblConexinA.setBounds(10, 11, 171, 14);
-		desktopPane.add(lblConexinA);
+		JLabel lblConexionA = new JLabel("Conexi\u00F3n a: ");
+		lblConexionA.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblConexionA.setBounds(10, 11, 171, 14);
+		desktopPane.add(lblConexionA);
 		
-		JLabel lblServidorPrimario = new JLabel("Servidor Primario: ");
+		lblServidorPrimario = new JLabel("");
 		lblServidorPrimario.setBounds(10, 44, 171, 14);
 		desktopPane.add(lblServidorPrimario);
 		
-		JLabel lblDireccinIp = new JLabel("Direcci\u00F3n IP: ");
-		lblDireccinIp.setBounds(10, 69, 171, 14);
-		desktopPane.add(lblDireccinIp);
+		lblDireccionIp = new JLabel("");
+		lblDireccionIp.setBounds(10, 69, 171, 14);
+		desktopPane.add(lblDireccionIp);
 		
-		JLabel lblPuerto = new JLabel("Puerto: ");
+		lblPuerto = new JLabel("");
 		lblPuerto.setBounds(10, 94, 171, 14);
 		desktopPane.add(lblPuerto);
 		
-		JLabel lblServidorBackup = new JLabel("Servidor Backup: ");
+		lblServidorBackup = new JLabel("");
 		lblServidorBackup.setBounds(10, 136, 171, 14);
 		desktopPane.add(lblServidorBackup);
 		
-		JLabel lblDireccinIp_1 = new JLabel("Direcci\u00F3n IP: ");
-		lblDireccinIp_1.setBounds(10, 161, 171, 14);
-		desktopPane.add(lblDireccinIp_1);
+		lblDireccionIp_1 = new JLabel("");
+		lblDireccionIp_1.setBounds(10, 161, 171, 14);
+		desktopPane.add(lblDireccionIp_1);
 		
-		JLabel lblPuerto_1 = new JLabel("Puerto: ");
+		lblPuerto_1 = new JLabel("");
 		lblPuerto_1.setBounds(10, 186, 171, 14);
 		desktopPane.add(lblPuerto_1);
-		
-		JLabel lblV = new JLabel("V");
-		lblV.setBounds(102, 44, 46, 14);
-		desktopPane.add(lblV);
-		
-		JLabel lblX = new JLabel("X");
-		lblX.setBounds(102, 136, 46, 14);
-		desktopPane.add(lblX);
 		
 		textPane = new JTextPane();
 		textPane.setBounds(211, 49, 353, 221);
@@ -214,11 +230,37 @@ public class ClienteJFrame extends JFrame {
 		jpanel_logeo.setVisible(false);
 		jpanel_trabajo.setVisible(true);
 		
-		//MUESTRO EL USUARIO Y LOS PUNTOS
-		lblUsuario_1.setText(lblUsuario_1.getText() + usuario);
+		//MUESTRO EL USUARIO Y LOS PUNTOS PERO LOS PUNTOS DEBERIAN ACTUALIZARSE
+		//CADA VEZ QUE SE FINALIZA UN BLOQUE Y EL SERVIDOR ME ENVIE LOS PUNTOS QUE GANE
+		lblUsuario_1.setText("Usuario: " + usuario);
+		lblPuntos.setText("Puntos: " + 0);
 	}
 	
+	//ESCRIBIR RESULTADO EN REALIDAD PUEDE ESCRIBIR CUALQUIER COSA AUNQUE NO SEA UN RESULTADO
 	public void escribirResultado(String resultado) {
 		textPane.setText(textPane.getText() +  resultado + "\n");
 	}
+	
+	public void actualizarPuntos(Integer puntos) {
+		lblPuntos.setText("Puntos: " + puntos);
+	}
+	
+	public void actualizarInfoServidor(boolean primario, String ip, Integer puerto) {
+		if (primario) {
+			lblServidorPrimario.setText("Servidor Primario: Conectado");
+			lblServidorBackup.setText("Servidor Backup: - ");
+			lblDireccionIp.setText("Dirección IP: " + ip);
+			lblPuerto.setText("Puerto: " + puerto);
+			lblDireccionIp_1.setText("Dirección IP: - ");
+			lblPuerto_1.setText("Puerto: - ");
+		} else {
+			lblServidorPrimario.setText("Servidor Primario: - ");
+			lblServidorBackup.setText("Servidor Backup: Conectado");
+			lblDireccionIp_1.setText("Dirección IP: " + ip);
+			lblPuerto_1.setText("Puerto: " + puerto);
+			lblPuerto.setText("Puerto: - ");
+			lblDireccionIp.setText("Dirección IP: - ");
+		}
+	}
+
 }
