@@ -17,6 +17,9 @@ import java.util.Observer;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 
+import baseDeDatos.BaseDatos;
+import baseDeDatos.EstadoUsuario;
+import baseDeDatos.Usuario;
 import bloquesYTareas.Bloque;
 import bloquesYTareas.EstadoTarea;
 import bloquesYTareas.Tarea;
@@ -181,13 +184,45 @@ public class ServidorVista extends JFrame implements Observer{
 	}
 
 	@Override
-	public void update(Observable o, Object arg) {
-		Tarea tarea = (Tarea) arg;
-		//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
-		int id_tarea = tarea.getId();
-		Bloque bloque = tarea.getBloque();
-		int idBloque = bloque.getId();
-		EstadoTarea estado = tarea.getEstado();
+	public void update(Observable claseLLamadora, Object objeto) {
+		//ya que voy a recibir distintos tipos de objetos, tengo q ver quien la clase llamadora (la que cambio de estado)
+		//y que objeto me pasa
+		if(claseLLamadora.getClass().equals(BaseDatos.class)){	// si claseLLamador es una clase de BaseDatos
+			//si la base de datos cambio de estado
+			
+			Tarea tarea = (Tarea) objeto;
+			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
+			int id_tarea = tarea.getId();
+			Bloque bloque = tarea.getBloque();
+			int idBloque = bloque.getId();
+			EstadoTarea estado = tarea.getEstado();
+		}else{
+			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
+				//si el que me indica que cambio de estado es el hilo primario
+				//pregunto si cambio el estado del usuario u otra cosa
+				if(objeto.getClass().equals(Usuario.class)){
+					//si el q cambio de estado es el usuario
+					Usuario usuario= (Usuario) objeto;
+					switch(usuario.getEstado()){
+					case conectado:
+							System.out.println("se ha autenticado el usuario: "+usuario.getNombre());
+							//habria que actualizar algun label o en lo que se muestre el usuario
+						break;
+					case noLogeado:
+							System.out.println("");
+						break;
+					default:
+						break;
+					
+					}
+				}
+			}else{
+				//por si despues necesitamos que observe a algo mas
+				this.mostrarError("fallo el observador! :(");
+			}
+		}
+		
+		
 	}
 
 }

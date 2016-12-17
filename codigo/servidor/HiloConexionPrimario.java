@@ -5,15 +5,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Observable;
-import java.util.Observer;
 
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.Tarea;
 import mensajes.*;
-import servidor.vista.ServidorVista;
 
 
-public class HiloConexionPrimario implements Runnable{
+public class HiloConexionPrimario extends Observable implements Runnable {
 
 	//conexion con otras clases
 	protected Primario servidor;
