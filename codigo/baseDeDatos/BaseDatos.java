@@ -191,10 +191,10 @@ public class BaseDatos extends Observable {
 				/* Select bloque */
 				PreparedStatement stm_bloque = c.prepareStatement (
 					"SELECT " +
-						"estado_bloque.estado AS estado" +
+						"estado_bloque.estado AS estado " +
 					"FROM " +
 						"bloque " +
-						"JOIN estado_bloque ON bloque.estado = estado_bloque " +
+						"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque " +
 					"WHERE " +
 						"bloque.id_bloque = ?"
 				);
@@ -232,7 +232,71 @@ public class BaseDatos extends Observable {
 	}
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
-		return false;
+		tarea.setEstado (EstadoTarea.enProceso);
+		this.cacheTareas.put (tarea.getId(), tarea);
+
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"UPDATE " +
+				"tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'en proceso' " +
+				") AS subq " +
+			"WHERE " +
+				"id_tarea = ?"
+			);
+		
+			stm.setInt (1, tarea.getId());
+			if(stm.executeUpdate() <1) {
+				return false;
+			}
+			
+			/* ACA TENEMOS QUE HACER EL INSERT O UPDATE EN procesamiento_tarea */
+			/* Primero buscamos la id de procesamiento de tarea mas alto para el usuario */
+			int id_proc_tarea = this.getIdProcesamiento (tarea.getId(), idUsuario);
+			
+			if (id_proc_tarea == -1) {
+				System.err.println("Error al recuperar id de procesamiento de tarea, id invalido");
+				return false;
+			}
+
+			stm = c.prepareStatement (
+			"UPDATE " +
+				"procesamiento_tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea, " +
+				"parcial = ? " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'en proceso' " +
+				") AS subq " +
+			"WHERE " +
+				"id_procesamiento_tarea = ? ");
+			
+			stm.setBytes(1, tarea.getParcial());
+			stm.setInt(2, id_proc_tarea);
+			
+			if(stm.executeUpdate() < 1) {
+				return false;
+			}
+			
+		} catch (Exception e) {
+			System.err.println ("Error al guardar parcial en DB: "+e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
@@ -407,6 +471,7 @@ public class BaseDatos extends Observable {
 	private synchronized boolean asignarTareaUsuario (int id_tarea, int id_usuario) {
 		try {
 			/* Insertamos el procesamiento */
+			/* WARNING: Falta insertar el parcial */
 			PreparedStatement stm_procesamiento = c.prepareStatement(
 			"INSERT " +
 				"INTO procesamiento_tarea (tarea, usuario, estado) " +
@@ -454,6 +519,35 @@ public class BaseDatos extends Observable {
 		}
 
 		return true;
+	}
+	
+	private synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {
+		int id_procesamiento = -1;
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT " +
+				"id_procesamiento_tarea " +
+			"FROM " +
+				"procesamiento_tarea " +
+			"WHERE " +
+				"tarea = ? " +
+				"AND usuario = ? " +
+			"ORDER BY id_procesamiento_tarea DESC " +
+			"LIMIT 1 "); 
+			stm.setInt(1, id_tarea);
+			stm.setInt(2, id_usuario);
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				id_procesamiento = rs.getInt("id_procesamiento_tarea");
+			}
+		
+		} catch (Exception e) {
+			System.err.println ("Error al recuperar ID de procesamiento de tarea");
+			e.printStackTrace();
+		}
+		
+		return id_procesamiento;
 	}
 	
 }
