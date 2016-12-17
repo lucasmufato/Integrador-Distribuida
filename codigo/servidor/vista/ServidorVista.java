@@ -209,7 +209,7 @@ public class ServidorVista extends JFrame implements Observer{
 							//habria que actualizar algun label o en lo que se muestre el usuario
 						break;
 					case noLogeado:
-							System.out.println("");
+							System.out.println("se a conectado un usuario no autenticado todavia");
 						break;
 					default:
 						break;

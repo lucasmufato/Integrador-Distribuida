@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Observable;
 
-import baseDeDatos.BaseDatos;
+import baseDeDatos.*;
 import bloquesYTareas.Tarea;
 import mensajes.*;
 
@@ -26,11 +26,13 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	//necesitaria ya sea un objeto usuario o el id de sesion para saber a que usuario estoy atendiendo
 	protected Tarea tareaEnTrabajo;
 	protected Integer idSesion;
-	protected Integer idUsuario=10;	//por el momento para completar los metodos
+	protected Usuario usuario;
+	//protected Integer idUsuario=10;	//por el momento para completar los metodos
 	
 	public HiloConexionPrimario(Primario servidor,Socket s) {
 		this.servidor=servidor;
 		this.socket=s;
+		this.usuario= new Usuario();
 		try {
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
@@ -66,7 +68,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected void cerrarConexion(){
 		//metodo que libera recursos y se desconecta
 		this.bd=null;
-		this.idUsuario=null;
+		this.usuario=null;
 		this.tareaEnTrabajo=null;
 		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
 		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
@@ -92,6 +94,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 				String usuario = msj.getUsuario();
 				String password = msj.getPassword();
 				this.idSesion = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+				this.usuario = bd.getUsuario(usuario);
 				MensajeLogeo mensaje;	//mensaje de respuesta
 				if(this.idSesion != null){
 					System.out.println("Autenticacion de usuario correcta, el numero de la sesion es: " + this.idSesion);
@@ -150,7 +153,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				e.printStackTrace();
-				this.bd.detenerTarea(this.tareaEnTrabajo, this.idUsuario);
+				this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
 				this.cerrarConexion();
 				this.morir();
 				return false;
@@ -162,7 +165,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected boolean resultadoFinalTarea(Tarea tarea){
 		System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
 		if (this.servidor.verificarResultado(tarea) == true){
-			if (this.bd.setResultado(tarea, idUsuario) == true){
+			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				this.enviarNuevaTarea();
 				return true;
 			}else{
@@ -177,7 +180,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected boolean resultadoParcialTarea(Tarea tarea){
 		//creo q no haria mas que eso
 		System.out.println ("[DEBUG] PARCIAL:  -> " + hashToString (tarea.getParcial()));
-		if(this.bd.setParcial(tarea, idUsuario) == true){
+		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
 			
 			return true;
 		}else{
@@ -188,7 +191,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
-		Tarea tarea = this.bd.getTarea(idUsuario);		//por ahora es un numero inventado lo que le paso
+		Tarea tarea = this.bd.getTarea(this.usuario.getId());		//por ahora es un numero inventado lo que le paso
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
@@ -211,16 +214,5 @@ public class HiloConexionPrimario extends Observable implements Runnable {
     	}
     	return builder.toString();
 	}
-	
-	//PARA LA VISTA DEL SERVIDOR, LE PASO EL ID Y LA TAREA DE ESTA CONEXION
-	public Integer getIdUsuario(){
-		return this.idUsuario;
-	}
-	
-	public String getTarea(){
-		byte[] tarea = this.tareaEnTrabajo.getTarea();
-		return this.hashToString(tarea);
-	}
-	
 	
 }//fin de la clase

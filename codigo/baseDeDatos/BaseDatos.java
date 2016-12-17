@@ -23,6 +23,7 @@ public class BaseDatos extends Observable {
 	protected final static Integer puertoBD=5432;
 	protected final static String user="distribuido";
 	protected final static String password="sistemas";
+	protected static Integer contadorSesiones;	//para que vaya devolviendo numero consecutivos de sesion
 
 	/* Los siguientes objetos son copias en memoria de lo que hay en la base de datos */
 	private Map <Integer, Bloque> cacheBloques;
@@ -32,6 +33,7 @@ public class BaseDatos extends Observable {
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
+		contadorSesiones=0;
 	}
 
 	public boolean conectarse(){
@@ -66,7 +68,8 @@ public class BaseDatos extends Observable {
 			}else{
 				//tendria q ver como crear el ID_SESION
 				//por ahora devuelvo un nro y listo
-				return 10;
+				contadorSesiones++;
+				return contadorSesiones;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -454,6 +457,11 @@ public class BaseDatos extends Observable {
 		}
 
 		return true;
+	}
+
+	public Usuario getUsuario(String usuario) {
+		// puede devuelve los datos 
+		return null;
 	}
 	
 }
