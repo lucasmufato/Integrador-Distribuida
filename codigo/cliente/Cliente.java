@@ -6,6 +6,7 @@ import cliente.vista.ClienteJFrame;
 public class Cliente {
 
 	private EstadoCliente estado;
+	private Integer puntos;
 	private ClienteJFrame vista;
 	private HiloConexion hiloConexion;
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
@@ -18,7 +19,7 @@ public class Cliente {
 	}
 
 	public Cliente(){
-		//vacio por ahora
+		this.puntos = 0;
 	}
 	
 	public boolean crearGUILogueo(){
@@ -79,6 +80,7 @@ public class Cliente {
 					if (this.hiloMinero == null) {
 						this.hiloMinero = new HiloMineroCPU(this, tarea);
 						this.estado = EstadoCliente.trabajando;
+						this.mostrarEstadoCliente("Trabajando en tarea...");
 						Thread hilo = new Thread(this.hiloMinero);
 						hilo.start();
 						return true;
@@ -104,10 +106,31 @@ public class Cliente {
 		this.estado=estado;
 	}
 
+	public void mostrarEstadoCliente(String texto){
+		vista.escribirResultado(texto);
+	}
+	
 	public void notificar (Tarea tarea){
-		vista.escribirResultado("Envio el resultado: PARCIAL " + HiloMinero.hashToString(tarea.getParcial()) + "  FINAL: " +HiloMinero.hashToString(tarea.getResultado()));
-		System.out.println("Envio el resultado: PARCIAL "+ HiloMinero.hashToString( tarea.getParcial() )+"  FINAL: " +HiloMinero.hashToString(tarea.getResultado()) );
+		String texto = "";
+		if (tarea.getResultado() == null) {
+			texto = "Envio el resultado: PARCIAL " + HiloMinero.hashToString(tarea.getParcial());
+		} else {
+			texto = "FINAL: " + HiloMinero.hashToString(tarea.getResultado());
+		}
+		vista.escribirResultado(texto);
 		this.hiloConexion.enviarResultado(tarea);
 	}
 	
+	public void setPuntos(Integer puntos) {
+		this.puntos += puntos;
+	}
+	
+	public Integer getPuntos() {
+		return puntos;
+	}
+	
+	//SI RECIBE UN TRUE ES QUE LA INFO ES DEL PRIMARIO Y SINO DEL BACKUP
+	public void actualizarIPConexion(boolean primario) {
+		vista.actualizarInfoServidor(primario, hiloConexion.getIPConexion(), hiloConexion.getPuertoConexion());
+	}
 }

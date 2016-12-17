@@ -3,6 +3,7 @@ package cliente;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -43,6 +44,7 @@ public class HiloConexion implements Runnable {
 			}
 			this.idSesion=respuesta.getID_Sesion();
 			cliente.setEstado(EstadoCliente.esperandoTrabajo);
+			cliente.mostrarEstadoCliente("Esperando trabajo");
 			return true;
 		} catch (UnknownHostException e) {
 			//no me pude conectar al servidor
@@ -63,6 +65,8 @@ public class HiloConexion implements Runnable {
 			//mientras no este desconectado
 			//leo y recibo mensajes
 			cliente.crearGUITrabajo();
+			//MANDO CON TRUE POR AHORA, PERO EN REALIDAD HABRIA QUE PREGUNTAR SI ES PRIMARIO O BACKUP
+			cliente.actualizarIPConexion(true);
 			try {
 				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
 				
@@ -105,4 +109,12 @@ public class HiloConexion implements Runnable {
 		}
 	}
 	
+	public String getIPConexion() {
+		InetAddress ip = socket.getInetAddress();
+		return ip.toString();
+	}
+	
+	public Integer getPuertoConexion() {
+		return socket.getPort();
+	}
 }

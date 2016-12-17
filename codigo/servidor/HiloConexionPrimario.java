@@ -26,7 +26,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	//necesitaria ya sea un objeto usuario o el id de sesion para saber a que usuario estoy atendiendo
 	protected Tarea tareaEnTrabajo;
 	protected Integer idSesion;
-	protected Integer idUsuario=10;	//por el momento para completar los metodos
+	protected Integer idUsuario=1;	//por el momento para completar los metodos
 	
 	public HiloConexionPrimario(Primario servidor,Socket s) {
 		this.servidor=servidor;
