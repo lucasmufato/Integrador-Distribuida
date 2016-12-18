@@ -304,10 +304,23 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
+		
+		tarea.setEstado(EstadoTarea.completada);
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(tarea);
 		return false;
 	}	
 
 	public synchronized boolean detenerTarea(Tarea tarea, Integer idUsuario){
+		//FALTA EL CAMBIO EN LA BD
+		
+		tarea.setEstado(EstadoTarea.detenida);
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(tarea);
 		return false;
 	}
 
