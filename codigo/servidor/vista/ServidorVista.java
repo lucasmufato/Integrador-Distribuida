@@ -882,6 +882,7 @@ public class ServidorVista extends JFrame implements Observer{
 		
 	}
 
+	
 	@Override
 	public void update(Observable claseLLamadora, Object objeto) {
 		//ya que voy a recibir distintos tipos de objetos, tengo q ver quien la clase llamadora (la que cambio de estado)
@@ -934,6 +935,9 @@ public class ServidorVista extends JFrame implements Observer{
 						break;
 					
 					}
+				}else{ //SI NO CAMBIO EL ESTADO USUARIO MUESTRO PARCIALES Y FINALES
+					String resultado = (String) objeto; 
+					textPaneMsj.setText(resultado);
 				}
 			}else{
 				//por si despues necesitamos que observe a algo mas
@@ -944,8 +948,4 @@ public class ServidorVista extends JFrame implements Observer{
 		
 	}
 
-	public void mostrarResultado(String resultado) {
-		//MUESTRO LOS RESULTADOS PARCIAL Y FINALES DESDE EL HILO CONEXION PRIMARIO
-		textPaneMsj.setText(resultado);
-	}
 }

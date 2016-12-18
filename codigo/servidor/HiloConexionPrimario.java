@@ -167,7 +167,12 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	
 	protected boolean resultadoFinalTarea(Tarea tarea){
 		System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
-        //this.vista.mostrarResultado("USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " FINAL: " + hashToString (tarea.getResultado()));
+		String resultado;
+		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " FINAL: " + hashToString (tarea.getResultado());
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(resultado);
 		if (this.servidor.verificarResultado(tarea) == true){
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				this.enviarNuevaTarea();
@@ -184,7 +189,12 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected boolean resultadoParcialTarea(Tarea tarea){
 		//creo q no haria mas que eso
 		System.out.println ("[DEBUG] PARCIAL:  -> " + hashToString (tarea.getParcial()));
-		//this.vista.mostrarResultado("USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial()));
+		String resultado;
+		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial());
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(resultado);
 		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
 			
 			return true;

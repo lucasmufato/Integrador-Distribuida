@@ -69,7 +69,9 @@ public class Primario implements Runnable {
 			try {
 				Socket s = this.serverSO.accept();
 				this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
-				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);			
+				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
+				//UNA VEZ Q CREO LA CONEXION HAGO QUE LA VISTA LA OBSERVE
+				nuevaConexion.addObserver(this.vista);
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
 				hilo.start();	
