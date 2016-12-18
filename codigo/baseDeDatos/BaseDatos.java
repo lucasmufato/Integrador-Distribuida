@@ -301,8 +301,95 @@ public class BaseDatos extends Observable {
 
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
-		//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
-		return false;
+		tarea.setEstado (EstadoTarea.enProceso);
+		this.cacheTareas.put (tarea.getId(), tarea);
+
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"UPDATE " +
+				"tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'completado' " +
+				") AS subq " +
+			"WHERE " +
+				"id_tarea = ?"
+			);
+		
+			stm.setInt (1, tarea.getId());
+			if(stm.executeUpdate() <1) {
+				return false;
+			}
+			
+			/* ACA TENEMOS QUE HACER EL UPDATE EN procesamiento_tarea */
+			/* Primero buscamos la id de procesamiento de tarea mas alto para el usuario */
+			int id_proc_tarea = this.getIdProcesamiento (tarea.getId(), idUsuario);
+			
+			if (id_proc_tarea == -1) {
+				System.err.println("Error al recuperar id de procesamiento de tarea, id invalido");
+				return false;
+			}
+
+			stm = c.prepareStatement (
+			"UPDATE " +
+				"procesamiento_tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea, " +
+				"resultado = ? " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'completado' " +
+				") AS subq " +
+			"WHERE " +
+				"id_procesamiento_tarea = ? ");
+			
+			stm.setBytes(1, tarea.getResultado());
+			stm.setInt(2, id_proc_tarea);
+			
+			if(stm.executeUpdate() < 1) {
+				return false;
+			}
+
+			//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
+			if (this.estaFinalizadoBloque (tarea.getBloque())) {
+				tarea.getBloque().setEstado(EstadoBloque.completado);
+				stm = c.prepareStatement ("UPDATE " +
+					"bloque " +
+				"SET " +
+					"estado = subq.id_estado " +
+				"FROM ( " +
+					"SELECT " +
+						"id_estado_bloque AS id_estado " +
+					"FROM " +
+						"estado_bloque " +
+					"WHERE " +
+						"estado = 'completado' " +
+				") AS subq " +
+				"WHERE id_bloque = ?");
+
+				if (stm.executeUpdate() < 1) {
+					System.err.println ("Error al establecer estado al bloque como finalizado");
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			System.err.println ("Error al guardar resultado en DB: "+e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+
+
 	}	
 
 	public synchronized boolean detenerTarea(Tarea tarea, Integer idUsuario){
@@ -342,7 +429,7 @@ public class BaseDatos extends Observable {
 	}
 
 
-	private synchronized boolean estaFinalizadoBloque(){
+	private synchronized boolean estaFinalizadoBloque(Bloque bloque){
 		//CHEQUEA QUE TODAS LAS TAREAS DEL BLOQUE ESTEN COMPLETAS
 		return false;
 	}
