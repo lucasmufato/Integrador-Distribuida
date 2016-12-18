@@ -113,7 +113,7 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		//TEXT PANE EN DONDE SE VAN A IR MOSTRANDO MSJs
 		textPaneConsola = new JTextPane();
-		textPaneConsola.setForeground(Color.GREEN);
+		textPaneConsola.setForeground(Color.DARK_GRAY);
 		textPaneConsola.setBackground(new java.awt.Color(209, 218, 225));
 		textPaneConsola.setBounds(0, 273, 676, 20);
 		jpanel_servidor.add(textPaneConsola);
@@ -137,7 +137,7 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		textPaneConsolaTrabajo = new JTextPane();
 		textPaneConsolaTrabajo.setBackground(new java.awt.Color(209, 218, 225));
-		textPaneConsolaTrabajo.setForeground(Color.GREEN);
+		textPaneConsolaTrabajo.setForeground(Color.DARK_GRAY);
 		textPaneConsolaTrabajo.setBounds(0, 273, 533, 20);
 		jpanel_trabajo.add(textPaneConsolaTrabajo);
 		
@@ -324,7 +324,7 @@ public class ServidorVista extends JFrame implements Observer{
 		lbl16.setForeground(Color.WHITE);
 		tareas.put("116",lbl16);
 		
-		lbl17 = new JLabel("");
+		lbl17 = new JLabel("1");
 		lbl17.setOpaque(true);
 		lbl17.setBackground(Color.RED);
 		lbl17.setForeground(Color.WHITE);
@@ -332,7 +332,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl17);
 		tareas.put("21",lbl17);
 		
-		lbl18 = new JLabel("");
+		lbl18 = new JLabel("2");
 		lbl18.setOpaque(true);
 		lbl18.setBackground(Color.RED);
 		lbl18.setForeground(Color.WHITE);
@@ -340,7 +340,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl18);
 		tareas.put("22",lbl18);
 		
-		lbl19 = new JLabel("");
+		lbl19 = new JLabel("3");
 		lbl19.setOpaque(true);
 		lbl19.setBackground(Color.RED);
 		lbl19.setForeground(Color.WHITE);
@@ -348,7 +348,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl19);
 		tareas.put("23",lbl19);
 		
-		lbl20 = new JLabel("");
+		lbl20 = new JLabel("4");
 		lbl20.setOpaque(true);
 		lbl20.setBackground(Color.RED);
 		lbl20.setForeground(Color.WHITE);
@@ -356,7 +356,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl20);
 		tareas.put("24",lbl20);
 		
-		lbl21 = new JLabel("");
+		lbl21 = new JLabel("5");
 		lbl21.setOpaque(true);
 		lbl21.setBackground(Color.RED);
 		lbl21.setForeground(Color.WHITE);
@@ -364,7 +364,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl21);
 		tareas.put("25",lbl21);
 		
-		lbl22 = new JLabel("");
+		lbl22 = new JLabel("6");
 		lbl22.setOpaque(true);
 		lbl22.setBackground(Color.RED);
 		lbl22.setForeground(Color.WHITE);
@@ -372,7 +372,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl22);
 		tareas.put("26", lbl22);
 		
-		lbl23 = new JLabel("");
+		lbl23 = new JLabel("7");
 		lbl23.setOpaque(true);
 		lbl23.setBackground(Color.RED);
 		lbl23.setForeground(Color.WHITE);
@@ -380,7 +380,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl23);
 		tareas.put("27",lbl23);
 		
-		lbl24 = new JLabel("");
+		lbl24 = new JLabel("8");
 		lbl24.setOpaque(true);
 		lbl24.setBackground(Color.RED);
 		lbl24.setForeground(Color.WHITE);
@@ -388,7 +388,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl24);
 		tareas.put("28",lbl24);
 		
-		lbl25 = new JLabel("");
+		lbl25 = new JLabel("9");
 		lbl25.setOpaque(true);
 		lbl25.setBackground(Color.RED);
 		lbl25.setForeground(Color.WHITE);
@@ -396,7 +396,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl25);
 		tareas.put("29",lbl25);
 		
-		lbl26 = new JLabel("");
+		lbl26 = new JLabel("10");
 		lbl26.setOpaque(true);
 		lbl26.setBackground(Color.RED);
 		lbl26.setForeground(Color.WHITE);
@@ -404,42 +404,48 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl26);
 		tareas.put("210",lbl26);
 		
-		lbl27 = new JLabel("");
+		lbl27 = new JLabel("11");
+		lbl27.setForeground(Color.WHITE);
 		lbl27.setOpaque(true);
 		lbl27.setBackground(Color.RED);
 		lbl27.setBounds(310, 42, 20, 20);
 		panel_bloques.add(lbl27);
 		tareas.put("211",lbl27);
 		
-		lbl28 = new JLabel("");
+		lbl28 = new JLabel("12");
+		lbl28.setForeground(Color.WHITE);
 		lbl28.setOpaque(true);
 		lbl28.setBackground(Color.RED);
 		lbl28.setBounds(340, 42, 20, 20);
 		panel_bloques.add(lbl28);
 		tareas.put("212",lbl28);
 		
-		lbl29 = new JLabel("");
+		lbl29 = new JLabel("13");
+		lbl29.setForeground(Color.WHITE);
 		lbl29.setOpaque(true);
 		lbl29.setBackground(Color.RED);
 		lbl29.setBounds(370, 42, 20, 20);
 		panel_bloques.add(lbl29);
 		tareas.put("213",lbl29);
 		
-		lbl30 = new JLabel("");
+		lbl30 = new JLabel("14");
+		lbl30.setForeground(Color.WHITE);
 		lbl30.setOpaque(true);
 		lbl30.setBackground(Color.RED);
 		lbl30.setBounds(400, 42, 20, 20);
 		panel_bloques.add(lbl30);
 		tareas.put("214",lbl30);
 		
-		lbl31 = new JLabel("");
+		lbl31 = new JLabel("15");
+		lbl31.setForeground(Color.WHITE);
 		lbl31.setOpaque(true);
 		lbl31.setBackground(Color.RED);
 		lbl31.setBounds(430, 42, 20, 20);
 		panel_bloques.add(lbl31);
 		tareas.put("215",lbl31);
 		
-		lbl32 = new JLabel("");
+		lbl32 = new JLabel("16");
+		lbl32.setForeground(Color.WHITE);
 		lbl32.setOpaque(true);
 		lbl32.setBackground(Color.RED);
 		lbl32.setBounds(460, 42, 20, 20);
@@ -574,7 +580,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl48);
 		tareas.put("316",lbl48);
 		
-		lbl49 = new JLabel("");
+		lbl49 = new JLabel("1");
 		lbl49.setOpaque(true);
 		lbl49.setBackground(Color.RED);
 		lbl49.setForeground(Color.WHITE);
@@ -582,7 +588,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl49);
 		tareas.put("41",lbl49);
 		
-		lbl50 = new JLabel("");
+		lbl50 = new JLabel("2");
 		lbl50.setOpaque(true);
 		lbl50.setBackground(Color.RED);
 		lbl50.setForeground(Color.WHITE);
@@ -590,7 +596,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl50);
 		tareas.put("42",lbl50);
 		
-		lbl51 = new JLabel("");
+		lbl51 = new JLabel("3");
 		lbl51.setOpaque(true);
 		lbl51.setBackground(Color.RED);
 		lbl51.setForeground(Color.WHITE);
@@ -598,7 +604,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl51);
 		tareas.put("43",lbl51);
 		
-		lbl52 = new JLabel("");
+		lbl52 = new JLabel("4");
 		lbl52.setOpaque(true);
 		lbl52.setBackground(Color.RED);
 		lbl52.setForeground(Color.WHITE);
@@ -606,7 +612,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl52);
 		tareas.put("44",lbl52);
 		
-		lbl53 = new JLabel("");
+		lbl53 = new JLabel("5");
 		lbl53.setOpaque(true);
 		lbl53.setBackground(Color.RED);
 		lbl53.setForeground(Color.WHITE);
@@ -614,77 +620,88 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques.add(lbl53);
 		tareas.put("45",lbl53);
 		
-		lbl54 = new JLabel("");
+		lbl54 = new JLabel("6");
+		lbl54.setForeground(Color.WHITE);
 		lbl54.setOpaque(true);
 		lbl54.setBackground(Color.RED);
 		lbl54.setBounds(160, 104, 20, 20);
 		panel_bloques.add(lbl54);
 		tareas.put("46",lbl54);
 		
-		lbl55 = new JLabel("");
+		lbl55 = new JLabel("7");
+		lbl55.setForeground(Color.WHITE);
 		lbl55.setOpaque(true);
 		lbl55.setBackground(Color.RED);
 		lbl55.setBounds(190, 104, 20, 20);
 		panel_bloques.add(lbl55);
 		tareas.put("47",lbl55);
 		
-		lbl56 = new JLabel("");
+		lbl56 = new JLabel("8");
+		lbl56.setForeground(Color.WHITE);
 		lbl56.setOpaque(true);
 		lbl56.setBackground(Color.RED);
 		lbl56.setBounds(220, 104, 20, 20);
 		panel_bloques.add(lbl56);
 		tareas.put("48",lbl56);
 		
-		lbl57 = new JLabel("");
+		lbl57 = new JLabel("9");
+		lbl57.setForeground(Color.WHITE);
 		lbl57.setOpaque(true);
 		lbl57.setBackground(Color.RED);
 		lbl57.setBounds(250, 103, 20, 20);
 		panel_bloques.add(lbl57);
 		tareas.put("49",lbl57);
 		
-		lbl58 = new JLabel("");
+		lbl58 = new JLabel("10");
+		lbl58.setForeground(Color.WHITE);
 		lbl58.setOpaque(true);
 		lbl58.setBackground(Color.RED);
 		lbl58.setBounds(280, 104, 20, 20);
 		panel_bloques.add(lbl58);
 		tareas.put("410",lbl58);
 		
-		lbl59 = new JLabel("");
+		lbl59 = new JLabel("11");
+		lbl59.setForeground(Color.WHITE);
 		lbl59.setOpaque(true);
 		lbl59.setBackground(Color.RED);
 		lbl59.setBounds(310, 104, 20, 20);
 		panel_bloques.add(lbl59);
 		tareas.put("411",lbl59);
 		
-		lbl60 = new JLabel("");
+		lbl60 = new JLabel("12");
+		lbl60.setForeground(Color.WHITE);
 		lbl60.setOpaque(true);
 		lbl60.setBackground(Color.RED);
 		lbl60.setBounds(340, 104, 20, 20);
 		panel_bloques.add(lbl60);
 		tareas.put("412",lbl60);
 		
-		lbl61 = new JLabel("");
+		lbl61 = new JLabel("13");
+		lbl61.setForeground(Color.WHITE);
 		lbl61.setOpaque(true);
 		lbl61.setBackground(Color.RED);
 		lbl61.setBounds(370, 103, 20, 20);
 		panel_bloques.add(lbl61);
 		tareas.put("413",lbl61);
 		
-		lbl62 = new JLabel("");
+		lbl62 = new JLabel("14");
+		lbl62.setForeground(Color.WHITE);
 		lbl62.setOpaque(true);
 		lbl62.setBackground(Color.RED);
 		lbl62.setBounds(400, 104, 20, 20);
 		panel_bloques.add(lbl62);
 		tareas.put("414",lbl62);
 		
-		lbl63 = new JLabel("");
+		lbl63 = new JLabel("15");
+		lbl63.setForeground(Color.WHITE);
 		lbl63.setOpaque(true);
 		lbl63.setBackground(Color.RED);
 		lbl63.setBounds(430, 104, 20, 20);
 		panel_bloques.add(lbl63);
 		tareas.put("415",lbl63);
 		
-		lbl64 = new JLabel("");
+		lbl64 = new JLabel("16");
+		lbl64.setForeground(Color.WHITE);
 		lbl64.setOpaque(true);
 		lbl64.setBackground(Color.RED);
 		lbl64.setBounds(460, 104, 20, 20);
@@ -925,5 +942,10 @@ public class ServidorVista extends JFrame implements Observer{
 		}
 		
 		
+	}
+
+	public void mostrarResultado(String resultado) {
+		//MUESTRO LOS RESULTADOS PARCIAL Y FINALES DESDE EL HILO CONEXION PRIMARIO
+		textPaneMsj.setText(resultado);
 	}
 }

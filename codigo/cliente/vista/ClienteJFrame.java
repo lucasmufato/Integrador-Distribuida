@@ -282,17 +282,17 @@ public class ClienteJFrame extends JFrame {
 		if (primario) {
 			lblServidorPrimario.setText("Servidor Primario: Conectado");
 			lblServidorBackup.setText("Servidor Backup: - ");
-			lblDireccionIp.setText("Direcci�n IP: " + ip);
+			lblDireccionIp.setText("Direccion IP: " + ip);
 			lblPuerto.setText("Puerto: " + puerto);
-			lblDireccionIp_1.setText("Direcci�n IP: - ");
+			lblDireccionIp_1.setText("Direccion IP: - ");
 			lblPuerto_1.setText("Puerto: - ");
 		} else {
 			lblServidorPrimario.setText("Servidor Primario: - ");
 			lblServidorBackup.setText("Servidor Backup: Conectado");
-			lblDireccionIp_1.setText("Direcci�n IP: " + ip);
+			lblDireccionIp_1.setText("Direccion IP: " + ip);
 			lblPuerto_1.setText("Puerto: " + puerto);
 			lblPuerto.setText("Puerto: - ");
-			lblDireccionIp.setText("Direcci�n IP: - ");
+			lblDireccionIp.setText("Direccion IP: - ");
 		}
 	}
 

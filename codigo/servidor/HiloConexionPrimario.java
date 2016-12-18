@@ -9,6 +9,7 @@ import java.util.Observable;
 import baseDeDatos.*;
 import bloquesYTareas.Tarea;
 import mensajes.*;
+import servidor.vista.ServidorVista;
 
 
 public class HiloConexionPrimario extends Observable implements Runnable {
@@ -16,6 +17,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	//conexion con otras clases
 	protected Primario servidor;
 	protected BaseDatos bd;
+	protected ServidorVista vista;
 	
 	//variables para la comunicacion con el cliente
 	protected Socket socket;	
@@ -165,6 +167,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	
 	protected boolean resultadoFinalTarea(Tarea tarea){
 		System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
+        //this.vista.mostrarResultado("USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " FINAL: " + hashToString (tarea.getResultado()));
 		if (this.servidor.verificarResultado(tarea) == true){
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				this.enviarNuevaTarea();
@@ -181,6 +184,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected boolean resultadoParcialTarea(Tarea tarea){
 		//creo q no haria mas que eso
 		System.out.println ("[DEBUG] PARCIAL:  -> " + hashToString (tarea.getParcial()));
+		//this.vista.mostrarResultado("USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial()));
 		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
 			
 			return true;
