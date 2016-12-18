@@ -133,7 +133,7 @@ public class ClienteJFrame extends JFrame {
 			lblAcaVaEl.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/icono.jpg")));
 		}catch(Exception e){
 			lblAcaVaEl.setBackground(Color.WHITE);
-			System.out.println("no se encontro la imagen ");
+			System.out.println("No se encontro la imagen ");
 		}
 		lblAcaVaEl.setHorizontalAlignment(SwingConstants.CENTER);
 		lblAcaVaEl.setBounds(305, 71, 228, 187);
@@ -152,7 +152,7 @@ public class ClienteJFrame extends JFrame {
 			btnSalir.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/logout.jpg")));
 		}catch(Exception e){
 			btnSalir.setBackground(Color.WHITE);
-			System.out.println("no se encontro la imagen ");
+			System.out.println("No se encontro la imagen ");
 		}
 		btnSalir.setBounds(534, 11, 30, 30);
 		jpanel_trabajo.add(btnSalir);
