@@ -3,8 +3,6 @@ package bloquesYTareas;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import cliente.EstadoCliente;
-
 public class Tarea implements Serializable{
 	
 	private static final long serialVersionUID = 1L;

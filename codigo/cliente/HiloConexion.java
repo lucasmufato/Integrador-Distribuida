@@ -48,13 +48,16 @@ public class HiloConexion implements Runnable {
 			return true;
 		} catch (UnknownHostException e) {
 			//no me pude conectar al servidor
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("No se pudo encontrar el servidor :(");
 		} catch (IOException e) {
 			//otro tipo de error, ya sea de comunicacion o al crear los flujos
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("Error de entrada/salida");
 		} catch (ClassNotFoundException e) {
 			//me mandaron algo que no era un objeto de la clase mensaje
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("no se pudo intepretar la respuesta del servidor");
 		}
 		return false;
 	}
@@ -83,12 +86,16 @@ public class HiloConexion implements Runnable {
 				}
 				
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				this.cliente.setEstado(EstadoCliente.desconectado);
+				//e.printStackTrace();
+				System.out.println("error al interpretar la respuesta del servidor. Desconectado");
 			} catch (IOException e) {
-				e.printStackTrace();
+				this.cliente.setEstado(EstadoCliente.desconectado);
+				//e.printStackTrace();
+				System.out.println("error en la comunicacion con el servidor. Desconectado");
 			}
 		}
-
+		this.cerrarConexiones();
 	}
 
 	private boolean tarea(Tarea tarea){
@@ -102,7 +109,9 @@ public class HiloConexion implements Runnable {
 	public void enviarResultado(Tarea tarea) {
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,tarea);
 		try {
-			this.flujoSaliente.writeObject(mensaje);
+			if(this.socket!=null){
+				this.flujoSaliente.writeObject(mensaje);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -116,5 +125,12 @@ public class HiloConexion implements Runnable {
 	
 	public Integer getPuertoConexion() {
 		return socket.getPort();
+	}
+	
+	private void cerrarConexiones(){
+		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
+		try {	this.socket.close();			} catch (IOException e) {}
+		this.socket=null;
 	}
 }

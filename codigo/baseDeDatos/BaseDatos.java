@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Observable;
 import java.util.HashMap;
@@ -23,6 +22,7 @@ public class BaseDatos extends Observable {
 	protected final static Integer puertoBD=5432;
 	protected final static String user="distribuido";
 	protected final static String password="sistemas";
+	protected static Integer contadorSesiones;	//para que vaya devolviendo numero consecutivos de sesion
 
 	/* Los siguientes objetos son copias en memoria de lo que hay en la base de datos */
 	private Map <Integer, Bloque> cacheBloques;
@@ -32,6 +32,7 @@ public class BaseDatos extends Observable {
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
+		contadorSesiones=0;
 	}
 
 	public boolean conectarse(){
@@ -66,7 +67,8 @@ public class BaseDatos extends Observable {
 			}else{
 				//tendria q ver como crear el ID_SESION
 				//por ahora devuelvo un nro y listo
-				return 10;
+				contadorSesiones++;
+				return contadorSesiones;
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -301,7 +303,7 @@ public class BaseDatos extends Observable {
 
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
-		tarea.setEstado (EstadoTarea.enProceso);
+		tarea.setEstado (EstadoTarea.completada);
 		this.cacheTareas.put (tarea.getId(), tarea);
 
 		try {
@@ -381,18 +383,29 @@ public class BaseDatos extends Observable {
 					System.err.println ("Error al establecer estado al bloque como finalizado");
 					return false;
 				}
+
 			}
+
+			//MARCO QUE CAMBIO EL OBJETO
+    	    setChanged();
+        	//NOTIFICO EL CAMBIO
+        	notifyObservers(tarea);
 		} catch (Exception e) {
 			System.err.println ("Error al guardar resultado en DB: "+e.getMessage());
 			e.printStackTrace();
 			return false;
 		}
 		return true;
-
-
 	}	
 
 	public synchronized boolean detenerTarea(Tarea tarea, Integer idUsuario){
+		//FALTA EL CAMBIO EN LA BD
+		
+		tarea.setEstado(EstadoTarea.detenida);
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(tarea);
 		return false;
 	}
 
@@ -606,6 +619,16 @@ public class BaseDatos extends Observable {
 		}
 
 		return true;
+	}
+
+	public synchronized Usuario getUsuario(String nombreUsuario) {
+		// por ahora devuelve el primer usuario nomas
+		Usuario u = new Usuario();
+		u.setId(1);
+		u.setNombre("usuario");
+		u.setPassword("usuario123");
+		u.setPuntos(0);
+		return u;
 	}
 	
 	private synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {

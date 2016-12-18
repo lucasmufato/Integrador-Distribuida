@@ -115,4 +115,11 @@ abstract class HiloMinero implements Runnable {
     	return builder.toString();
 	}
 
+	public void setTarea(Tarea tarea2) {
+		this.tareaNueva=tarea2;
+		this.tarea = this.tareaNueva.getTarea();
+		this.limite_superior = this.tareaNueva.getLimiteSuperior();
+		this.inicio=this.tareaNueva.getParcial();
+	}
+
 }
