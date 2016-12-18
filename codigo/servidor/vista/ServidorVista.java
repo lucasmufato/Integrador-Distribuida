@@ -186,7 +186,7 @@ public class ServidorVista extends JFrame implements Observer{
 		panel_bloques = new JTextPane();
 		panel_bloques.setForeground(Color.LIGHT_GRAY);
 		panel_bloques.setBackground(new java.awt.Color(27, 40, 56));
-		//panel_bloques.setEditable(false);
+		panel_bloques.setEditable(false);
 		panel_bloques.setLayout(null);
 		//panel_bloques.setBounds(10, 62, 512, 112);
 		//jpanel_trabajo.add(panel_bloques);
