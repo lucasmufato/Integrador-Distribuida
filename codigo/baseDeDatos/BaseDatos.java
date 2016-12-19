@@ -174,14 +174,9 @@ public class BaseDatos extends Observable {
 				}
 			}
 
-			this.asignarTareaUsuario(res_tarea.getInt("id"), idUsuario);
-
-			tarea = new Tarea (
-				this.getBloque (res_tarea.getInt("bloque")),
-				res_tarea.getBytes("h_bytes"),
-				res_tarea.getBytes("parcial")
-			);
-			tarea.setId(res_tarea.getInt("id"));
+			int id_tarea = res_tarea.getInt("id");
+			this.asignarTareaUsuario(id_tarea, idUsuario);
+			tarea = this.getTareaById(id_tarea);
 			tarea.setEstado(EstadoTarea.enProceso);
 
 			//CUANDO SE HAYA ASIGNADO CORRECTAMENTE UN TAREA AL USUARIO SE AVISA AL OBSERVADOR DEL CAMBIO
@@ -277,7 +272,6 @@ public class BaseDatos extends Observable {
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
 		tarea.setEstado (EstadoTarea.enProceso);
-		this.cacheTareas.put (tarea.getId(), tarea);
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
@@ -346,7 +340,6 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
-		this.cacheTareas.put (tarea.getId(), tarea);
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
@@ -407,7 +400,8 @@ public class BaseDatos extends Observable {
 			//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
 			if (this.estaFinalizadoBloque (tarea.getBloque())) {
 				tarea.getBloque().setEstado(EstadoBloque.completado);
-				stm = c.prepareStatement ("UPDATE " +
+				stm = c.prepareStatement (
+				"UPDATE " +
 					"bloque " +
 				"SET " +
 					"estado = subq.id_estado " +
@@ -420,6 +414,7 @@ public class BaseDatos extends Observable {
 						"estado = 'completado' " +
 				") AS subq " +
 				"WHERE id_bloque = ?");
+				stm.setInt(1, tarea.getBloque().getId());
 
 				if (stm.executeUpdate() < 1) {
 					System.err.println ("Error al establecer estado al bloque como finalizado");
@@ -486,6 +481,28 @@ public class BaseDatos extends Observable {
 
 	private synchronized boolean estaFinalizadoBloque(Bloque bloque){
 		//CHEQUEA QUE TODAS LAS TAREAS DEL BLOQUE ESTEN COMPLETAS
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT " +
+				"COUNT (tarea.id_tarea) AS restantes " +
+			"FROM " +
+				"tarea " +
+				"JOIN estado_tarea ON tarea.estado = estado_tarea.id_estado_tarea "+
+			"WHERE " + 
+				"tarea.bloque = ? " +
+				"AND estado_tarea.estado <> 'completada' "
+			);
+			stm.setInt (1, bloque.getId());
+			stm.execute();
+			ResultSet result = stm.getResultSet();
+			result.next();
+			int restantes = result.getInt("restantes");
+			System.out.println ("DEBUG: Restantes: " + restantes);
+			return (restantes == 0);
+		} catch (Exception e) {
+			System.err.println ("Error al intentar determinar si bloque esta finalizado "+e.getMessage());
+			e.printStackTrace();
+		}
 		return false;
 	}
 

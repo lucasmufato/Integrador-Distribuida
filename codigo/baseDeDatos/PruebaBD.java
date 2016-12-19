@@ -12,7 +12,7 @@ public class PruebaBD{
 		
 		if (tarea == null) {
 			System.out.println ("Ya no hay tareas por procesar. Generamos un bloque nuevo");
-			bd.generarBloques (1, 32, 40);
+			bd.generarBloques (1, 4, 40);
 			tarea = bd.getTarea (1);
 			if (tarea == null) {
 				System.out.println ("Adios");
