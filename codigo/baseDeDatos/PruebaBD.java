@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class PruebaBD{
 	public static void main (String[] args) {
-		BaseDatos bd = new BaseDatos();
+		BaseDatos bd = BaseDatos.getInstance();
 
 		
 		System.out.println ("Pedimos una tarea para el usuario con ID 1");
@@ -22,23 +22,25 @@ public class PruebaBD{
 		
 		System.out.println ("Le cambiamos los bytes de parcial y resultado ");
 		byte[] parcial = new byte[4];
-		parcial[0] = (byte) 0x99;
-		parcial[1] = (byte) 0x88;
-		parcial[2] = (byte) 0x77;
-		parcial[3] = (byte) 0x66;
+		parcial[0] = (byte) 0x33;
+		parcial[1] = (byte) 0x22;
+		parcial[2] = (byte) 0x33;
+		parcial[3] = (byte) 0x22;
 		tarea.setParcial(parcial);
 		byte[] resultado = new byte[4];
 		resultado[0] = (byte) 0x99;
 		resultado[1] = (byte) 0x99;
 		resultado[2] = (byte) 0x99;
 		resultado[3] = (byte) 0x99;
-		tarea.setResultado(parcial);
+		tarea.setResultado(resultado);
 		if (!bd.setParcial(tarea, 1)) { System.err.println("Error en setParcial");}
 		if (!bd.setResultado(tarea, 1)) { System.err.println("Error en setResultado");}
 
 		System.out.println ("TAREA:");
 		System.out.println ("ID de Tarea: " + tarea.getId());
 		System.out.println ("Estado de Tarea: " + tarea.getEstado());
+		System.out.println ("Parcial: " + Tarea.bytesToString(tarea.getParcial()));
+		System.out.println ("Resultado: " + Tarea.bytesToString(tarea.getResultado()));
 		System.out.println ("Bytes: "+tarea.toString());
 
 		Bloque bloque = tarea.getBloque();
@@ -46,11 +48,13 @@ public class PruebaBD{
 		System.out.println ("ID de Bloque: " + tarea.getBloque().getId());
 		System.out.println ("Estado de Bloque: " + bloque.getEstado());
 		
+		/*
 		ArrayList<Tarea> tareas_bloque = bloque.getTareas();
 		System.out.println ("\nOTRAS TAREAS EN BLOQUE:");
 		for (Tarea t: tareas_bloque) {
 			System.out.println ("ID: " + t.getId() + "  Estado: " + t.getEstado() + " <" + t.toString().substring(0, 16)+"..>");
 		}
+		*/
 
 		ArrayList<Bloque> lista_bloques = bd.getBloquesNoCompletados();
 		System.out.println ("\nBLOQUES NO COMPLETADOS: " + lista_bloques.size());

@@ -41,7 +41,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 			//si hay error aca cagamos
 			e.printStackTrace();
 		}
-		this.bd = new BaseDatos();
+		this.bd = BaseDatos.getInstance();
 		bd.conectarse();
 		
 	}

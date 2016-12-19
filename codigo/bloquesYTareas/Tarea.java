@@ -106,4 +106,14 @@ public class Tarea implements Serializable{
     	}
     	return builder.toString();
 	}
+	public static String bytesToString (byte[] bytes) {
+	if(bytes == null){
+			return "";
+		}
+    	StringBuilder builder = new StringBuilder();
+    	for(byte b : bytes) {
+    	    builder.append(String.format("%02x ", b));
+    	}
+    	return builder.toString();
+	}
 }

@@ -16,6 +16,7 @@ import bloquesYTareas.*;
 
 public class BaseDatos extends Observable {
 
+	private static BaseDatos instance = null; //Esto es para el singleton
 	protected Connection c;
 	protected final static String host="localhost";
 	protected final static String nombreBD="finaldistribuido";
@@ -28,11 +29,18 @@ public class BaseDatos extends Observable {
 	private Map <Integer, Bloque> cacheBloques;
 	private Map <Integer, Tarea> cacheTareas;
 
-	public BaseDatos(){
+	private BaseDatos(){
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
 		contadorSesiones=0;
+	}
+
+	public static BaseDatos getInstance () {
+		if(BaseDatos.instance == null) {
+			BaseDatos.instance = new BaseDatos();
+		}
+		return BaseDatos.instance;
 	}
 
 	public boolean conectarse(){
@@ -357,7 +365,6 @@ public class BaseDatos extends Observable {
 			if(stm.executeUpdate() < 1) {
 				return false;
 			}
-			
 		} catch (Exception e) {
 			System.err.println ("Error al guardar parcial en DB: "+e.getMessage());
 			e.printStackTrace();
@@ -452,7 +459,6 @@ public class BaseDatos extends Observable {
 
 			}
 
-			System.out.println (":) llegamos al final");
 			//MARCO QUE CAMBIO EL OBJETO
     	    setChanged();
         	//NOTIFICO EL CAMBIO
