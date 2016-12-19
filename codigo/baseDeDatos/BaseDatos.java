@@ -242,6 +242,35 @@ public class BaseDatos extends Observable {
 		return bloque;
 	}
 
+	public synchronized ArrayList<Bloque> getBloquesNoCompletados() {
+		ArrayList<Bloque> lista_bloques = null;
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT "+
+				"bloque.id_bloque AS id_bloque " +
+			"FROM "  +
+				"bloque " +
+				"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque " +
+			"WHERE " +
+				"estado_bloque.estado <> 'completado' " +
+			"ORDER BY bloque.id_bloque ASC "
+			);
+			stm.execute();
+			ResultSet res = stm.getResultSet();
+			lista_bloques = new ArrayList <Bloque> ();
+			while (res.next()) {
+				lista_bloques.add (this.getBloque (res.getInt("id_bloque")));
+			}
+
+		} catch (Exception e) {
+				System.err.println ("Error al recuperar tareas de bloque: " + e.getMessage());
+				e.printStackTrace();
+				lista_bloques = null;
+		}
+		
+		return lista_bloques;
+	}
+
 	public synchronized ArrayList<Tarea> getTareasPorBloque(int id_bloque) {
 		Bloque bloque = this.getBloque (id_bloque);
 		ArrayList <Tarea> lista_tareas;
@@ -423,6 +452,7 @@ public class BaseDatos extends Observable {
 
 			}
 
+			System.out.println (":) llegamos al final");
 			//MARCO QUE CAMBIO EL OBJETO
     	    setChanged();
         	//NOTIFICO EL CAMBIO

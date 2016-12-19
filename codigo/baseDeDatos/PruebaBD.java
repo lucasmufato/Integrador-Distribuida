@@ -12,7 +12,7 @@ public class PruebaBD{
 		
 		if (tarea == null) {
 			System.out.println ("Ya no hay tareas por procesar. Generamos un bloque nuevo");
-			bd.generarBloques (1, 4, 40);
+			bd.generarBloques (1, 16, 40);
 			tarea = bd.getTarea (1);
 			if (tarea == null) {
 				System.out.println ("Adios");
@@ -52,6 +52,9 @@ public class PruebaBD{
 			System.out.println ("ID: " + t.getId() + "  Estado: " + t.getEstado() + " <" + t.toString().substring(0, 16)+"..>");
 		}
 
+		ArrayList<Bloque> lista_bloques = bd.getBloquesNoCompletados();
+		System.out.println ("\nBLOQUES NO COMPLETADOS: " + lista_bloques.size());
+		
 		System.out.println ("\nINFORMACION DE CACHE:");
 		System.out.println(bd.cacheInfo());
 		
