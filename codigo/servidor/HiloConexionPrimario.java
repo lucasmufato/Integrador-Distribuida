@@ -146,7 +146,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 						this.resultadoFinalTarea(mensaje.getTarea());
 					}else{
 						//si no tiene resultado final entonces tiene un resultado parcial
-						this.resultadoParcialTarea(mensaje.getTarea());
+						this.resultadoParcialTarea(mensaje.getTarea());						
 					}
 					break;
 				default:

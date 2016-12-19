@@ -346,6 +346,11 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
+		//MARCO QUE CAMBIO EL OBJETO
+        setChanged();
+        //NOTIFICO EL CAMBIO
+        notifyObservers(tarea);
+        
 		this.cacheTareas.put (tarea.getId(), tarea);
 
 		try {
