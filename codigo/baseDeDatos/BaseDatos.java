@@ -719,12 +719,27 @@ public class BaseDatos extends Observable {
 	}
 
 	public synchronized Usuario getUsuario(String nombreUsuario) {
-		// por ahora devuelve el primer usuario nomas
-		Usuario u = new Usuario();
-		u.setId(1);
-		u.setNombre("usuario");
-		u.setPassword("usuario123");
-		u.setPuntos(0);
+		Usuario u = null;
+		try {
+			String query = "SELECT USUARIO.NOMBRE, USUARIO.CONTRASENIA, USUARIO.PUNTOS, USUARIO.ID_USUARIO FROM USUARIO WHERE USUARIO.NOMBRE = ? ";
+
+			PreparedStatement stm = c.prepareStatement(query);
+			stm.setString(1, nombreUsuario);
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				u = new Usuario();
+				u.setNombre(rs.getString("nombre"));
+				u.setPassword(rs.getString("contrasenia"));
+				u.setPuntos(rs.getInt("puntos"));
+				u.setId(rs.getInt("id_usuario"));
+			}
+			
+		} catch (SQLException e) {
+			System.err.println ("Error al recuperar Usuario");
+			e.printStackTrace();
+		}
+
 		return u;
 	}
 	
