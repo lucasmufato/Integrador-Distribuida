@@ -937,7 +937,7 @@ public class ServidorVista extends JFrame implements Observer{
 					}
 				}else{ //SI NO CAMBIO EL ESTADO USUARIO MUESTRO PARCIALES Y FINALES
 					String resultado = (String) objeto; 
-					textPaneMsj.setText(resultado);
+					textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
 				}
 			}else{
 				//por si despues necesitamos que observe a algo mas

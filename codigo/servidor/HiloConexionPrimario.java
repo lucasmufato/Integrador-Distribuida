@@ -206,7 +206,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
-		System.out.println("el usuario es: "+this.usuario);
+		System.out.println("el usuario es: " + this.usuario.getNombre());
 		Tarea tarea = this.bd.getTarea(this.usuario.getId());		//por ahora es un numero inventado lo que le paso
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		try {
