@@ -106,7 +106,9 @@ public class BaseDatos extends Observable {
 					"JOIN bloque ON tarea.bloque = bloque.id_bloque " +
 					"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque "+
 				"WHERE " +
-					"tarea.id_tarea = ? "
+					"tarea.id_tarea = ? " +
+				"ORDER BY " +
+					"id_tarea ASC"
 				); 
 				stm_tarea.setInt(1, id_tarea);
 				stm_tarea.execute();
@@ -119,6 +121,21 @@ public class BaseDatos extends Observable {
 						res_tarea.getBytes("parcial")
 					);
 					tarea.setId (id_tarea);
+
+				String str_estado = res_tarea.getString("estado");
+				switch (str_estado) {
+						case "pendiente":
+							tarea.setEstado(EstadoTarea.pendiente);
+							break;
+						case "en proceso":
+							tarea.setEstado(EstadoTarea.enProceso);
+							break;
+						case "detenida":
+							tarea.setEstado(EstadoTarea.detenida);
+						case "completada":
+							tarea.setEstado(EstadoTarea.completada);
+							break;
+					}
 				
 					this.cacheTareas.put(id_tarea, tarea);
 				}
@@ -198,7 +215,7 @@ public class BaseDatos extends Observable {
 						"bloque " +
 						"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque " +
 					"WHERE " +
-						"bloque.id_bloque = ?"
+						"bloque.id_bloque = ? "
 				);
 				stm_bloque.setInt(1, id_bloque);
 				stm_bloque.execute();
@@ -218,8 +235,9 @@ public class BaseDatos extends Observable {
 							bloque.setEstado(EstadoBloque.completado);
 							break;
 					}
-					bloque.setTareas(this.getTareasPorBloque(id_bloque));
 					this.cacheBloques.put(id_bloque, bloque);
+					bloque.setTareas(this.getTareasPorBloque(id_bloque));
+					/* Nota: esto va  a producir que se carguen en memoria todas las tareas del bloque */
 				}
 			} catch (Exception e) {
 				System.err.println ("Error al recuperar bloque: " + e.getMessage());
@@ -230,7 +248,31 @@ public class BaseDatos extends Observable {
 	}
 
 	public synchronized ArrayList<Tarea> getTareasPorBloque(int id_bloque) {
-		return null;
+		Bloque bloque = this.getBloque (id_bloque);
+		ArrayList <Tarea> lista_tareas;
+		try {
+			PreparedStatement stm = c.prepareStatement(
+			"SELECT " +
+				"id_tarea " +
+			"FROM " +
+				"tarea " +
+			"WHERE " +
+				"bloque = ? " +
+			"ORDER BY id_tarea ASC"
+			);
+			stm.setInt(1, id_bloque);
+			ResultSet res = stm.executeQuery();
+			lista_tareas = new ArrayList <Tarea> ();
+			while (res.next()) {
+				lista_tareas.add (this.getTareaById(res.getInt("id_tarea")));
+			}
+		} catch (Exception e) {
+				System.err.println ("Error al recuperar tareas de bloque: " + e.getMessage());
+				e.printStackTrace();
+				lista_tareas = null;
+		}
+		
+		return lista_tareas;
 	}
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
@@ -537,6 +579,8 @@ public class BaseDatos extends Observable {
 
 			if (res_tarea.next()) {
 				System.out.println ("DEBUG: Se ha encontrado una tarea no iniciada dentro de un bloque no iniciado");
+			} else {
+				res_tarea = null;
 			}
 			
 		} catch (Exception e) {
@@ -660,4 +704,9 @@ public class BaseDatos extends Observable {
 		return id_procesamiento;
 	}
 	
+	public String cacheInfo () {
+		return	
+		"Tareas en cache: " + this.cacheTareas.size() +
+		"\nBloques en cache: " + this.cacheBloques.size();
+	}
 }

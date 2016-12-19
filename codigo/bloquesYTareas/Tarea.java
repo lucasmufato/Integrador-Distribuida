@@ -96,4 +96,14 @@ public class Tarea implements Serializable{
 		this.estado=estado;
 	}
 	
+	public String toString() {
+		if(this.tarea == null){
+			return "";
+		}
+    	StringBuilder builder = new StringBuilder();
+    	for(byte b : this.tarea) {
+    	    builder.append(String.format("%02x ", b));
+    	}
+    	return builder.toString();
+	}
 }
