@@ -20,16 +20,21 @@ public class PruebaBD{
 			}
 		}
 		
-/*
-		System.out.println ("Le cambiamos los bytes de parcial, y llamamos a setParcial en la DB");
+		System.out.println ("Le cambiamos los bytes de parcial y resultado ");
 		byte[] parcial = new byte[4];
 		parcial[0] = (byte) 0x99;
 		parcial[1] = (byte) 0x88;
 		parcial[2] = (byte) 0x77;
 		parcial[3] = (byte) 0x66;
 		tarea.setParcial(parcial);
-		bd.setParcial(tarea, 1);
-*/
+		byte[] resultado = new byte[4];
+		resultado[0] = (byte) 0x99;
+		resultado[1] = (byte) 0x99;
+		resultado[2] = (byte) 0x99;
+		resultado[3] = (byte) 0x99;
+		tarea.setResultado(parcial);
+		if (!bd.setParcial(tarea, 1)) { System.err.println("Error en setParcial");}
+		if (!bd.setResultado(tarea, 1)) { System.err.println("Error en setResultado");}
 
 		System.out.println ("TAREA:");
 		System.out.println ("ID de Tarea: " + tarea.getId());

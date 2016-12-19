@@ -360,7 +360,7 @@ public class BaseDatos extends Observable {
 				"FROM " +
 					"estado_tarea " +
 				"WHERE " +
-					"estado = 'completado' " +
+					"estado = 'completada' " +
 				") AS subq " +
 			"WHERE " +
 				"id_tarea = ?"
@@ -392,7 +392,7 @@ public class BaseDatos extends Observable {
 				"FROM " +
 					"estado_tarea " +
 				"WHERE " +
-					"estado = 'completado' " +
+					"estado = 'completada' " +
 				") AS subq " +
 			"WHERE " +
 				"id_procesamiento_tarea = ? ");
