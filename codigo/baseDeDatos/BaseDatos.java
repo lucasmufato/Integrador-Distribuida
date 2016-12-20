@@ -107,7 +107,6 @@ public class BaseDatos {
 					"tarea.id_tarea AS id, "+
 					"tarea.bloque as bloque, "+
 					"tarea.header_bytes as h_bytes, "+
-					"E'\\\\x00' AS parcial, "+
 					"estado_tarea.estado as estado "+
 				"FROM tarea " +
 					"JOIN estado_tarea ON tarea.estado = estado_tarea.id_estado_tarea " +
@@ -122,11 +121,13 @@ public class BaseDatos {
 				stm_tarea.execute();
 				res_tarea = stm_tarea.getResultSet ();
 
+
 				if (res_tarea.next()) {
+					byte[] parcial = this.getParcial(id_tarea);
 					tarea = new Tarea (
 						this.getBloque (res_tarea.getInt("bloque")),
 						res_tarea.getBytes("h_bytes"),
-						res_tarea.getBytes("parcial")
+						parcial
 					);
 					tarea.setId (id_tarea);
 
@@ -366,6 +367,41 @@ public class BaseDatos {
 			return false;
 		}
 		return true;
+	}
+
+	/* Devuelve el ultimo parcial registrado para una tarea */
+	public synchronized byte[] getParcial(int id_tarea) {
+		byte[] parcial = null;
+
+		try{
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT "+
+				"parcial "+
+			"FROM "+
+				"procesamiento_tarea "+
+			"WHERE "+
+				"tarea = ? "+
+			"ORDER BY id_procesamiento_tarea DESC "+
+			"LIMIT 1 "
+			);
+			stm.setInt(1, id_tarea);
+			if(stm.execute()) {
+				ResultSet res = stm.getResultSet();
+				if (res.next()) {
+					parcial = res.getBytes("parcial");
+				}
+			}
+		} catch (Exception e) {
+			System.err.println("Error al obtener parcial: " + e.getMessage());
+			e.printStackTrace();
+		}
+		/* Si no se encontro parcial, devolvemos [0] */
+		if(parcial == null) {
+			parcial = new byte[1];
+			parcial[0] = (byte) 0x00;
+		}
+		return parcial;
+		
 	}
 
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
@@ -747,13 +783,14 @@ public class BaseDatos {
 	private synchronized boolean asignarTareaUsuario (int id_tarea, int id_usuario) {
 		try {
 			/* Insertamos el procesamiento */
-			/* WARNING: Falta insertar el parcial */
+
 			PreparedStatement stm_procesamiento = c.prepareStatement(
 			"INSERT " +
-				"INTO procesamiento_tarea (tarea, usuario, estado) " +
+				"INTO procesamiento_tarea (tarea, usuario, parcial, estado) " +
 			"SELECT " +
 				"? as tarea, " +
 				"? as usuario, " +
+				"? as parcial, " +
 				"id_estado_tarea as estado " +
 			"FROM estado_tarea " +
 				"WHERE estado = 'en proceso'"
@@ -779,6 +816,7 @@ public class BaseDatos {
 
 			stm_procesamiento.setInt(1, id_tarea);
 			stm_procesamiento.setInt(2, id_usuario);
+			stm_procesamiento.setBytes(3, this.getParcial(id_tarea));
 			stm_update_tarea.setInt(1, id_tarea);
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {

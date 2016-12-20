@@ -198,7 +198,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	
 	protected boolean resultadoParcialTarea(Tarea tarea){
 		//creo q no haria mas que eso
-		System.out.println ("[DEBUG] PARCIAL:  -> " + hashToString (tarea.getParcial()));
 		String resultado;
 		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial());
 		//MARCO QUE CAMBIO EL OBJETO
