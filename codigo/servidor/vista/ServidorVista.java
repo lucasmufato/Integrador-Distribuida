@@ -220,6 +220,7 @@ public class ServidorVista extends JFrame implements Observer{
 	public void crearPanelTrabajo() {
 		//CUANDO SE CONCECTA UN CLIENTE, HAGO VISIBLE LA VISTA DE TRABAJO
 		jpanel_servidor.setVisible(false);
+		panel.remove(jpanel_servidor);
 		jpanel_trabajo.setVisible(true);
 		
 		//MUESTRO LA IP Y EL PUERTO
