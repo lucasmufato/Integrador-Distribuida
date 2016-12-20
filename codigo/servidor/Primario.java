@@ -60,6 +60,8 @@ public class Primario implements Runnable {
 	private boolean crearGUI2(){
 		//creo la GUI 2
 		this.vista.crearPanelTrabajo();
+		ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
+		vista.crearAreadeBloques(bs);
 		return false;
 	}
 	
@@ -70,6 +72,7 @@ public class Primario implements Runnable {
 		this.vista.mostrarMsjConsola("Esperando conexiones");
 		//CREO LA GUI2
 		this.crearGUI2();
+		
 		while (this.estado.equals( EstadoServidor.esperandoClientes) ){
 			try {
 				Socket s = this.serverSO.accept();
