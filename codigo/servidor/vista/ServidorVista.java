@@ -29,6 +29,7 @@ import bloquesYTareas.Tarea;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -55,7 +56,7 @@ public class ServidorVista extends JFrame implements Observer{
 	private JLabel lblPuertoServidor;
 
 	private JTextPane textPaneMsj;
-	private JTextPane panel_bloques;
+	private JPanel panel_bloques;
 	private JLabel label_logo;
 	private JScrollPane scrollBarBloques;
 
@@ -304,24 +305,25 @@ public class ServidorVista extends JFrame implements Observer{
 
 	//----------------------------------------------- VISTA 2 -------------------------------------------------------
 	public void crearAreadeBloques(ArrayList<Bloque> bs) {
-		panel_bloques = new JTextPane();
+		panel_bloques = new JPanel();
+		panel_bloques.setLayout(null);
 		panel_bloques.setForeground(Color.LIGHT_GRAY);
 		panel_bloques.setBackground(new java.awt.Color(27, 40, 56));
-		panel_bloques.setEditable(false);
-		panel_bloques.setLayout(null);
-		//panel_bloques.setBounds(10, 62, 512, 112);
-		//jpanel_trabajo.add(panel_bloques);
 		
 		scrollBarBloques = new JScrollPane(panel_bloques);
 		scrollBarBloques.setBounds(10, 100, 512, 70);
-		jpanel_trabajo.add(scrollBarBloques);
 		Integer x = 10, y = 11;
 		JLabel label;
 		Integer cantidadBloques = bs.size();
 		Integer cantidadTareas;
 		for(int numbloques = 0; numbloques < cantidadBloques; numbloques++) {
 			//LA CANTIDAD DE TAREAS DEL BLOQUE "NUMBLOQUES"
-			panel_bloques.setText("Bloque " + numbloques+1 + ": \n");
+			JLabel label_bloque = new JLabel ("Bloque " + bs.get(numbloques).getId() + ":");
+			panel_bloques.add(label_bloque);
+			label_bloque.setBounds (x, y, 120, 12);
+			label_bloque.setForeground(Color.LIGHT_GRAY);
+			y += 16;
+			
 			cantidadTareas = bs.get(numbloques).getTareas().size();
 			System.out.println("Bloque " + numbloques + ": ");
 			System.out.println(cantidadTareas);
@@ -336,7 +338,6 @@ public class ServidorVista extends JFrame implements Observer{
 					panel_bloques.add(label);
 					y += 31;
 					x = 10;
-					panel_bloques.setText("\n\n\n\n");
 				} else {
 					label = new JLabel();
 					label.setOpaque(true); label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
@@ -350,15 +351,17 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 			x = 10;
             y += 31;
-            panel_bloques.setText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 		}
+        panel_bloques.setPreferredSize(new Dimension(20*16,y));
+		jpanel_trabajo.add(scrollBarBloques);
+		jpanel_trabajo.revalidate();
+		jpanel_trabajo.repaint();
 	}
 	public void actualizarAreadeBloques(ArrayList<Bloque> bs){
 		mostrarMsjConsolaTrabajo("Se ha creado un nuevo bloque de tareas.");
 		tareas.clear(); // Limpiar el hashmap de tareas
 		jpanel_trabajo.remove(scrollBarBloques); // Borrar los bloques antiguos
 		this.crearAreadeBloques(bs); //Volver a crear el panel de bloques
-		this.scrollBarBloques.getVerticalScrollBar().setValue(0);
 		mostrarMsjConsolaTrabajo("Actualizada visualizacion de bloques.");
 		
 	}
