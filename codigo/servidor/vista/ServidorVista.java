@@ -111,7 +111,7 @@ public class ServidorVista extends JFrame implements Observer{
 				
 			}
 		});
-		btnConectarServidor.setBounds(78, 161, 144, 23);
+		btnConectarServidor.setBounds(78, 161, 181, 23);
 		jpanel_servidor.add(btnConectarServidor);
 		
 		//TEXT PANE EN DONDE SE VAN A IR MOSTRANDO MSJs
@@ -330,7 +330,7 @@ public class ServidorVista extends JFrame implements Observer{
 					label.setOpaque(true);
 					label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
-					label.setText(""+(numtareas)); 
+					label.setText(""+(bs.get(numbloques).getTareas().get(numtareas-1).getId())); 
 					panel_bloques.add(label);
 					y += 31;
 					x = 10;
@@ -339,7 +339,7 @@ public class ServidorVista extends JFrame implements Observer{
 					label = new JLabel();
 					label.setOpaque(true); label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
-					label.setText(""+(numtareas)); 
+					label.setText(""+(bs.get(numbloques).getTareas().get(numtareas-1).getId())); 
 					panel_bloques.add(label);
 					x += 30;
 				}
