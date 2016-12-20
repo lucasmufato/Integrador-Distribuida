@@ -466,10 +466,65 @@ public class BaseDatos extends Observable {
 	}	
 
 	public synchronized boolean detenerTarea(Tarea tarea, Integer idUsuario){
-		//FALTA EL CAMBIO EN LA BD
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"UPDATE " +
+				"tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'detenida' " +
+				") AS subq " +
+			"WHERE " +
+				"id_tarea = ?"
+			);
 		
+			stm.setInt (1, tarea.getId());
+			if(stm.executeUpdate() <1) {
+				return false;
+			}
+			int id_proc_tarea = this.getIdProcesamiento (tarea.getId(), idUsuario);
+			
+			if (id_proc_tarea == -1) {
+				System.err.println("Error al recuperar id de procesamiento de tarea, id invalido");
+				return false;
+			}
+
+			stm = c.prepareStatement (
+			"UPDATE " +
+				"procesamiento_tarea " +
+			"SET " +
+				"estado = subq.id_estado_tarea " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'detenida' " +
+				") AS subq " +
+			"WHERE " +
+				"id_procesamiento_tarea = ? ");
+			
+			stm.setInt(1, id_proc_tarea);
+			
+			if(stm.executeUpdate() < 1) {
+				return false;
+			}
+	
 		tarea.setEstado(EstadoTarea.detenida);
-		return false;
+		} catch (Exception e) {
+			System.err.println("Error al detener tarea:" + e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
 	}
 
 	public synchronized boolean generarBloques (int numBloques, int numTareasPorBloque, int numBytesPorTarea) {
