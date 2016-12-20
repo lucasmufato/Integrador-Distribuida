@@ -187,11 +187,6 @@ public class BaseDatos extends Observable {
 			tarea = this.getTareaById(id_tarea);
 			tarea.setEstado(EstadoTarea.enProceso);
 
-			//CUANDO SE HAYA ASIGNADO CORRECTAMENTE UN TAREA AL USUARIO SE AVISA AL OBSERVADOR DEL CAMBIO
-			//MARCO QUE CAMBIO EL OBJETO
-	        setChanged();
-	        //NOTIFICO EL CAMBIO
-	        notifyObservers(tarea);
 	        
 			/* TODO: Esto deberia establecerlo el servidor primario, no la base de datos */
 			tarea.SetLimite(3, (byte) 0x80);
@@ -376,15 +371,10 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
-<<<<<<< HEAD
-		//MARCO QUE CAMBIO EL OBJETO
-        setChanged();
-        //NOTIFICO EL CAMBIO
-        notifyObservers(tarea);
-        
+//<<<<<<< HEAD
 		this.cacheTareas.put (tarea.getId(), tarea);
-=======
->>>>>>> origin/master
+//=======
+//>>>>>>> origin/master
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
@@ -467,11 +457,6 @@ public class BaseDatos extends Observable {
 				}
 
 			}
-
-			//MARCO QUE CAMBIO EL OBJETO
-    	    setChanged();
-        	//NOTIFICO EL CAMBIO
-        	notifyObservers(tarea);
 		} catch (Exception e) {
 			System.err.println ("Error al guardar resultado en DB: "+e.getMessage());
 			e.printStackTrace();
@@ -484,10 +469,6 @@ public class BaseDatos extends Observable {
 		//FALTA EL CAMBIO EN LA BD
 		
 		tarea.setEstado(EstadoTarea.detenida);
-		//MARCO QUE CAMBIO EL OBJETO
-        setChanged();
-        //NOTIFICO EL CAMBIO
-        notifyObservers(tarea);
 		return false;
 	}
 
