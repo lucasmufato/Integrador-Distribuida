@@ -16,6 +16,7 @@ import bloquesYTareas.*;
 
 public class BaseDatos extends Observable {
 
+	private static BaseDatos instance = null; //Esto es para el singleton
 	protected Connection c;
 	protected final static String host="localhost";
 	protected final static String nombreBD="finaldistribuido";
@@ -28,11 +29,18 @@ public class BaseDatos extends Observable {
 	private Map <Integer, Bloque> cacheBloques;
 	private Map <Integer, Tarea> cacheTareas;
 
-	public BaseDatos(){
+	private BaseDatos(){
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
 		contadorSesiones=0;
+	}
+
+	public static BaseDatos getInstance () {
+		if(BaseDatos.instance == null) {
+			BaseDatos.instance = new BaseDatos();
+		}
+		return BaseDatos.instance;
 	}
 
 	public boolean conectarse(){
@@ -174,14 +182,9 @@ public class BaseDatos extends Observable {
 				}
 			}
 
-			this.asignarTareaUsuario(res_tarea.getInt("id"), idUsuario);
-
-			tarea = new Tarea (
-				this.getBloque (res_tarea.getInt("bloque")),
-				res_tarea.getBytes("h_bytes"),
-				res_tarea.getBytes("parcial")
-			);
-			tarea.setId(res_tarea.getInt("id"));
+			int id_tarea = res_tarea.getInt("id");
+			this.asignarTareaUsuario(id_tarea, idUsuario);
+			tarea = this.getTareaById(id_tarea);
 			tarea.setEstado(EstadoTarea.enProceso);
 
 			//CUANDO SE HAYA ASIGNADO CORRECTAMENTE UN TAREA AL USUARIO SE AVISA AL OBSERVADOR DEL CAMBIO
@@ -247,6 +250,35 @@ public class BaseDatos extends Observable {
 		return bloque;
 	}
 
+	public synchronized ArrayList<Bloque> getBloquesNoCompletados() {
+		ArrayList<Bloque> lista_bloques = null;
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT "+
+				"bloque.id_bloque AS id_bloque " +
+			"FROM "  +
+				"bloque " +
+				"JOIN estado_bloque ON bloque.estado = estado_bloque.id_estado_bloque " +
+			"WHERE " +
+				"estado_bloque.estado <> 'completado' " +
+			"ORDER BY bloque.id_bloque ASC "
+			);
+			stm.execute();
+			ResultSet res = stm.getResultSet();
+			lista_bloques = new ArrayList <Bloque> ();
+			while (res.next()) {
+				lista_bloques.add (this.getBloque (res.getInt("id_bloque")));
+			}
+
+		} catch (Exception e) {
+				System.err.println ("Error al recuperar tareas de bloque: " + e.getMessage());
+				e.printStackTrace();
+				lista_bloques = null;
+		}
+		
+		return lista_bloques;
+	}
+
 	public synchronized ArrayList<Tarea> getTareasPorBloque(int id_bloque) {
 		Bloque bloque = this.getBloque (id_bloque);
 		ArrayList <Tarea> lista_tareas;
@@ -277,7 +309,6 @@ public class BaseDatos extends Observable {
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
 		tarea.setEstado (EstadoTarea.enProceso);
-		this.cacheTareas.put (tarea.getId(), tarea);
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
@@ -334,7 +365,6 @@ public class BaseDatos extends Observable {
 			if(stm.executeUpdate() < 1) {
 				return false;
 			}
-			
 		} catch (Exception e) {
 			System.err.println ("Error al guardar parcial en DB: "+e.getMessage());
 			e.printStackTrace();
@@ -346,12 +376,15 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
+<<<<<<< HEAD
 		//MARCO QUE CAMBIO EL OBJETO
         setChanged();
         //NOTIFICO EL CAMBIO
         notifyObservers(tarea);
         
 		this.cacheTareas.put (tarea.getId(), tarea);
+=======
+>>>>>>> origin/master
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
@@ -412,7 +445,8 @@ public class BaseDatos extends Observable {
 			//LLAMA AL METODO ESTAFINALIZADOBLOQUE(), SI ESTE DEVUELVE TRUE CAMBIA ESTADO DEL BLOQUE
 			if (this.estaFinalizadoBloque (tarea.getBloque())) {
 				tarea.getBloque().setEstado(EstadoBloque.completado);
-				stm = c.prepareStatement ("UPDATE " +
+				stm = c.prepareStatement (
+				"UPDATE " +
 					"bloque " +
 				"SET " +
 					"estado = subq.id_estado " +
@@ -425,6 +459,7 @@ public class BaseDatos extends Observable {
 						"estado = 'completado' " +
 				") AS subq " +
 				"WHERE id_bloque = ?");
+				stm.setInt(1, tarea.getBloque().getId());
 
 				if (stm.executeUpdate() < 1) {
 					System.err.println ("Error al establecer estado al bloque como finalizado");
@@ -491,6 +526,28 @@ public class BaseDatos extends Observable {
 
 	private synchronized boolean estaFinalizadoBloque(Bloque bloque){
 		//CHEQUEA QUE TODAS LAS TAREAS DEL BLOQUE ESTEN COMPLETAS
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT " +
+				"COUNT (tarea.id_tarea) AS restantes " +
+			"FROM " +
+				"tarea " +
+				"JOIN estado_tarea ON tarea.estado = estado_tarea.id_estado_tarea "+
+			"WHERE " + 
+				"tarea.bloque = ? " +
+				"AND estado_tarea.estado <> 'completada' "
+			);
+			stm.setInt (1, bloque.getId());
+			stm.execute();
+			ResultSet result = stm.getResultSet();
+			result.next();
+			int restantes = result.getInt("restantes");
+			System.out.println ("DEBUG: Restantes: " + restantes);
+			return (restantes == 0);
+		} catch (Exception e) {
+			System.err.println ("Error al intentar determinar si bloque esta finalizado "+e.getMessage());
+			e.printStackTrace();
+		}
 		return false;
 	}
 
@@ -671,12 +728,27 @@ public class BaseDatos extends Observable {
 	}
 
 	public synchronized Usuario getUsuario(String nombreUsuario) {
-		// por ahora devuelve el primer usuario nomas
-		Usuario u = new Usuario();
-		u.setId(1);
-		u.setNombre("usuario");
-		u.setPassword("usuario123");
-		u.setPuntos(0);
+		Usuario u = null;
+		try {
+			String query = "SELECT USUARIO.NOMBRE, USUARIO.CONTRASENIA, USUARIO.PUNTOS, USUARIO.ID_USUARIO FROM USUARIO WHERE USUARIO.NOMBRE = ? ";
+
+			PreparedStatement stm = c.prepareStatement(query);
+			stm.setString(1, nombreUsuario);
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				u = new Usuario();
+				u.setNombre(rs.getString("nombre"));
+				u.setPassword(rs.getString("contrasenia"));
+				u.setPuntos(rs.getInt("puntos"));
+				u.setId(rs.getInt("id_usuario"));
+			}
+			
+		} catch (SQLException e) {
+			System.err.println ("Error al recuperar Usuario");
+			e.printStackTrace();
+		}
+
 		return u;
 	}
 	

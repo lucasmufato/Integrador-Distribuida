@@ -31,11 +31,16 @@ public class Primario implements Runnable {
 	//variables de control
 	private EstadoServidor estado;
 	
+	//otras variables
+	private BaseDatos baseDatos;
+	
 	
 	public Primario(){
 		//algo
 		this.estado=EstadoServidor.desconectado;
 		this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
+		this.baseDatos= BaseDatos.getInstance();
+		this.baseDatos.conectarse();
 		this.crearGUI();
 		this.CrearReplicador();
 		try {
@@ -48,6 +53,7 @@ public class Primario implements Runnable {
 	private boolean crearGUI(){
 		//creo la GUI
 		this.vista = new ServidorVista(this);
+		this.baseDatos.addObserver(this.vista);
 		//despues empiezo a esperar por los clientes
 		return false;
 	}
@@ -69,7 +75,7 @@ public class Primario implements Runnable {
 			try {
 				Socket s = this.serverSO.accept();
 				this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
-				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s);
+				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos);
 				//UNA VEZ Q CREO LA CONEXION HAGO QUE LA VISTA LA OBSERVE
 				nuevaConexion.addObserver(this.vista);
 				this.hilosConexiones.add(nuevaConexion);

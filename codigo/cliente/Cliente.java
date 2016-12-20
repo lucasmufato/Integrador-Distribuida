@@ -79,6 +79,7 @@ public class Cliente {
 				case esperandoTrabajo:
 					if (this.hiloMinero == null) {
 						this.hiloMinero = new HiloMineroCPU(this, tarea);
+						this.hiloMinero.setCliente(this);
 					}else{
 						this.hiloMinero.setTarea(tarea);
 					}
