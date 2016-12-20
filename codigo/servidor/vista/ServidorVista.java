@@ -89,6 +89,7 @@ public class ServidorVista extends JFrame implements Observer{
 		textFieldPuerto.setBounds(233, 48, 134, 23);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
+		textFieldPuerto.setText("5555");
 		
 		//CUANDO PRESIONES EL BOTON, VOY A CHEQUEAR QUE EL PUERTO QUE INGRESE ESTE LIBRE
 		btnConectarServidor = new JButton("Conectar Servidor");
