@@ -24,6 +24,9 @@ public class Primario implements Runnable {
 	private Integer puerto;
 	private String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
 	private Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
+	private int numTareasPorBloque = 32;
+	private int numBytesPorTarea = 40;
+	
 	
 	//variables para la vista
 	private ServidorVista vista;
@@ -64,6 +67,16 @@ public class Primario implements Runnable {
 		ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 		vista.crearAreadeBloques(bs);
 		return false;
+	}
+
+	public boolean generarBloque() {
+		if (this.baseDatos.generarBloques(1, numTareasPorBloque, numBytesPorTarea)) {
+			ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
+			this.vista.actualizarAreadeBloques(bs);
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	protected boolean esperarClientes(){

@@ -57,6 +57,7 @@ public class ServidorVista extends JFrame implements Observer{
 	private JTextPane textPaneMsj;
 	private JTextPane panel_bloques;
 	private JLabel label_logo;
+	private JScrollPane scrollBarBloques;
 
 	
 	public ServidorVista(Primario servidor){
@@ -189,6 +190,7 @@ public class ServidorVista extends JFrame implements Observer{
 		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
 		btnGenerarBloques.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				servidor.generarBloque();
 			}
 		});
 		btnGenerarBloques.setBackground(SystemColor.inactiveCaption);
@@ -310,7 +312,7 @@ public class ServidorVista extends JFrame implements Observer{
 		//panel_bloques.setBounds(10, 62, 512, 112);
 		//jpanel_trabajo.add(panel_bloques);
 		
-		JScrollPane scrollBarBloques = new JScrollPane(panel_bloques);
+		scrollBarBloques = new JScrollPane(panel_bloques);
 		scrollBarBloques.setBounds(10, 100, 512, 70);
 		jpanel_trabajo.add(scrollBarBloques);
 		Integer x = 10, y = 11;
@@ -350,6 +352,15 @@ public class ServidorVista extends JFrame implements Observer{
             y += 31;
             panel_bloques.setText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 		}
+	}
+	public void actualizarAreadeBloques(ArrayList<Bloque> bs){
+		mostrarMsjConsolaTrabajo("Se ha creado un nuevo bloque de tareas.");
+		tareas.clear(); // Limpiar el hashmap de tareas
+		jpanel_trabajo.remove(scrollBarBloques); // Borrar los bloques antiguos
+		this.crearAreadeBloques(bs); //Volver a crear el panel de bloques
+		this.scrollBarBloques.getVerticalScrollBar().setValue(0);
+		mostrarMsjConsolaTrabajo("Actualizada visualizacion de bloques.");
+		
 	}
 
 	private static Color colorEstado (EstadoTarea estado) { 			switch(estado){
