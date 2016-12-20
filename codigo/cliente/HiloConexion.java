@@ -107,7 +107,25 @@ public class HiloConexion implements Runnable {
 	}
 
 	public void enviarResultado(Tarea tarea) {
-		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,tarea);
+
+		/* Tenemos que copiar el objeto a otro antes de enviarlo, sino del otro lado se recibe siempre igual a como estaba la primera vez que se envio */
+		byte[] copia_parcial = new byte[tarea.getParcial().length];
+		System.arraycopy(tarea.getParcial(), 0, copia_parcial, 0, copia_parcial.length);
+		byte[] copia_resultado = null;
+
+		if (tarea.getResultado() != null) {
+			copia_resultado = new byte[tarea.getResultado().length];
+			System.arraycopy(tarea.getParcial(), 0, copia_resultado, 0, copia_resultado.length);
+		}
+
+		Tarea copia = new Tarea(
+			tarea.getBloque(),
+			tarea.getTarea(),
+			copia_parcial,
+			copia_resultado);
+		copia.setId(tarea.getId());
+		copia.setLimiteSuperior(tarea.getLimiteSuperior());
+		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,copia);
 		try {
 			if(this.socket!=null){
 				this.flujoSaliente.writeObject(mensaje);
