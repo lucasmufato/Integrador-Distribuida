@@ -27,10 +27,8 @@ import bloquesYTareas.Tarea;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.SystemColor;
 
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 public class ServidorVista extends JFrame implements Observer{
@@ -889,7 +887,7 @@ public class ServidorVista extends JFrame implements Observer{
 		//y que objeto me pasa
 		if(claseLLamadora.getClass().equals(BaseDatos.class)){	// si claseLLamador es una clase de BaseDatos
 			//si la base de datos cambio de estado
-			
+			System.out.println("observe un cambio en la BD:");
 			Tarea tarea = (Tarea) objeto;
 			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
 			int id_tarea = tarea.getId();
@@ -918,6 +916,7 @@ public class ServidorVista extends JFrame implements Observer{
 			
 		}else{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
+				System.out.println("observe un cambio en HiloConexionPrimario:");
 				//si el que me indica que cambio de estado es el hilo primario
 				//pregunto si cambio el estado del usuario u otra cosa
 				if(objeto.getClass().equals(Usuario.class)){
@@ -936,10 +935,12 @@ public class ServidorVista extends JFrame implements Observer{
 					
 					}
 				}else{ //SI NO CAMBIO EL ESTADO USUARIO MUESTRO PARCIALES Y FINALES
+					
 					String resultado = (String) objeto; 
 					textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
 				}
 			}else{
+				System.out.println("observe un cambio que no es ni de BD ni de HiloPrimarioConexion :O");
 				//por si despues necesitamos que observe a algo mas
 				this.mostrarError("fallo el observador! :(");
 			}

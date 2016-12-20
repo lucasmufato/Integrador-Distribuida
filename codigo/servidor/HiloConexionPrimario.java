@@ -30,7 +30,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected Integer idSesion;
 	protected Usuario usuario;
 	
-	public HiloConexionPrimario(Primario servidor,Socket s) {
+	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd) {
 		this.servidor=servidor;
 		this.socket=s;
 		this.usuario= new Usuario();
@@ -41,8 +41,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 			//si hay error aca cagamos
 			e.printStackTrace();
 		}
-		this.bd = BaseDatos.getInstance();
-		bd.conectarse();
+		this.bd = bd;
 		
 	}
 
