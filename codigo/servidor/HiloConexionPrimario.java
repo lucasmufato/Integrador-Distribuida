@@ -10,9 +10,11 @@ import baseDeDatos.*;
 import bloquesYTareas.Tarea;
 import mensajes.*;
 import servidor.vista.ServidorVista;
+import misc.*;
 
 
-public class HiloConexionPrimario extends Observable implements Runnable {
+public class HiloConexionPrimario extends Observable implements Runnable, WatchdogListener {
+	private static long TIMEOUT_DESCONEXION = 10000; //Si despues de 10 segundos no se recibe un mensaje, cerrar la conexion
 
 	//conexion con otras clases
 	protected Primario servidor;
@@ -29,6 +31,9 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected Tarea tareaEnTrabajo;
 	protected Integer idSesion;
 	protected Usuario usuario;
+
+	//variables relacionadas con el watchdog timer (desconecta al cliente si tarda mucho en responder)
+	protected Watchdog wdt = null;
 	
 	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd) {
 		this.servidor=servidor;
@@ -73,6 +78,9 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
 		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
 		try {	this.socket.close();			} catch (IOException e) {}
+		if (this.wdt != null) {
+			this.wdt.interrupt();
+		}
 	}
 	
 	protected boolean clienteLogeo(){
@@ -133,6 +141,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 		while(conectado){
 			try {
 				Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
+				this.kickDog();
 				switch(msj.getCodigo()){
 				case logeo:
 					//
@@ -155,7 +164,7 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 			} catch (ClassNotFoundException | IOException e) {
 				//e.printStackTrace();
 				System.out.println("hubo un error en la conexion con el usuario: "+this.usuario.getNombre()+". Desconectandolo.");
-				this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+				this.detenerTarea();
 				this.cerrarConexion();
 				this.morir();
 				return false;
@@ -206,7 +215,10 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
 		System.out.println("el usuario es: " + this.usuario.getNombre());
-		Tarea tarea = this.bd.getTarea(this.usuario.getId());		//por ahora es un numero inventado lo que le paso
+		Tarea tarea = this.bd.getTarea(this.usuario.getId());
+		if (tarea == null) {
+			setChanged();
+		}
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
@@ -217,6 +229,32 @@ public class HiloConexionPrimario extends Observable implements Runnable {
 			e.printStackTrace();
 			return false;
 		}
+	}
+
+	protected boolean detenerTarea() {
+		boolean retval = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+		setChanged();
+		this.notifyObservers(this.tareaEnTrabajo);
+		
+		return retval;
+	}
+
+	protected void kickDog() {
+		if (this.wdt == null) {
+			this.wdt = new Watchdog(TIMEOUT_DESCONEXION, this);
+			this.wdt.start();
+		} else {
+			this.wdt.kick();
+		}
+	}
+
+	@Override
+	public synchronized void timeout() {
+		setChanged();
+		this.notifyObservers("Se desconecto al cliente con id " + this.usuario.getId() + " por inactividad");
+		this.detenerTarea();
+		this.cerrarConexion();
+		this.morir();
 	}
 	
 	public static String hashToString(byte[] hash) {
