@@ -32,6 +32,8 @@ import java.awt.Rectangle;
 
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.JSpinner;
+import java.awt.SystemColor;
 
 public class ServidorVista extends JFrame implements Observer{
 	
@@ -173,7 +175,7 @@ public class ServidorVista extends JFrame implements Observer{
 		JLabel lblBloquesYTareas = new JLabel("BLOQUES Y SUS TAREAS");
 		lblBloquesYTareas.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblBloquesYTareas.setForeground(new java.awt.Color(189, 187, 185));
-		lblBloquesYTareas.setBounds(206, 37, 184, 14);
+		lblBloquesYTareas.setBounds(203, 78, 184, 14);
 		jpanel_trabajo.add(lblBloquesYTareas); 
 		
 		
@@ -183,6 +185,24 @@ public class ServidorVista extends JFrame implements Observer{
 		JScrollPane scrollBarMsj = new JScrollPane(textPaneMsj);
 		scrollBarMsj.setBounds(10, 181, 512, 81);
 		jpanel_trabajo.add(scrollBarMsj);
+		
+		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
+		btnGenerarBloques.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnGenerarBloques.setBackground(SystemColor.inactiveCaption);
+		btnGenerarBloques.setBounds(40, 36, 210, 23);
+		jpanel_trabajo.add(btnGenerarBloques);
+		
+		JSpinner spinner = new JSpinner();
+		spinner.setBounds(402, 37, 60, 20);
+		jpanel_trabajo.add(spinner);
+		
+		JLabel lblDificultad = new JLabel("Dificultad : ");
+		lblDificultad.setForeground(new java.awt.Color(189, 187, 185));
+		lblDificultad.setBounds(300, 40, 92, 14);
+		jpanel_trabajo.add(lblDificultad);
 		
 		this.revalidate();
 		this.repaint();
@@ -291,7 +311,7 @@ public class ServidorVista extends JFrame implements Observer{
 		//jpanel_trabajo.add(panel_bloques);
 		
 		JScrollPane scrollBarBloques = new JScrollPane(panel_bloques);
-		scrollBarBloques.setBounds(10, 62, 512, 112);
+		scrollBarBloques.setBounds(10, 100, 512, 70);
 		jpanel_trabajo.add(scrollBarBloques);
 		Integer x = 10, y = 11;
 		JLabel label;
@@ -346,5 +366,4 @@ public class ServidorVista extends JFrame implements Observer{
 				return (Color.RED);
 		}
 	}
-
 }
