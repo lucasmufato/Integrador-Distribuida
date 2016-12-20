@@ -41,6 +41,7 @@ public class Primario implements Runnable {
 		this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 		this.baseDatos= BaseDatos.getInstance();
 		this.baseDatos.conectarse();
+		this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 		this.crearGUI();
 		this.CrearReplicador();
 		try {

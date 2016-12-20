@@ -140,6 +140,7 @@ public class BaseDatos {
 							break;
 						case "detenida":
 							tarea.setEstado(EstadoTarea.detenida);
+							break;
 						case "completada":
 							tarea.setEstado(EstadoTarea.completada);
 							break;
@@ -471,16 +472,17 @@ public class BaseDatos {
 				"estado = subq.id_estado_tarea " +
 			"FROM ( " +
 				"SELECT " +
-					"id_estado_tarea " +
+					"estado_tarea.id_estado_tarea AS id_estado_tarea " +
 				"FROM " +
 					"estado_tarea " +
 				"WHERE " +
-					"estado = 'detenida' " +
+					"estado_tarea.estado = 'detenida' " +
 				") AS subq " +
 			"WHERE " +
 				"id_tarea = ?"
 			);
 		
+			tarea.setEstado(EstadoTarea.detenida);
 			stm.setInt (1, tarea.getId());
 			if(stm.executeUpdate() <1) {
 				return false;
@@ -522,6 +524,41 @@ public class BaseDatos {
 		}
 
 		return true;
+	}
+
+	/* Cuando el servidor arranca todas las tareas deben estar pendientes, completadas o detenidas (nunca en proceso) */
+	public synchronized boolean detenerTareasEnProceso() {
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"UPDATE " +
+				"tarea " +
+			"SET " +
+				"estado=subq_detenida.id " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea AS id " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'en proceso' " +
+			") AS subq_proc, " +
+			"(" +
+					"SELECT " +
+					"id_estado_tarea  AS id " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'detenida' " +
+			") AS subq_detenida " +
+			"WHERE " +
+				"estado = subq_proc.id" 
+			);
+			return stm.execute();
+		} catch (Exception e) {
+			System.err.println("Error al detener tareas en proceso: "+e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public synchronized boolean generarBloques (int numBloques, int numTareasPorBloque, int numBytesPorTarea) {
