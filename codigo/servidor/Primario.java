@@ -53,7 +53,6 @@ public class Primario implements Runnable {
 	private boolean crearGUI(){
 		//creo la GUI
 		this.vista = new ServidorVista(this);
-		this.baseDatos.addObserver(this.vista);
 		//despues empiezo a esperar por los clientes
 		return false;
 	}

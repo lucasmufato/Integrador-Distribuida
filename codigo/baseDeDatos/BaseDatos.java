@@ -14,7 +14,7 @@ import java.util.Random;
 
 import bloquesYTareas.*;
 
-public class BaseDatos extends Observable {
+public class BaseDatos {
 
 	private static BaseDatos instance = null; //Esto es para el singleton
 	protected Connection c;
@@ -186,7 +186,6 @@ public class BaseDatos extends Observable {
 			this.asignarTareaUsuario(id_tarea, idUsuario);
 			tarea = this.getTareaById(id_tarea);
 			tarea.setEstado(EstadoTarea.enProceso);
-
 	        
 			/* TODO: Esto deberia establecerlo el servidor primario, no la base de datos */
 			tarea.SetLimite(3, (byte) 0x80);
@@ -304,7 +303,7 @@ public class BaseDatos extends Observable {
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
 		tarea.setEstado (EstadoTarea.enProceso);
-
+		
 		try {
 			PreparedStatement stm = c.prepareStatement (
 			"UPDATE " +
@@ -371,10 +370,8 @@ public class BaseDatos extends Observable {
 	public synchronized boolean setResultado(Tarea tarea, Integer idUsuario){
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
-//<<<<<<< HEAD
 		this.cacheTareas.put (tarea.getId(), tarea);
-//=======
-//>>>>>>> origin/master
+
 
 		try {
 			PreparedStatement stm = c.prepareStatement (
