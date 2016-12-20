@@ -183,6 +183,8 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
         notifyObservers(resultado);
 		if (this.servidor.verificarResultado(tarea) == true){
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
+				setChanged();
+				notifyObservers(tarea);
 				this.enviarNuevaTarea();
 				return true;
 			}else{
@@ -204,7 +206,8 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
         //NOTIFICO EL CAMBIO
         notifyObservers(resultado);
 		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
-			
+			setChanged();
+			notifyObservers(tarea);
 			return true;
 		}else{
 			//TODO si sale mal que hago?

@@ -51,7 +51,6 @@ public class ServidorVista extends JFrame implements Observer{
 	private JTextPane textPaneConsolaTrabajo;
 	private JLabel lblIPServidor;
 	private JLabel lblPuertoServidor;
-	private JLabel lbl2, lbl3, lbl4, lbl5, lbl6, lbl7, lbl8, lbl9, lbl10, lbl11, lbl12, lbl13, lbl14, lbl15, lbl16, lbl17, lbl18, lbl19, lbl20, lbl21, lbl22, lbl23, lbl24, lbl25, lbl26, lbl27, lbl28, lbl29, lbl30, lbl31, lbl32, lbl33, lbl34, lbl35, lbl36, lbl37, lbl38, lbl39, lbl40, lbl41, lbl42, lbl43, lbl44, lbl45, lbl46, lbl47, lbl48, lbl49, lbl50, lbl51, lbl52, lbl53, lbl54, lbl55, lbl56, lbl57, lbl58, lbl59, lbl60, lbl61, lbl62, lbl63, lbl64, lbl65, lbl66, lbl67, lbl68, lbl69, lbl70, lbl71, lbl72, lbl73, lbl74, lbl75, lbl76, lbl77, lbl78, lbl79, lbl80;
 
 	private JTextPane textPaneMsj;
 	private JTextPane panel_bloques;
@@ -232,35 +231,20 @@ public class ServidorVista extends JFrame implements Observer{
 	public void update(Observable claseLLamadora, Object objeto) {
 		//ya que voy a recibir distintos tipos de objetos, tengo q ver quien la clase llamadora (la que cambio de estado)
 		//y que objeto me pasa
-		if(claseLLamadora.getClass().equals(BaseDatos.class)){	// si claseLLamador es una clase de BaseDatos
-			//si la base de datos cambio de estado
-			System.out.println("observe un cambio en la BD:");
+		if(objeto.getClass().equals(Tarea.class)){
+			//si una tarea cambio de datos cambio de estado
+			System.out.println("observe en una tarea:");
 			Tarea tarea = (Tarea) objeto;
 			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
 			int id_tarea = tarea.getId();
 			Bloque bloque = tarea.getBloque();
 			int idBloque = bloque.getId();
 			EstadoTarea estado = tarea.getEstado();
-			//ARMO UN STRING QUE VA A GUARDAR LA CLAVE PARA EL HASHMAP (BLOQUE+TAREA)
-			String clave = String.valueOf(idBloque) + String.valueOf(id_tarea);
+			// La clave del Hashmap es la id de la tarea
+			Integer clave = id_tarea;
 			//VEO A QUE ESTADO CAMBIO
-			switch(estado){
-			case enProceso:
-				//PASA A COLOR CELESTE
-				tareas.get(clave).setBackground(Color.CYAN);
-				break;
-			case detenida:
-				//PASA A COLOR AZUL
-				tareas.get(clave).setBackground(Color.BLUE);
-				break;
-			case completada:
-				//PASA A COLOR VERDE
-				tareas.get(clave).setBackground(Color.green);
-				break;
-			default:
-				break;
-			}
-			
+			tareas.get(clave).setBackground(colorEstado(estado));
+		
 		}else{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
 				System.out.println("observe un cambio en HiloConexionPrimario:");
@@ -323,7 +307,7 @@ public class ServidorVista extends JFrame implements Observer{
 				if ((numtareas % 16) == 0){
 					label = new JLabel();
 					label.setOpaque(true);
-					label.setBackground(Color.RED);
+					label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
 					label.setText(""+(numtareas)); 
 					panel_bloques.add(label);
@@ -332,8 +316,7 @@ public class ServidorVista extends JFrame implements Observer{
 					panel_bloques.setText("\n\n\n\n");
 				} else {
 					label = new JLabel();
-					label.setOpaque(true);
-					label.setBackground(Color.RED);
+					label.setOpaque(true); label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
 					label.setText(""+(numtareas)); 
 					panel_bloques.add(label);
@@ -345,6 +328,21 @@ public class ServidorVista extends JFrame implements Observer{
 			x = 10;
             y += 31;
             panel_bloques.setText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+		}
+	}
+
+	private static Color colorEstado (EstadoTarea estado) { 			switch(estado){
+			case enProceso:
+				//PASA A COLOR CELESTE
+				return (Color.CYAN);
+			case detenida:
+				//PASA A COLOR AZUL
+				return (Color.BLUE);
+			case completada:
+				//PASA A COLOR VERDE
+				return (Color.GREEN);
+			default:
+				return (Color.RED);
 		}
 	}
 
