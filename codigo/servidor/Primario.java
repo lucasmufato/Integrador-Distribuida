@@ -12,6 +12,8 @@ import java.util.Observer;
 
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.*;
+import mensajes.CodigoMensaje;
+import mensajes.MensajePuntos;
 import servidor.vista.ServidorVista;
 
 
@@ -169,6 +171,9 @@ public class Primario implements Runnable {
 		this.hilosConexiones.remove(hiloConexionPrimario);
 	}
 	
+	
+	
+	
 	/** 	SETTERS Y GETTERS		**/
 	public Integer getPuerto() {
 		return puerto;
@@ -204,6 +209,28 @@ public class Primario implements Runnable {
 
 	public String getIP() {
 		return IP;
+	}
+
+	public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) {
+		//PROVISORIO DIVIDO LOS PUNTOS POR LA CANTIDAD DE ENTRADAD QUE TENGO EN LA TABLA, IGUAL PARA TODOS LOS USUARIOS DE UNA TAREA
+		//TODO HACER EL VERDADERO DIVISOR
+		Integer puntosRepartir = lista_proc.size()/100; //REPARTIMOS 100 PTOS POR TAREA
+		
+		//TOMO EL USUARIO DE CADA ENTRADA 
+		for(int i=0;i<lista_proc.size();i++) {
+			  ProcesamientoTarea pt = lista_proc.get(i);
+			  //ACTUALIZO LOS PUNTOS EN LA BD
+			  this.baseDatos.actualizarPuntos(pt.getUsuario(),puntosRepartir);
+			  //NOTIFICO A LOS USUARIOS
+			  for(int j=0;j<this.hilosConexiones.size();j++){
+				  HiloConexionPrimario hp = this.hilosConexiones.get(j);
+				  if(hp.usuario.getId() == pt.getUsuario()){
+					  MensajePuntos msj = new MensajePuntos(CodigoMensaje.puntos,hp.idSesion,pt.getTarea(),puntosRepartir); 
+					  hp.enviarNotificacionPuntos(msj);
+				  }
+			  }
+		}
+		
 	}
 
 
