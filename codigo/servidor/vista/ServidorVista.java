@@ -88,12 +88,12 @@ public class ServidorVista extends JFrame implements Observer{
 		JLabel lblPuertoDeEscucha = new JLabel("Puerto de escucha:");
 		lblPuertoDeEscucha.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPuertoDeEscucha.setForeground(new java.awt.Color(189, 187, 185));
-		lblPuertoDeEscucha.setBounds(78, 51,this.ancho-(800-144), this.alto-(500-14));
+		lblPuertoDeEscucha.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3)-18, 180, 24);
 		jpanel_servidor.add(lblPuertoDeEscucha);
 		
 		//TEXFIELD DEL PUERTO
 		textFieldPuerto = new JTextField();
-		textFieldPuerto.setBounds(233, 48, this.ancho-(800-134), this.alto-(500-23));
+		textFieldPuerto.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3), 180, 24);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
 		textFieldPuerto.setText("5555");
@@ -117,7 +117,7 @@ public class ServidorVista extends JFrame implements Observer{
 				
 			}
 		});
-		btnConectarServidor.setBounds(132, 163, this.ancho-(800-181), this.alto-(500-23));
+		btnConectarServidor.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3)+32, 180, 24);
 		jpanel_servidor.add(btnConectarServidor);
 		
 		//TEXT PANE EN DONDE SE VAN A IR MOSTRANDO MSJs
@@ -135,7 +135,7 @@ public class ServidorVista extends JFrame implements Observer{
 			System.out.println("No se encontro la imagen ");
 		}
 		label_logo.setHorizontalAlignment(SwingConstants.CENTER);
-		label_logo.setBounds(243, 82, this.ancho-(800-279), this.alto-(500-180));
+		label_logo.setBounds((this.ancho-128)/2, ((this.alto-128)/2)-64, 128, 128);
 		jpanel_servidor.add(label_logo);
 		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
@@ -175,7 +175,7 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 		});
 		btnDesconectar.setBackground(new java.awt.Color(23, 26, 33));
-		btnDesconectar.setBounds(764, 0, this.ancho-(800-30), this.alto-(500-30));
+		btnDesconectar.setBounds(this.ancho-36, 4, 32, 32);
 		jpanel_trabajo.add(btnDesconectar);
 		
 		JLabel lblBloquesYTareas = new JLabel("BLOQUES Y SUS TAREAS");
@@ -204,12 +204,12 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		JSpinner spinner = new JSpinner();
 		spinner.setBounds(462, 36, 60, 20);
-		jpanel_trabajo.add(spinner);
+		//jpanel_trabajo.add(spinner); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
 		
 		JLabel lblDificultad = new JLabel("Dificultad : ");
 		lblDificultad.setForeground(new java.awt.Color(189, 187, 185));
 		lblDificultad.setBounds(353, 40, this.ancho-(800-92), this.alto-(500-14));
-		jpanel_trabajo.add(lblDificultad);
+		//jpanel_trabajo.add(lblDificultad); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
 		
 		this.revalidate();
 		this.repaint();
@@ -248,6 +248,9 @@ public class ServidorVista extends JFrame implements Observer{
 		//CUANDO SE CONCECTA UN CLIENTE, HAGO VISIBLE LA VISTA DE TRABAJO
 		jpanel_servidor.setVisible(false);
 		panel.remove(jpanel_servidor);
+		jpanel_servidor.remove(label_logo);
+		jpanel_trabajo.add(label_logo);
+		label_logo.setBounds((this.ancho-148), 100, 128, 128);
 		jpanel_trabajo.setVisible(true);
 		
 		//MUESTRO LA IP Y EL PUERTO
