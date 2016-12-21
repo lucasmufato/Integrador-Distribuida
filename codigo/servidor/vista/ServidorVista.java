@@ -27,8 +27,10 @@ import bloquesYTareas.EstadoTarea;
 import bloquesYTareas.Tarea;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -55,17 +57,20 @@ public class ServidorVista extends JFrame implements Observer{
 	private JLabel lblPuertoServidor;
 
 	private JTextPane textPaneMsj;
-	private JTextPane panel_bloques;
+	private JPanel panel_bloques;
 	private JLabel label_logo;
 	private JScrollPane scrollBarBloques;
 
+	//TAMAÑO
+	private Integer alto = 500;
+	private Integer ancho = 800;
 	
 	public ServidorVista(Primario servidor){
+		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
 		setTitle("Servidor BitCoin Mining");
 		this.servidor=servidor;
 		this.setVisible(true);
 		this.setResizable(false);
-		this.setBounds(250, 250, 538, 321);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
@@ -83,12 +88,12 @@ public class ServidorVista extends JFrame implements Observer{
 		JLabel lblPuertoDeEscucha = new JLabel("Puerto de escucha:");
 		lblPuertoDeEscucha.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPuertoDeEscucha.setForeground(new java.awt.Color(189, 187, 185));
-		lblPuertoDeEscucha.setBounds(78, 51, 144, 14);
+		lblPuertoDeEscucha.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3)-18, 180, 24);
 		jpanel_servidor.add(lblPuertoDeEscucha);
 		
 		//TEXFIELD DEL PUERTO
 		textFieldPuerto = new JTextField();
-		textFieldPuerto.setBounds(233, 48, 134, 23);
+		textFieldPuerto.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3), 180, 24);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
 		textFieldPuerto.setText("5555");
@@ -112,14 +117,14 @@ public class ServidorVista extends JFrame implements Observer{
 				
 			}
 		});
-		btnConectarServidor.setBounds(78, 161, 181, 23);
+		btnConectarServidor.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3)+32, 180, 24);
 		jpanel_servidor.add(btnConectarServidor);
 		
 		//TEXT PANE EN DONDE SE VAN A IR MOSTRANDO MSJs
 		textPaneConsola = new JTextPane();
 		textPaneConsola.setForeground(Color.DARK_GRAY);
 		textPaneConsola.setBackground(new java.awt.Color(209, 218, 225));
-		textPaneConsola.setBounds(0, 273, 676, 20);
+		textPaneConsola.setBounds(0, 452, this.ancho-(800-794), this.alto-(500-20));
 		jpanel_servidor.add(textPaneConsola);
 		
 		label_logo = new JLabel("");
@@ -130,7 +135,7 @@ public class ServidorVista extends JFrame implements Observer{
 			System.out.println("No se encontro la imagen ");
 		}
 		label_logo.setHorizontalAlignment(SwingConstants.CENTER);
-		label_logo.setBounds(243, 82, 279, 180);
+		label_logo.setBounds((this.ancho-128)/2, ((this.alto-128)/2)-64, 128, 128);
 		jpanel_servidor.add(label_logo);
 		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
@@ -142,17 +147,17 @@ public class ServidorVista extends JFrame implements Observer{
 		textPaneConsolaTrabajo = new JTextPane();
 		textPaneConsolaTrabajo.setBackground(new java.awt.Color(209, 218, 225));
 		textPaneConsolaTrabajo.setForeground(Color.DARK_GRAY);
-		textPaneConsolaTrabajo.setBounds(0, 273, 533, 20);
+		textPaneConsolaTrabajo.setBounds(0, 452, this.ancho-(800-794), this.alto-(500-20));
 		jpanel_trabajo.add(textPaneConsolaTrabajo);
 		
 		lblIPServidor = new JLabel("");
 		lblIPServidor.setForeground(new java.awt.Color(189, 187, 185));
-		lblIPServidor.setBounds(54, 11, 148, 14);
+		lblIPServidor.setBounds(54, 11, this.ancho-(800-148), this.alto-(500-14));
 		jpanel_trabajo.add(lblIPServidor);
 		
 		lblPuertoServidor = new JLabel("");
 		lblPuertoServidor.setForeground(new java.awt.Color(189, 187, 185));
-		lblPuertoServidor.setBounds(343, 11, 139, 14);
+		lblPuertoServidor.setBounds(343, 11, this.ancho-(800-139), this.alto-(500-14));
 		jpanel_trabajo.add(lblPuertoServidor);
 		
 		JButton btnDesconectar = new JButton("");
@@ -170,21 +175,21 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 		});
 		btnDesconectar.setBackground(new java.awt.Color(23, 26, 33));
-		btnDesconectar.setBounds(492, 11, 30, 30);
+		btnDesconectar.setBounds(this.ancho-36, 4, 32, 32);
 		jpanel_trabajo.add(btnDesconectar);
 		
 		JLabel lblBloquesYTareas = new JLabel("BLOQUES Y SUS TAREAS");
 		lblBloquesYTareas.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblBloquesYTareas.setForeground(new java.awt.Color(189, 187, 185));
-		lblBloquesYTareas.setBounds(203, 78, 184, 14);
+		lblBloquesYTareas.setBounds(203, 78, this.ancho-(800-184), this.alto-(500-14));
 		jpanel_trabajo.add(lblBloquesYTareas); 
 		
 		
 		textPaneMsj = new JTextPane();
-		textPaneMsj.setBounds(10, 132, 512, 130);
+		textPaneMsj.setBounds(10, 132, this.ancho-(800-512), this.alto-(500-130));
 		
 		JScrollPane scrollBarMsj = new JScrollPane(textPaneMsj);
-		scrollBarMsj.setBounds(10, 181, 512, 81);
+		scrollBarMsj.setBounds(10, 248, this.ancho-(800-512), this.alto-(500-183));
 		jpanel_trabajo.add(scrollBarMsj);
 		
 		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
@@ -194,17 +199,17 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 		});
 		btnGenerarBloques.setBackground(SystemColor.inactiveCaption);
-		btnGenerarBloques.setBounds(40, 36, 210, 23);
+		btnGenerarBloques.setBounds(40, 36, this.ancho-(800-210), this.alto-(500-23));
 		jpanel_trabajo.add(btnGenerarBloques);
 		
 		JSpinner spinner = new JSpinner();
-		spinner.setBounds(402, 37, 60, 20);
-		jpanel_trabajo.add(spinner);
+		spinner.setBounds(462, 36, 60, 20);
+		//jpanel_trabajo.add(spinner); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
 		
 		JLabel lblDificultad = new JLabel("Dificultad : ");
 		lblDificultad.setForeground(new java.awt.Color(189, 187, 185));
-		lblDificultad.setBounds(300, 40, 92, 14);
-		jpanel_trabajo.add(lblDificultad);
+		lblDificultad.setBounds(353, 40, this.ancho-(800-92), this.alto-(500-14));
+		//jpanel_trabajo.add(lblDificultad); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
 		
 		this.revalidate();
 		this.repaint();
@@ -243,6 +248,9 @@ public class ServidorVista extends JFrame implements Observer{
 		//CUANDO SE CONCECTA UN CLIENTE, HAGO VISIBLE LA VISTA DE TRABAJO
 		jpanel_servidor.setVisible(false);
 		panel.remove(jpanel_servidor);
+		jpanel_servidor.remove(label_logo);
+		jpanel_trabajo.add(label_logo);
+		label_logo.setBounds((this.ancho-148), 100, 128, 128);
 		jpanel_trabajo.setVisible(true);
 		
 		//MUESTRO LA IP Y EL PUERTO
@@ -304,24 +312,25 @@ public class ServidorVista extends JFrame implements Observer{
 
 	//----------------------------------------------- VISTA 2 -------------------------------------------------------
 	public void crearAreadeBloques(ArrayList<Bloque> bs) {
-		panel_bloques = new JTextPane();
+		panel_bloques = new JPanel();
+		panel_bloques.setLayout(null);
 		panel_bloques.setForeground(Color.LIGHT_GRAY);
 		panel_bloques.setBackground(new java.awt.Color(27, 40, 56));
-		panel_bloques.setEditable(false);
-		panel_bloques.setLayout(null);
-		//panel_bloques.setBounds(10, 62, 512, 112);
-		//jpanel_trabajo.add(panel_bloques);
 		
 		scrollBarBloques = new JScrollPane(panel_bloques);
-		scrollBarBloques.setBounds(10, 100, 512, 70);
-		jpanel_trabajo.add(scrollBarBloques);
+		scrollBarBloques.setBounds(10, 100, this.ancho-(800-512), this.alto-(500-130));
 		Integer x = 10, y = 11;
 		JLabel label;
 		Integer cantidadBloques = bs.size();
 		Integer cantidadTareas;
 		for(int numbloques = 0; numbloques < cantidadBloques; numbloques++) {
 			//LA CANTIDAD DE TAREAS DEL BLOQUE "NUMBLOQUES"
-			panel_bloques.setText("Bloque " + numbloques+1 + ": \n");
+			JLabel label_bloque = new JLabel ("Bloque " + bs.get(numbloques).getId() + ":");
+			panel_bloques.add(label_bloque);
+			label_bloque.setBounds (x, y, 120, 12);
+			label_bloque.setForeground(Color.LIGHT_GRAY);
+			y += 16;
+			
 			cantidadTareas = bs.get(numbloques).getTareas().size();
 			System.out.println("Bloque " + numbloques + ": ");
 			System.out.println(cantidadTareas);
@@ -336,7 +345,6 @@ public class ServidorVista extends JFrame implements Observer{
 					panel_bloques.add(label);
 					y += 31;
 					x = 10;
-					panel_bloques.setText("\n\n\n\n");
 				} else {
 					label = new JLabel();
 					label.setOpaque(true); label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
@@ -350,15 +358,17 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 			x = 10;
             y += 31;
-            panel_bloques.setText("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 		}
+        panel_bloques.setPreferredSize(new Dimension(20*16,y));
+		jpanel_trabajo.add(scrollBarBloques);
+		jpanel_trabajo.revalidate();
+		jpanel_trabajo.repaint();
 	}
 	public void actualizarAreadeBloques(ArrayList<Bloque> bs){
 		mostrarMsjConsolaTrabajo("Se ha creado un nuevo bloque de tareas.");
 		tareas.clear(); // Limpiar el hashmap de tareas
 		jpanel_trabajo.remove(scrollBarBloques); // Borrar los bloques antiguos
 		this.crearAreadeBloques(bs); //Volver a crear el panel de bloques
-		this.scrollBarBloques.getVerticalScrollBar().setValue(0);
 		mostrarMsjConsolaTrabajo("Actualizada visualizacion de bloques.");
 		
 	}
