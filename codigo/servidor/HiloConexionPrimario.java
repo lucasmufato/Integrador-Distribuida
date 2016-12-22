@@ -65,7 +65,9 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	
 	protected void morir(){
 		//metodo que borra la relacion entre el servidor y el HiloConexionPrimario y despues llama al garbage colector
-		this.servidor.eliminarHiloConexion(this);
+		if (this.servidor != null) {
+			this.servidor.eliminarHiloConexion(this);
+		}
 		this.servidor=null;
 		try {	this.finalize();	} catch (Throwable e) {	}
 	}
@@ -163,7 +165,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				//e.printStackTrace();
-				System.out.println("hubo un error en la conexion con el usuario: "+this.usuario.getNombre()+". Desconectandolo.");
+				System.out.println("hubo un error en la conexion con un usuario. Desconectandolo.");
 				this.detenerTarea();
 				this.cerrarConexion();
 				this.morir();
@@ -234,9 +236,12 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	}
 
 	protected boolean detenerTarea() {
-		boolean retval = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
-		setChanged();
-		this.notifyObservers(this.tareaEnTrabajo);
+		boolean retval = false;
+		if (this.usuario != null) {
+			retval = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+			setChanged();
+			this.notifyObservers(this.tareaEnTrabajo);
+		}
 		
 		return retval;
 	}

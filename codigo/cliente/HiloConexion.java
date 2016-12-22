@@ -115,7 +115,7 @@ public class HiloConexion implements Runnable {
 
 		if (tarea.getResultado() != null) {
 			copia_resultado = new byte[tarea.getResultado().length];
-			System.arraycopy(tarea.getParcial(), 0, copia_resultado, 0, copia_resultado.length);
+			System.arraycopy(tarea.getResultado(), 0, copia_resultado, 0, copia_resultado.length);
 		}
 
 		Tarea copia = new Tarea(
