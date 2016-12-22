@@ -2,6 +2,7 @@ package cliente;
 
 import bloquesYTareas.Tarea;
 import cliente.vista.ClienteJFrame;
+import mensajes.MensajePuntos;
 
 public class Cliente {
 
@@ -134,5 +135,11 @@ public class Cliente {
 	//SI RECIBE UN TRUE ES QUE LA INFO ES DEL PRIMARIO Y SINO DEL BACKUP
 	public void actualizarIPConexion(boolean primario) {
 		vista.actualizarInfoServidor(primario, hiloConexion.getIPConexion(), hiloConexion.getPuertoConexion());
+	}
+	
+	public void notificarPuntos(MensajePuntos msj) {
+		Integer puntos = msj.getPuntos();
+		this.setPuntos(puntos);
+		this.vista.actualizarPuntos(this.getPuntos());
 	}
 }

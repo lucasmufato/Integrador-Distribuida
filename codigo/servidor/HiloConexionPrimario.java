@@ -4,9 +4,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Observable;
 
 import baseDeDatos.*;
+import bloquesYTareas.EstadoBloque;
+import bloquesYTareas.ProcesamientoTarea;
 import bloquesYTareas.Tarea;
 import mensajes.*;
 import servidor.vista.ServidorVista;
@@ -187,6 +190,19 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				setChanged();
 				notifyObservers(tarea);
+				//SI ESTA FINALIZADO EL BLOQUE ENTONCES
+				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
+					ArrayList<Tarea> tareas = this.bd.getTareasPorBloque(tarea.getBloque().getId());
+					ArrayList<ProcesamientoTarea> lista_proc;
+					//ACA SE LLAMA A GETPROCEDIMIENTOS Y SE LE MANDA UN ID DE TAREA
+					for (int i = 0; i < tareas.size(); i++) {
+						lista_proc = this.bd.getProcesamientos(tareas.get(i).getId());
+						//ACA SE OPERA SOBRE LA LISTA DE ESOS PROCEDIMIENTOS QUE SE OBTUVIERON
+						this.servidor.calculoPuntos(lista_proc);
+					}
+					
+				}
+				
 				this.enviarNuevaTarea();
 				return true;
 			}else{
@@ -273,6 +289,15 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
     	    builder.append(String.format("%02x ", b));
     	}
     	return builder.toString();
+	}
+
+	public void enviarNotificacionPuntos(MensajePuntos msj) {
+		try {
+			this.flujoSaliente.writeObject(msj);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }//fin de la clase

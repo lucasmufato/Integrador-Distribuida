@@ -888,6 +888,68 @@ public class BaseDatos {
 		
 		return id_procesamiento;
 	}
+	//METODO PARA SABER QUE USUARIOS INTERVINIERON EN UNA TAREA
+	public synchronized ArrayList<ProcesamientoTarea>  getProcesamientos(Integer id_tarea) {
+		ArrayList<ProcesamientoTarea> lista_pt;
+		ProcesamientoTarea pt;
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"SELECT " +
+				"id_procesamiento_tarea, " +
+				"tarea, " +
+				"usuario, " +
+				"parcial, " +
+				"resultado " +
+			"FROM " +
+				"procesamiento_tarea " +
+			"WHERE " +
+				"tarea = ? " +
+			"ORDER BY id_procesamiento_tarea ASC"	
+			);
+			stm.setInt(1, id_tarea);
+			ResultSet res = stm.executeQuery();
+			lista_pt = new ArrayList<ProcesamientoTarea>();
+			while (res.next()) {
+				pt = new ProcesamientoTarea();
+				pt.setId_procesamiento_tarea(res.getInt("id_procesamiento_tarea"));
+				pt.setTarea(res.getInt("tarea"));
+				pt.setUsuario(res.getInt("usuario"));
+				pt.setParcial(res.getBytes("parcial"));
+				pt.setResultado(res.getBytes("resultado"));
+				lista_pt.add(pt);
+			}
+		} catch (SQLException e) {
+			System.err.println ("Error al recuperar los procesamientos de tareas: " + e.getMessage());
+			e.printStackTrace();
+			lista_pt = null;
+		}
+		
+		return lista_pt;
+		
+	}
+	
+	public synchronized boolean actualizarPuntos(Integer id_usuario, Integer puntos) {
+		try {
+			PreparedStatement stm = c.prepareStatement(
+			"UPDATE " + 
+				"usuario " + 
+			"SET " + 
+				"puntos = (SELECT usuario.puntos FROM usuario WHERE usuario.id_usuario = ?) + ? " +
+			"WHERE usuario.id_usuario = ?"
+			);
+			stm.setInt(1, id_usuario);
+			stm.setInt(2, puntos);
+			stm.setInt(3, id_usuario);
+			if(stm.executeUpdate() <1) {
+				System.err.println("Error al actualizar los puntos del usuario");
+				return false;
+			}
+		} catch (SQLException e) {
+			System.err.println("Error al actualizar los puntos del usuario");
+			e.printStackTrace();
+		}
+		return true;
+	}
 	
 	public String cacheInfo () {
 		return	

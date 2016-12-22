@@ -78,6 +78,9 @@ public class HiloConexion implements Runnable {
 					MensajeTarea mensaje = (MensajeTarea) mensajeRecibido;
 					this.tarea(mensaje.getTarea());
 					break;
+				case puntos:
+					MensajePuntos msj = (MensajePuntos) mensajeRecibido;
+					this.cliente.notificarPuntos(msj);
 				default:
 					//aca entran los casos de un mensaje con codigo=logeo y codigo respuestaTarea
 					//ambos no deberian suceder

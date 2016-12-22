@@ -88,7 +88,7 @@ public class ServidorVista extends JFrame implements Observer{
 		JLabel lblPuertoDeEscucha = new JLabel("Puerto de escucha:");
 		lblPuertoDeEscucha.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPuertoDeEscucha.setForeground(new java.awt.Color(189, 187, 185));
-		lblPuertoDeEscucha.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3)-18, 180, 24);
+		lblPuertoDeEscucha.setBounds(310, 286, 180, 24);
 		jpanel_servidor.add(lblPuertoDeEscucha);
 		
 		//TEXFIELD DEL PUERTO
@@ -342,6 +342,7 @@ public class ServidorVista extends JFrame implements Observer{
 					label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
 					label.setText(""+(bs.get(numbloques).getTareas().get(numtareas-1).getId())); 
+					label.setFont(new Font("Tahoma", Font.PLAIN, 9));
 					panel_bloques.add(label);
 					y += 31;
 					x = 10;
@@ -350,6 +351,7 @@ public class ServidorVista extends JFrame implements Observer{
 					label.setOpaque(true); label.setBackground(colorEstado(bs.get(numbloques).getTareas().get(numtareas-1).getEstado()));
 					label.setBounds(x, y, 20, 20);
 					label.setText(""+(bs.get(numbloques).getTareas().get(numtareas-1).getId())); 
+					label.setFont(new Font("Tahoma", Font.PLAIN, 9));
 					panel_bloques.add(label);
 					x += 30;
 				}
