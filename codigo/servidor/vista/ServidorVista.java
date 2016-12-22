@@ -176,7 +176,7 @@ public class ServidorVista extends JFrame implements Observer{
 			}
 		});
 		btnDesconectar.setBackground(new java.awt.Color(23, 26, 33));
-		btnDesconectar.setBounds(this.ancho-36, 4, 32, 32);
+		btnDesconectar.setBounds(752, 11, 32, 32);
 		jpanel_trabajo.add(btnDesconectar);
 		
 		JLabel lblBloquesYTareas = new JLabel("BLOQUES Y SUS TAREAS");

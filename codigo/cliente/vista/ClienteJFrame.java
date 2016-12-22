@@ -266,7 +266,7 @@ public class ClienteJFrame extends JFrame {
 		//MUESTRO EL USUARIO Y LOS PUNTOS PERO LOS PUNTOS DEBERIAN ACTUALIZARSE
 		//CADA VEZ QUE SE FINALIZA UN BLOQUE Y EL SERVIDOR ME ENVIE LOS PUNTOS QUE GANE
 		lblUsuario_1.setText("Usuario: " + usuario);
-		lblPuntos.setText("Puntos: " + 0);
+		lblPuntos.setText("Puntos: " + cliente.getPuntos());
 	}
 	
 	//ESCRIBIR RESULTADO EN REALIDAD PUEDE ESCRIBIR CUALQUIER COSA AUNQUE NO SEA UN RESULTADO

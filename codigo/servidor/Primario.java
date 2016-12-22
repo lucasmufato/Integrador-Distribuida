@@ -178,7 +178,7 @@ public class Primario implements Runnable {
 	public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) {
 		//PROVISORIO DIVIDO LOS PUNTOS POR LA CANTIDAD DE ENTRADAD QUE TENGO EN LA TABLA, IGUAL PARA TODOS LOS USUARIOS DE UNA TAREA
 		//TODO HACER EL VERDADERO DIVISOR
-		Integer puntosRepartir = lista_proc.size()/100; //REPARTIMOS 100 PTOS POR TAREA
+		Integer puntosRepartir = 100/lista_proc.size(); //REPARTIMOS 100 PTOS POR TAREA
 		
 		//TOMO EL USUARIO DE CADA ENTRADA 
 		for(int i=0;i<lista_proc.size();i++) {

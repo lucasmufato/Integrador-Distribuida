@@ -1,5 +1,6 @@
 package cliente;
 
+import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import cliente.vista.ClienteJFrame;
 import mensajes.MensajePuntos;
@@ -12,6 +13,7 @@ public class Cliente {
 	private HiloConexion hiloConexion;
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
 	private HiloMinero hiloMinero;
+	private Usuario usuario;
 	
 	public static void main(String[] args) {
 		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
@@ -150,6 +152,7 @@ public class Cliente {
 	public void notificarPuntos(MensajePuntos msj) {
 		Integer puntos = msj.getPuntos();
 		this.setPuntos(puntos);
+		System.out.println("los puntos que tengo que notificar a la vista son: " + this.puntos);
 		this.vista.actualizarPuntos(this.getPuntos());
 	}
 
@@ -169,5 +172,11 @@ public class Cliente {
 		// TODO metodo que chequea si tengo info del servidor backup para conectarme
 		return false;
 	}
+	
+	public void setUsuarioACliente(Usuario usuario) {
+		this.usuario = usuario;
+		this.puntos = usuario.getPuntos();
+	}
+	
 }
 

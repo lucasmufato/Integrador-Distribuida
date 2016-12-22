@@ -116,7 +116,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				MensajeLogeo mensaje;	//mensaje de respuesta
 				if(this.idSesion != null){
 					System.out.println("Autenticacion de usuario correcta, el numero de la sesion es: " + this.idSesion);
-					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,this.idSesion,usuario,password);
+					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,this.idSesion,this.usuario,password);
 					logeado=true;	//bandera para salir del bucle
 				}else{
 					System.out.println("Error en autenticacion de usuario.");

@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import mensajes.CodigoMensaje;
 import mensajes.*;
@@ -20,6 +21,7 @@ public class HiloConexion implements Runnable {
 	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 	
 	protected Integer idSesion;
+	protected Usuario usuario;
 	protected static final int socketTimeout = 100;	//tiempo de espera de lectura del socket
 	
 	public HiloConexion(Cliente cliente){
@@ -44,7 +46,9 @@ public class HiloConexion implements Runnable {
 				//TODO informar a la vista
 				return false;
 			}
+			this.usuario = respuesta.getUsuarioObject();
 			this.idSesion=respuesta.getID_Sesion();
+			cliente.setUsuarioACliente(this.usuario);
 			cliente.setEstado(EstadoCliente.esperandoTrabajo);
 			cliente.mostrarEstadoCliente("Esperando trabajo");
 			return true;
@@ -149,6 +153,11 @@ public class HiloConexion implements Runnable {
 	
 	public Integer getPuertoConexion() {
 		return socket.getPort();
+	}
+	
+	public Usuario getUsuarioDeCliente() {
+		Usuario usuario = null;
+		return usuario;
 	}
 	
 	private void cerrarConexiones(){
