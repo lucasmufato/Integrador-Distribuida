@@ -25,9 +25,9 @@ public class Primario implements Runnable {
 	private ArrayList<HiloConexionPrimario> hilosConexiones;
 	private Integer puerto;
 	private String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
-	private Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
-	private int numTareasPorBloque = 32;
-	private int numBytesPorTarea = 40;
+	private static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
+	private static final int numTareasPorBloque = 32;
+	private static final int numBytesPorTarea = 40;
 	
 	
 	//variables para la vista
@@ -35,6 +35,7 @@ public class Primario implements Runnable {
 	
 	//variables de control
 	private EstadoServidor estado;
+	private ArrayList<Thread> hilos;
 	
 	//otras variables
 	private BaseDatos baseDatos;
@@ -44,6 +45,7 @@ public class Primario implements Runnable {
 		//algo
 		this.estado=EstadoServidor.desconectado;
 		this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
+		this.hilos = new ArrayList<Thread>();
 		this.baseDatos= BaseDatos.getInstance();
 		this.baseDatos.conectarse();
 		this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
@@ -98,6 +100,7 @@ public class Primario implements Runnable {
 				nuevaConexion.addObserver(this.vista);
 				this.hilosConexiones.add(nuevaConexion);
 				Thread hilo = new Thread(nuevaConexion);
+				this.hilos.add(hilo);
 				hilo.start();	
 			} catch (SocketTimeoutException e) {
 				//si sale por timeout no hay problema
@@ -109,6 +112,7 @@ public class Primario implements Runnable {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("ya no espero mas conexiones");
 		return false;
 	}
 	
@@ -116,7 +120,7 @@ public class Primario implements Runnable {
 		try {
 			this.puerto=puerto;
 			this.serverSO = new ServerSocket(this.puerto);
-			this.serverSO.setSoTimeout(this.tiempoEspera);
+			this.serverSO.setSoTimeout(tiempoEspera);
 			this.vista.MostrarPopUp("Servidor conectado con exito");
 			return true;
 		} catch (IOException e) {
@@ -171,46 +175,6 @@ public class Primario implements Runnable {
 		this.hilosConexiones.remove(hiloConexionPrimario);
 	}
 	
-	
-	
-	
-	/** 	SETTERS Y GETTERS		**/
-	public Integer getPuerto() {
-		return puerto;
-	}
-
-	public void setPuerto(Integer puerto) {
-		this.puerto = puerto;
-	}
-
-	public Integer getTiempoEspera() {
-		return tiempoEspera;
-	}
-
-	public void setTiempoEspera(Integer tiempoEspera) {
-		this.tiempoEspera = tiempoEspera;
-	}
-
-	public ServidorVista getVista() {
-		return vista;
-	}
-
-	public void setVista(ServidorVista vista) {
-		this.vista = vista;
-	}
-
-	public EstadoServidor getEstado() {
-		return estado;
-	}
-
-	public void setEstado(EstadoServidor estado) {
-		this.estado = estado;
-	}
-
-	public String getIP() {
-		return IP;
-	}
-
 	public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) {
 		//PROVISORIO DIVIDO LOS PUNTOS POR LA CANTIDAD DE ENTRADAD QUE TENGO EN LA TABLA, IGUAL PARA TODOS LOS USUARIOS DE UNA TAREA
 		//TODO HACER EL VERDADERO DIVISOR
@@ -233,5 +197,59 @@ public class Primario implements Runnable {
 		
 	}
 
+	public void desconectarse() {
+		System.out.println("desconectando el servidor");
+		//metodo que interrumpe a todos los HilosDeConexion, deja de esperar nuevas conexiones y libera recursos
+		//cambio la bandera que indica que sigo esperando conexiones
+		this.estado = EstadoServidor.desconectado;
+		//cierro las conexiones con los clientes (de buena manera)
+		for(HiloConexionPrimario h: this.hilosConexiones){
+			h.desconectar();
+			
+		}
+		//libero recursos
+		try {	this.serverSO.close();	} catch (IOException e) {	}
+		this.serverSO = null;
+		this.baseDatos.desconectarse();
+		this.baseDatos=null;
+	}
+	
+	
+	/** 	SETTERS Y GETTERS		**/
+	public Integer getPuerto() {
+		return puerto;
+	}
+
+	public void setPuerto(Integer puerto) {
+		this.puerto = puerto;
+	}
+
+	public Integer getTiempoEspera() {
+		return tiempoEspera;
+	}
+
+	public void setTiempoEspera(Integer tiempoEsperaNuevo) {
+		//tiempoEspera = tiempoEsperaNuevo;		//lo comento por que creo q no se usa y la variables es una constante
+	}
+
+	public ServidorVista getVista() {
+		return vista;
+	}
+
+	public void setVista(ServidorVista vista) {
+		this.vista = vista;
+	}
+
+	public EstadoServidor getEstado() {
+		return estado;
+	}
+
+	public void setEstado(EstadoServidor estado) {
+		this.estado = estado;
+	}
+
+	public String getIP() {
+		return IP;
+	}
 
 }

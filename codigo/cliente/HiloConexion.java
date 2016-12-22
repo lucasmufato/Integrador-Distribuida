@@ -20,6 +20,7 @@ public class HiloConexion implements Runnable {
 	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 	
 	protected Integer idSesion;
+	protected static final int socketTimeout = 100;	//tiempo de espera de lectura del socket
 	
 	public HiloConexion(Cliente cliente){
 		this.cliente=cliente;
@@ -33,6 +34,7 @@ public class HiloConexion implements Runnable {
 
 		try {
 			this.socket = new Socket(ip,puerto);
+			this.socket.setSoTimeout(socketTimeout);
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
 			this.flujoSaliente.writeObject(msj);
@@ -81,6 +83,9 @@ public class HiloConexion implements Runnable {
 				case puntos:
 					MensajePuntos msj = (MensajePuntos) mensajeRecibido;
 					this.cliente.notificarPuntos(msj);
+					break;
+				case desconexion:
+					this.cliente.primarioDesconecto();
 				default:
 					//aca entran los casos de un mensaje con codigo=logeo y codigo respuestaTarea
 					//ambos no deberian suceder
@@ -88,13 +93,11 @@ public class HiloConexion implements Runnable {
 				
 				}
 				
-			} catch (ClassNotFoundException e) {
+			} catch (java.net.SocketTimeoutException e) {
+				//no hago nada
+			} catch (ClassNotFoundException | IOException e) {
 				this.cliente.setEstado(EstadoCliente.desconectado);
-				//e.printStackTrace();
-				System.out.println("error al interpretar la respuesta del servidor. Desconectado");
-			} catch (IOException e) {
-				this.cliente.setEstado(EstadoCliente.desconectado);
-				//e.printStackTrace();
+				e.printStackTrace();
 				System.out.println("error en la comunicacion con el servidor. Desconectado");
 			}
 		}
@@ -153,5 +156,9 @@ public class HiloConexion implements Runnable {
 		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
 		try {	this.socket.close();			} catch (IOException e) {}
 		this.socket=null;
+	}
+
+	public void desconectarse() {
+		//al final creo q es al pedo el metodo
 	}
 }

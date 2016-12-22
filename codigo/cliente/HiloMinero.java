@@ -122,4 +122,8 @@ abstract class HiloMinero implements Runnable {
 		this.inicio=this.tareaNueva.getParcial();
 	}
 
+	public void detener() {
+		//aca tendria que detener la ejecucion del hilo o lo que fuera.
+	}
+
 }

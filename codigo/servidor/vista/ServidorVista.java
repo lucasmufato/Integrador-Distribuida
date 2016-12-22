@@ -61,7 +61,7 @@ public class ServidorVista extends JFrame implements Observer{
 	private JLabel label_logo;
 	private JScrollPane scrollBarBloques;
 
-	//TAMAÑO
+	//TAMAï¿½O
 	private Integer alto = 500;
 	private Integer ancho = 800;
 	
@@ -171,6 +171,7 @@ public class ServidorVista extends JFrame implements Observer{
 		btnDesconectar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				//LAMARA A UN METODO DESCONECTAR EN LA CLASE PRIMARIO
+				servidor.desconectarse();
 				System.exit(0);
 			}
 		});
