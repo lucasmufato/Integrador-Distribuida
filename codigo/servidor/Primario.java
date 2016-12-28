@@ -1,6 +1,7 @@
 package servidor;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
@@ -26,7 +27,7 @@ public class Primario implements Runnable {
 	private Integer puerto;
 	private String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
 	private static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
-	private static final int numTareasPorBloque = 32;
+	private static final int numTareasPorBloque = 5;
 	private static final int numBytesPorTarea = 40;
 	
 	
@@ -175,26 +176,123 @@ public class Primario implements Runnable {
 		this.hilosConexiones.remove(hiloConexionPrimario);
 	}
 	
-	public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) {
-		//PROVISORIO DIVIDO LOS PUNTOS POR LA CANTIDAD DE ENTRADAD QUE TENGO EN LA TABLA, IGUAL PARA TODOS LOS USUARIOS DE UNA TAREA
-		//TODO HACER EL VERDADERO DIVISOR
-		Integer puntosRepartir = 100/lista_proc.size(); //REPARTIMOS 100 PTOS POR TAREA
+	public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) { //RESIVE LISTA POR TAREA
+		System.out.println("Parciales sumados a sus combinaciones menores");
+		for(int i=0;i<lista_proc.size();i++){
+			BigInteger parcial = new BigInteger(1,lista_proc.get(i).getParcial());
+			BigInteger combinaciones = this.sumarParcial(lista_proc.get(i).getParcial().length-1);
+			lista_proc.get(i).setParcialCombinaciones(parcial.add(combinaciones));
+			System.out.println(parcial);
+		}
+		//HAGO LO MISMO PARA EL RESULTADO
+		BigInteger resultado = new BigInteger(1,lista_proc.get(lista_proc.size()-1).getResultado());
+		BigInteger combinaciones = this.sumarParcial(lista_proc.get(lista_proc.size()-1).getParcial().length-1);
+		lista_proc.get(lista_proc.size()-1).setResultadoCombinaciones(resultado.add(combinaciones));
 		
-		//TOMO EL USUARIO DE CADA ENTRADA 
-		for(int i=0;i<lista_proc.size();i++) {
-			  ProcesamientoTarea pt = lista_proc.get(i);
-			  //ACTUALIZO LOS PUNTOS EN LA BD
-			  this.baseDatos.actualizarPuntos(pt.getUsuario(),puntosRepartir);
-			  //NOTIFICO A LOS USUARIOS
-			  for(int j=0;j<this.hilosConexiones.size();j++){
-				  HiloConexionPrimario hp = this.hilosConexiones.get(j);
-				  if(hp.usuario.getId() == pt.getUsuario()){
-					  MensajePuntos msj = new MensajePuntos(CodigoMensaje.puntos,hp.idSesion,pt.getTarea(),puntosRepartir); 
-					  hp.enviarNotificacionPuntos(msj);
-				  }
-			  }
+		Integer puntosRepartir = 100; //REPARTIMOS 100 PTOS POR TAREA
+		BigInteger parcial, anterior, resta;
+		BigInteger inicial = new BigInteger("0");
+		ProcesamientoTarea pt, ptAux;
+		ArrayList<ProcesamientoTarea> usuarios = new ArrayList<ProcesamientoTarea>();
+		Integer cont = 0;
+		
+		if(lista_proc.size() > 1){
+			//PRIMERO TOMO EL PRIMER ELEMENTO DE LA LISTA Y LE RESTO 0
+			parcial = lista_proc.get(0).getParcialCombinaciones();
+			anterior = new BigInteger("0");
+			resta = parcial.subtract(anterior);
+			lista_proc.get(0).setResta(resta);
+			System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " resta " + lista_proc.get(0).getResta());
+		
+			//A CADA USUARIO LE RESTO EL PARCIAL DEL ANTERIOR, MIENTRAS NO SEA EL ULTIMO ELEMENTO
+			for(int i=1;i<lista_proc.size();i++) {
+				if(lista_proc.size()-1 != i){
+					parcial = lista_proc.get(i).getParcialCombinaciones();
+					anterior = lista_proc.get(i-1).getParcialCombinaciones();
+					resta = parcial.subtract(anterior);
+					lista_proc.get(i).setResta(resta);
+					System.out.println("Usuario " + lista_proc.get(i).getUsuario() + " resta " + lista_proc.get(i).getResta());
+				}
+			}	  
+			//AL RESULTADO FINAL LE RESTO EL ULTIMO PARCIAL
+			parcial = lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones(); //PARCIAL QUEDO CON EL RESULTADO
+			anterior = lista_proc.get(lista_proc.size()-2).getParcialCombinaciones();
+			resta = parcial.subtract(anterior);
+			lista_proc.get(lista_proc.size()-1).setResta(resta);
+			System.out.println("Usuario " + lista_proc.get(lista_proc.size()-1).getUsuario() + " resta " + lista_proc.get(lista_proc.size()-1).getResta());
+		}else{
+			parcial = lista_proc.get(0).getResultadoCombinaciones();
+			anterior = new BigInteger("0");
+			resta = parcial.subtract(anterior);
+			lista_proc.get(0).setResta(resta);
+			System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " resta " + lista_proc.get(0).getResta());
+		}
+			
+		//PRIMERO HAGO UNA LISTA DE USUARIOS NO REPETIDOS,PARA LUEGO SUMAR
+		for(int i=0; i < lista_proc.size(); i++){
+			pt = lista_proc.get(i);
+			for(int j=i+1;j<lista_proc.size();j++){
+				ptAux = lista_proc.get(j);
+				if(pt.getUsuario() == ptAux.getUsuario()){
+					cont++;
+				}
+			}
+			if(cont == 0){//NO TIENE REPETICION 
+				//SI ENCUENTRO UN USUARIO Q NO TIENE REPETICION LO AGREGO A LA LISTA USUARIOS
+				//LOS UNICOS ATRIBUTOS Q VOY A USAR SON EL ID DE USUARIO, ID TAREA Y EL TRABAJO REALIZADO
+				ProcesamientoTarea nuevo = new ProcesamientoTarea();
+				nuevo.setUsuario(pt.getUsuario());
+				nuevo.setTrabajo_Realizado(inicial);
+				nuevo.setTarea(pt.getTarea());
+				usuarios.add(nuevo);
+				System.out.println("Agrego a la lista a: " + pt.getUsuario() + " por la tarea " + pt.getTarea());
+			}
+			cont = 0;
+		}// CUANDO TERMINA EL FOR DEBERIA TENER UNA LISTA CON LOS ID DE LOS USUARIOS SIN REPETICION
+		
+			
+		
+		//COMPARO LA LISTA DE USUARIOS NO REPETIDOS CON LA LISTA ORIGINAL
+		for(int i = 0; i < usuarios.size(); i++){
+			for(int j = i; j < lista_proc.size(); j++){
+				if(usuarios.get(i).getUsuario() == lista_proc.get(j).getUsuario()){
+					usuarios.get(i).addTrabajo_Realizado(lista_proc.get(j).getResta());
+				}
+			}
+			System.out.println(" Tarea " + usuarios.get(i).getTarea() + " usuario " + usuarios.get(i).getUsuario() + " trabajo realizado " + usuarios.get(i).getTrabajo_Realizado());
 		}
 		
+		
+		BigInteger proporcion;
+		//AHORA TENGO QUE DIVIDIR EL RESULTADO FINAL / LO HECHO POR CADA USUARIO Y TENGO LA PROPORCION
+		for (int i = 0; i < usuarios.size(); i++) {
+			proporcion = resultado.divide(usuarios.get(i).getTrabajo_Realizado());
+			//ACTUALIZO LOS PUNTOS EN LA BD
+			System.out.println("Los puntos a repartir  al usuario " + usuarios.get(i).getUsuario() + " son: " + proporcion.intValue()*puntosRepartir);
+			this.baseDatos.actualizarPuntos(usuarios.get(i).getUsuario(), proporcion.intValue()*puntosRepartir);
+		}
+		
+		//NOTIFICO A LOS USUARIOS
+		for(int j = 0; j < this.hilosConexiones.size(); j++){
+			HiloConexionPrimario hp = this.hilosConexiones.get(j);
+			if(hp.usuario.getId() == usuarios.get(j).getUsuario()){
+				MensajePuntos msj = new MensajePuntos(CodigoMensaje.puntos,hp.idSesion,usuarios.get(j).getTarea(),puntosRepartir); 
+				hp.enviarNotificacionPuntos(msj);
+			}
+		}
+		
+	}
+
+	private BigInteger sumarParcial(int i) {
+		//g(x) = 256^x + g(x-1), para x > 0
+		BigInteger suma = new BigInteger("0");
+		int potenciaInt;
+		while(i > 0) {
+			potenciaInt = (int) Math.pow(256, i);
+			suma = suma.add(BigInteger.valueOf(potenciaInt));
+			i--;
+		}
+		return suma;
 	}
 
 	public void desconectarse() {

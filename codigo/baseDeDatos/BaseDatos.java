@@ -1,5 +1,6 @@
 package baseDeDatos;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -892,6 +893,7 @@ public class BaseDatos {
 	public synchronized ArrayList<ProcesamientoTarea>  getProcesamientos(Integer id_tarea) {
 		ArrayList<ProcesamientoTarea> lista_pt;
 		ProcesamientoTarea pt;
+		BigInteger inicial = new BigInteger("0");
 		try {
 			PreparedStatement stm = c.prepareStatement (
 			"SELECT " +
@@ -904,7 +906,7 @@ public class BaseDatos {
 				"procesamiento_tarea " +
 			"WHERE " +
 				"tarea = ? " +
-			"ORDER BY id_procesamiento_tarea ASC"	
+			"ORDER BY parcial ASC"	
 			);
 			stm.setInt(1, id_tarea);
 			ResultSet res = stm.executeQuery();
@@ -916,6 +918,10 @@ public class BaseDatos {
 				pt.setUsuario(res.getInt("usuario"));
 				pt.setParcial(res.getBytes("parcial"));
 				pt.setResultado(res.getBytes("resultado"));
+				pt.setResta(inicial);
+				pt.setTrabajo_Realizado(inicial);
+				pt.setParcialCombinaciones(inicial);
+				pt.setResultadoCombinaciones(inicial);
 				lista_pt.add(pt);
 			}
 		} catch (SQLException e) {

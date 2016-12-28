@@ -1,12 +1,53 @@
 package bloquesYTareas;
 
+import java.math.BigInteger;
+
 public class ProcesamientoTarea {
 	private Integer id_procesamiento_tarea;
 	private Integer tarea;
 	private Integer usuario;
 	private byte[] parcial;
 	private byte[] resultado;
+	private BigInteger resta;
+	private BigInteger trabajoRealizado;
+	private BigInteger parcialCombinaciones,resultadoCombinaciones;
 	
+	public BigInteger getResultadoCombinaciones() {
+		return resultadoCombinaciones;
+	}
+
+	public void setResultadoCombinaciones(BigInteger resultadoCombinaciones) {
+		this.resultadoCombinaciones = resultadoCombinaciones;
+	}
+
+	public BigInteger getParcialCombinaciones() {
+		return parcialCombinaciones;
+	}
+
+	public void setParcialCombinaciones(BigInteger parcialCombinaciones) {
+		this.parcialCombinaciones = parcialCombinaciones;
+	}
+
+	public BigInteger getTrabajo_Realizado() {
+		return this.trabajoRealizado;
+	}
+
+	public void setTrabajo_Realizado(BigInteger trabajo_Realizado) {
+		this.trabajoRealizado = trabajo_Realizado;
+	}
+	
+	public void addTrabajo_Realizado(BigInteger trabajo_realizado){
+		this.trabajoRealizado = this.trabajoRealizado.add(trabajo_realizado);
+	}
+
+	public BigInteger getResta() {
+		return resta;
+	}
+
+	public void setResta(BigInteger resta) {
+		this.resta = resta;
+	}
+
 	public Integer getId_procesamiento_tarea() {
 		return id_procesamiento_tarea;
 	}
