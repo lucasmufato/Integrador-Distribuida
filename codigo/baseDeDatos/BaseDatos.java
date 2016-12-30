@@ -922,6 +922,7 @@ public class BaseDatos {
 				pt.setTrabajo_Realizado(inicial);
 				pt.setParcialCombinaciones(inicial);
 				pt.setResultadoCombinaciones(inicial);
+				pt.setPuntos(0);
 				lista_pt.add(pt);
 			}
 		} catch (SQLException e) {

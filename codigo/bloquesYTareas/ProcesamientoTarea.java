@@ -11,7 +11,16 @@ public class ProcesamientoTarea {
 	private BigInteger resta;
 	private BigInteger trabajoRealizado;
 	private BigInteger parcialCombinaciones,resultadoCombinaciones;
+	private Integer puntos;
 	
+	public Integer getPuntos() {
+		return puntos;
+	}
+
+	public void setPuntos(Integer puntos) {
+		this.puntos = puntos;
+	}
+
 	public BigInteger getResultadoCombinaciones() {
 		return resultadoCombinaciones;
 	}

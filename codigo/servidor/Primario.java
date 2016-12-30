@@ -278,7 +278,7 @@ public class Primario implements Runnable {
 			System.out.println(" Tarea " + usuarios.get(i).getTarea() + " usuario " + usuarios.get(i).getUsuario() + " trabajo realizado " + usuarios.get(i).getTrabajo_Realizado());
 		}
 		
-		Integer p;
+		Integer p = null;
 		BigDecimal resultadoDecimal, trabajoDecimal;
 		//AHORA TENGO QUE DIVIDIR EL RESULTADO FINAL / LO HECHO POR CADA USUARIO Y TENGO LA PROPORCION
 		for (int i = 0; i < usuarios.size(); i++) {
@@ -291,20 +291,22 @@ public class Primario implements Runnable {
 			//ACTUALIZO LOS PUNTOS EN LA BD
 			System.out.println("La proporcion del usuario " + usuarios.get(i).getUsuario() + " es " + trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP));
 			p = trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP).multiply(puntosARepartir).intValue();
+			usuarios.get(i).setPuntos(p);//LE SETTEO LOS PTOS A ESE USUARIO
 			//System.out.println("Los puntos a repartir  al usuario " + usuarios.get(i).getUsuario() + " son: " + trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP).multiply(puntosARepartir));
 			System.out.println("Los puntos a repartir  al usuario " + usuarios.get(i).getUsuario() + " son: " + p);
 			this.baseDatos.actualizarPuntos(usuarios.get(i).getUsuario(), p);
 		}
-		/*
-		//NOTIFICO A LOS USUARIOS
-		for(int j = 0; j < this.hilosConexiones.size(); j++){
-			HiloConexionPrimario hp = this.hilosConexiones.get(j);
-			if(hp.usuario.getId() == usuarios.get(j).getUsuario()){
-				MensajePuntos msj = new MensajePuntos(CodigoMensaje.puntos,hp.idSesion,usuarios.get(j).getTarea(),puntosRepartir); 
-				hp.enviarNotificacionPuntos(msj);
-			}
-		}*/
 		
+		//NOTIFICO A LOS USUARIOS, EN HILOCONEXIONES ESTAN LAS CONEXIONES ACTIVAS
+		for(int j = 0; j < this.hilosConexiones.size(); j++){
+			HiloConexionPrimario hp = this.hilosConexiones.get(j); //TOMO LA COMEXION
+			for(int i=0; i < usuarios.size(); i++){ //RECORRO EL ARRAR DE USUARIO PARA BUSCAR EL DE ESA CONEXION
+				if(hp.usuario.getId() == usuarios.get(i).getUsuario()){
+					MensajePuntos msj = new MensajePuntos(CodigoMensaje.puntos,hp.idSesion,usuarios.get(i).getTarea(),usuarios.get(i).getPuntos()); 
+					hp.enviarNotificacionPuntos(msj);
+				}
+			}
+		}		
 	}
 
 	private BigInteger sumarParcial(int i) {
