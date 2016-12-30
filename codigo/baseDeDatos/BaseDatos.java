@@ -906,7 +906,7 @@ public class BaseDatos {
 				"procesamiento_tarea " +
 			"WHERE " +
 				"tarea = ? " +
-			"ORDER BY parcial ASC"	
+			"ORDER BY LENGTH(parcial), parcial"	
 			);
 			stm.setInt(1, id_tarea);
 			ResultSet res = stm.executeQuery();
