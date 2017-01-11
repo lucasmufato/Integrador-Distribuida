@@ -1,4 +1,4 @@
-package cliente;
+package mineria;
 
 import java.io.*;
 

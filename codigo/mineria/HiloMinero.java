@@ -1,18 +1,19 @@
-package cliente;
+package mineria;
 
 import bloquesYTareas.Tarea;
+import cliente.*;
 
-abstract class HiloMinero implements Runnable {
+public abstract class HiloMinero implements Runnable {
 	protected static long LAPSO_NOTIFICACION = 2000; //Enviar una notificacion de progreso parcial cada 2 segundos
-	private Cliente cliente; //Cliente al que se notificaran los resultados parciales y finales
+	protected Cliente cliente; //Cliente al que se notificaran los resultados parciales y finales
 	
 	private byte[] tarea; //tarea asignada
 	private byte[] limite_superior; //limite contra el cual comparar para saber si el resultado es el que esperamos
-	private byte[] inicio; //Puede ser el resultado parcial de otro proceso que no termino
+	protected byte[] inicio; //Puede ser el resultado parcial de otro proceso que no termino
 	
-	private Tarea tareaNueva;	//tiene este nombre para que no se solape con la otra "tarea"
+	protected Tarea tareaNueva;	//tiene este nombre para que no se solape con la otra "tarea"
+	public static boolean trabajando;	//para que el hilo se pueda detener
 	
-	//
 	public HiloMinero(Tarea tarea){
 		this.tareaNueva=tarea;
 		this.tarea = this.tareaNueva.getTarea();

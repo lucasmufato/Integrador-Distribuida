@@ -1,4 +1,4 @@
-package cliente;
+package mineria;
 import java.util.Arrays;
 
 import bloquesYTareas.Tarea;
@@ -15,9 +15,13 @@ public class PruebaMinero {
 		tarea.SetLimite(3,(byte) 0x80);
 
 		//HiloMinero minero = new HiloMineroCPU(null, tareaResolver, parcial, limite_superior);
-		HiloMinero minero = new HiloMineroCPU(tarea);
-		Thread thread = new Thread (minero);
-		thread.start();
+		//HiloMinero minero = new HiloMineroCPU(tarea);
+		//Thread thread = new Thread (minero);
+		//thread.start();
+		
+		HiloMineroGestorMultiCore nombreLargo = new HiloMineroGestorMultiCore(tarea);
+		Thread t = new Thread(nombreLargo);
+		t.start();
 	}
 }
 

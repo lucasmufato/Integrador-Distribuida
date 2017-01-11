@@ -1,4 +1,4 @@
-package cliente;
+package mineria;
 
 public class HiloMineroCuda extends HiloMinero{
 	

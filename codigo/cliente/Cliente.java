@@ -4,6 +4,7 @@ import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import cliente.vista.ClienteJFrame;
 import mensajes.MensajePuntos;
+import mineria.*;
 
 public class Cliente {
 
