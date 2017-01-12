@@ -15,6 +15,7 @@ public class Cliente {
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
 	private HiloMinero hiloMinero;
 	private Usuario usuario;
+	private ModoTrabajo modoTrabajo;
 	
 	public static void main(String[] args) {
 		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
@@ -24,6 +25,7 @@ public class Cliente {
 
 	public Cliente(){
 		this.puntos = 0;
+		this.modoTrabajo= ModoTrabajo.multiThread;
 	}
 	
 	public boolean crearGUILogueo(){
@@ -92,8 +94,17 @@ public class Cliente {
 					return false;
 				case esperandoTrabajo:
 					if (this.hiloMinero == null) {
-						this.hiloMinero = new HiloMineroCPU(this, tarea);
-						this.hiloMinero.setCliente(this);
+						switch(this.modoTrabajo){
+						case monoThread:
+							this.hiloMinero = new HiloMineroCPU(this, tarea);
+							break;
+						case multiThread:
+							this.hiloMinero = new HiloMineroGestorMultiCore(this, tarea);
+							break;
+						case video:
+							//TODO	 faltaaaa
+							break;
+						}
 					}else{
 						this.hiloMinero.setTarea(tarea);
 					}

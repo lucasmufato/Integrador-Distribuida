@@ -9,7 +9,7 @@ public class HiloMineroMultiCore extends HiloMinero {
 	private MessageDigest sha256;
 	protected HiloMineroGestorMultiCore gestor;
 	public static int nro=0;
-	private int id;
+	protected int id;
 	
 	public HiloMineroMultiCore(Tarea tareaNueva, HiloMineroGestorMultiCore padre) {
 		super(tareaNueva);
@@ -32,15 +32,13 @@ public class HiloMineroMultiCore extends HiloMinero {
 		System.arraycopy(tarea, 0, hashAProbrar, 0, tarea.length);
 		System.arraycopy(parcial, 0, hashAProbrar, tarea.length, parcial.length);
 		
-		
-		boolean encontrado=false;
-		while(HiloMinero.trabajando && !encontrado){
-			System.out.println("Thread "+this.id+" pruebo con: "+HiloMinero.hashToString(parcial));
+		while(HiloMinero.trabajando){
+			//System.out.println("Thread "+this.id+" pruebo con: "+HiloMinero.hashToString(parcial));
 			byte []hash = this.sha256.digest(hashAProbrar);
 			if(this.esMenor(hash, limite)){
 				//encontre el resultado, se lo informo al gestor y salgo del bucle
+				HiloMinero.trabajando=false;
 				gestor.notificarResultado(parcial);
-				encontrado=true;
 			}else{
 				//si no era la respuesta, le informo al gestor que comprobe ese parcial
 				gestor.informarParcial(parcial);				
