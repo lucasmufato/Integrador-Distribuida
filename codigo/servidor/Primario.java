@@ -44,8 +44,10 @@ public class Primario implements Runnable {
 	private BaseDatos baseDatos;
 	
 	
-	public Primario(){
+	public Primario(String ip, String puerto){
 		//algo
+		this.setIP(ip);
+		this.setPuerto(Integer.valueOf(puerto));
 		this.estado=EstadoServidor.desconectado;
 		this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 		this.hilos = new ArrayList<Thread>();
@@ -61,6 +63,8 @@ public class Primario implements Runnable {
 		}
 	}
 	
+	
+
 	private boolean crearGUI(){
 		//creo la GUI
 		this.vista = new ServidorVista(this);
@@ -375,6 +379,10 @@ public class Primario implements Runnable {
 
 	public String getIP() {
 		return IP;
+	}
+	private void setIP(String ip) {
+		this.IP = ip;
+		
 	}
 
 }

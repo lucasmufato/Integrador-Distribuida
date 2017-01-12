@@ -13,10 +13,15 @@ import javax.swing.JTextField;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Properties;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 
@@ -93,10 +98,27 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		//TEXFIELD DEL PUERTO
 		textFieldPuerto = new JTextField();
+		textFieldPuerto.setBackground(Color.DARK_GRAY);
+		textFieldPuerto.setForeground(Color.BLACK);
+		textFieldPuerto.setEnabled(false);
+		textFieldPuerto.setEditable(false);
 		textFieldPuerto.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3), 180, 24);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
-		textFieldPuerto.setText("5555");
+		Properties propiedades = new Properties();
+	    InputStream entrada = null;
+	    try {
+			entrada = new FileInputStream("configuracion.properties");
+			propiedades.load(entrada);
+			String puertoA = propiedades.getProperty("PUERTOA");
+			textFieldPuerto.setText(puertoA);
+	    } catch (FileNotFoundException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		//CUANDO PRESIONES EL BOTON, VOY A CHEQUEAR QUE EL PUERTO QUE INGRESE ESTE LIBRE
 		btnConectarServidor = new JButton("Conectar Servidor");
