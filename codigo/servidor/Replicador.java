@@ -3,6 +3,8 @@ package servidor;
 import mensajes.*;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -13,6 +15,8 @@ public class Replicador extends Thread {
 	private static int PUERTO_REPLICADOR = 76167;
 	private ServerSocket serverSocket;
 	private Socket socket;
+	private ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
+	private ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 	private Queue<Mensaje> cola; // Esta es la cola principal de mensajes
 	private Queue<Mensaje> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
 

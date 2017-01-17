@@ -36,11 +36,14 @@ public class Servidor {
 		    String ipA = propiedades.getProperty("IPA");
 		    String puertoA = propiedades.getProperty("PUERTOA");
 		    
+		    String ipB = propiedades.getProperty("IPB");
+		    String puertoB = propiedades.getProperty("PUERTOB");
+		    
 		    //CHEQUEO SI EL SERVIDOR PRIMARIO ESTA ESCUCHANDO EN EL PUERTO
 		    try {
 		    	prueba = new Socket(ipA,Integer.parseInt(puertoA));	
 		    	System.out.println("El servidor primario ya esta levantado, se creara el backup");
-		       	this.crearServidorBackup();
+		       	this.crearServidorBackup(ipB, puertoB);
 		    }catch (ConnectException e){
 		    	System.out.println("Se creara el servidor primario");
 		    	this.crearServidorPrimario(ipA, puertoA);
@@ -62,9 +65,10 @@ public class Servidor {
 		return true;
 	}
 	
-	public boolean crearServidorBackup(){
-		//crea el servidor de backup pasandole como dato la ip y puerto del primario (RECIBO EL SOCKET DIRECTAMENTE)
+	public boolean crearServidorBackup(String ip, String puerto){
+		//recibe ip y puerto del backup
 		System.out.println("Entre al metodo del servidor backup");
+		Backup backup = new Backup(ip,puerto);
 		return false;
 	}
 }
