@@ -40,7 +40,8 @@ public class Replicador extends Thread {
 	@Override
 	public void run () {
 		try {
-			while (this.acceptConnection()) {
+		this.acceptConnection();
+			while (true) {
 				this.volcarColaTmp(); // volcar cola temporaria a cola principal
 
 				synchronized (this.cola) {
