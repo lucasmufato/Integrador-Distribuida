@@ -46,9 +46,6 @@ public class Primario implements Runnable {
 	private Replicador replicador;
 	
 	public Primario(String ip, String puerto){
-		//algo
-		//VOY A CREAR AL REPLICADOR
-		this.CrearReplicador();
 		
 		this.setIP(ip);
 		this.setPuerto(Integer.valueOf(puerto));
@@ -141,8 +138,14 @@ public class Primario implements Runnable {
 	}
 	
 	protected boolean CrearReplicador(){
-		replicador = new Replicador();
-		return false;
+		try {
+			replicador = new Replicador();
+			replicador.start ();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	protected boolean verificarResultado(Tarea tarea) {
