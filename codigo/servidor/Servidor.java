@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 public class Servidor {
@@ -19,11 +21,21 @@ public class Servidor {
 		this.buscarServidorPrimario();
 	}
 	
+	public boolean buscarServidorPrimarioBroadcast(){
+		
+		return false;
+	}
+	
 	public boolean buscarServidorPrimario(){
-		//lee el archivo con las ips
-		//intenta de contactarse con el servidor primario
-		//si no lo logra se crea un servidor primario
-		//si se conecta con un servidor primario, crea un servidor backup
+		//busca por broadcast en la red, si no tiene respuesta
+		//lee el archivo con las ips,intenta de contactarse con el servidor primario
+		//si no lo logra se crea un servidor primario,si se conecta con un servidor primario, crea un servidor backup
+		
+		String ipPrimario=null;
+		try {
+			ipPrimario=BusquedaUDP.buscarPrimario();
+		} catch (SocketException | UnknownHostException e1) {
+		}
 		
 		Properties propiedades = new Properties();
 	    InputStream entrada = null;
