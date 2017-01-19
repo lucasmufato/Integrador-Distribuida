@@ -206,7 +206,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				notifyObservers(tarea);
 				//SI ESTA FINALIZADO EL BLOQUE ENTONCES
 				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
-					// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
+					this.replicador.replicarCompletitudBloque(tarea.getBloque());
 					ArrayList<Tarea> tareas = this.bd.getTareasPorBloque(tarea.getBloque().getId());
 					ArrayList<ProcesamientoTarea> lista_proc;
 					//ACA SE LLAMA A GETPROCEDIMIENTOS Y SE LE MANDA UN ID DE TAREA
@@ -217,7 +217,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					}
 					
 				}	
-				// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
+				this.replicador.replicarResultadoTarea(tarea, this.usuario);
 				this.enviarNuevaTarea();
 				return true;
 			}else{
@@ -240,7 +240,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
 			setChanged();
 			notifyObservers(tarea);
-			// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
+			this.replicador.replicarParcialTarea(tarea, this.usuario);
 			return true;
 		}else{
 			//TODO si sale mal que hago?
@@ -257,7 +257,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			setChanged();
 		}
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
-		// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
+		this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
 			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
@@ -270,15 +270,17 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	}
 
 	protected boolean detenerTarea() {
-		boolean retval = false;
+		boolean tareaSeDetuvo = false;
 		if (this.usuario != null) {
-			retval = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
-			// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
-			setChanged();
-			this.notifyObservers(this.tareaEnTrabajo);
+			tareaSeDetuvo = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+			if (tareaSeDetuvo) {
+				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
+				setChanged();
+				this.notifyObservers(this.tareaEnTrabajo);
+			}
 		}
 		
-		return retval;
+		return tareaSeDetuvo;
 	}
 
 	protected void kickDog() {
@@ -312,7 +314,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 
 	public void enviarNotificacionPuntos(MensajePuntos msj) {
 		try {
-			// TODO ACA SE LLAMA AL METODO REPLICAR DE REPLICADOR CON EL MENSAJE CORRESPONDIENTE
+			this.replicador.replicarAsignacionPuntos (msj.getPuntos(), this.usuario);
 			this.flujoSaliente.writeObject(msj);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
