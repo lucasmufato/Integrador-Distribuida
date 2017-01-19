@@ -40,9 +40,13 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	//variables relacionadas con el watchdog timer (desconecta al cliente si tarda mucho en responder)
 	protected Watchdog wdt = null;
 	
-	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd) {
+	//VARIABLE PARA HACER LA REPLICACION
+	protected Replicador replicador;
+	
+	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd,Replicador replicador) {
 		this.servidor=servidor;
 		this.socket=s;
+		this.replicador=replicador;
 		this.usuario= new Usuario();
 		try {
 			this.socket.setSoTimeout(socketTimeout);
@@ -202,6 +206,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				notifyObservers(tarea);
 				//SI ESTA FINALIZADO EL BLOQUE ENTONCES
 				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
+					this.replicador.replicarCompletitudBloque(tarea.getBloque());
 					ArrayList<Tarea> tareas = this.bd.getTareasPorBloque(tarea.getBloque().getId());
 					ArrayList<ProcesamientoTarea> lista_proc;
 					//ACA SE LLAMA A GETPROCEDIMIENTOS Y SE LE MANDA UN ID DE TAREA
@@ -212,6 +217,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					}
 					
 				}	
+				this.replicador.replicarResultadoTarea(tarea, this.usuario);
 				this.enviarNuevaTarea();
 				return true;
 			}else{
@@ -234,6 +240,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		if(this.bd.setParcial(tarea, this.usuario.getId()) == true){
 			setChanged();
 			notifyObservers(tarea);
+			this.replicador.replicarParcialTarea(tarea, this.usuario);
 			return true;
 		}else{
 			//TODO si sale mal que hago?
@@ -250,9 +257,10 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			setChanged();
 		}
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
+		this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
-			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo.       
+			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
 			return true;
 		} catch (IOException e) {
 			//TODO si sale mal q hago?
@@ -262,14 +270,17 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	}
 
 	protected boolean detenerTarea() {
-		boolean retval = false;
+		boolean tareaSeDetuvo = false;
 		if (this.usuario != null) {
-			retval = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
-			setChanged();
-			this.notifyObservers(this.tareaEnTrabajo);
+			tareaSeDetuvo = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+			if (tareaSeDetuvo) {
+				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
+				setChanged();
+				this.notifyObservers(this.tareaEnTrabajo);
+			}
 		}
 		
-		return retval;
+		return tareaSeDetuvo;
 	}
 
 	protected void kickDog() {
@@ -303,6 +314,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 
 	public void enviarNotificacionPuntos(MensajePuntos msj) {
 		try {
+			this.replicador.replicarAsignacionPuntos (msj.getPuntos(), this.usuario);
 			this.flujoSaliente.writeObject(msj);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

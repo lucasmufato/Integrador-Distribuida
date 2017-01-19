@@ -1,8 +1,14 @@
 package servidor;
 
 import mensajes.*;
+import mensajes.replicacion.*;
+import bloquesYTareas.*;
+import baseDeDatos.Usuario;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -10,21 +16,23 @@ import java.net.Socket;
 /* El replicador espera conexiones del servidor secundario */
 
 public class Replicador extends Thread {
-	private static int PUERTO_REPLICADOR = 76167;
+	private static int PUERTO_REPLICADOR = 7567;
 	private ServerSocket serverSocket;
 	private Socket socket;
-	private Queue<Mensaje> cola; // Esta es la cola principal de mensajes
-	private Queue<Mensaje> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
+	private ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
+	private ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	private Queue<MensajeReplicacion> cola; // Esta es la cola principal de mensajes
+	private Queue<MensajeReplicacion> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
 
-	public Replicador () {
+	public Replicador () throws IOException {
 		this.cola = new LinkedList();
 		this.colaTmp = new LinkedList();
 
 		// CREAR UN SOCKET PARA QUE EL SERVIDOR SECUNDARIO SE CONECTE
-		//this.serverSocket = new ServerSocket ();
+		this.serverSocket = new ServerSocket (PUERTO_REPLICADOR);
 	}
 	
-	public void replicar (Mensaje mensaje) {
+	public void replicar (MensajeReplicacion mensaje) {
 		/* Guarda un mensaje en la cola */
 		synchronized (this.colaTmp) {
 			this.colaTmp.add (mensaje);
@@ -32,15 +40,46 @@ public class Replicador extends Thread {
 		this.notify();
 	}
 
+	public void replicarParcialTarea (Tarea tarea, Usuario usuario) {
+		MensajeReplicacion mensaje = new MensajeParcialTarea (tarea, usuario);
+		this.replicar (mensaje);
+	}
+
+	public void replicarResultadoTarea (Tarea tarea, Usuario usuario) {
+		MensajeReplicacion mensaje = new MensajeResultadoTarea (tarea, usuario);
+		this.replicar (mensaje);
+	}
+
+	public void replicarCompletitudBloque (Bloque bloque) {
+		MensajeReplicacion mensaje = new MensajeCompletitudBloque (bloque);
+		this.replicar (mensaje);
+	}
+
+	public void replicarAsignacionTareaUsuario (Tarea tarea, Usuario usuario) {
+		MensajeReplicacion mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario);
+		this.replicar (mensaje);
+	}
+
+	public void replicarDetencionTarea (Tarea tarea, Usuario usuario) {
+		MensajeReplicacion mensaje = new MensajeDetencionTarea (tarea, usuario);
+		this.replicar (mensaje);
+	}
+
+	public void replicarAsignacionPuntos (Integer puntos, Usuario usuario) {
+		MensajeReplicacion mensaje = new MensajeAsignacionPuntos (puntos, usuario);
+		this.replicar (mensaje);
+	}
+
 	@Override
 	public void run () {
 		try {
+		this.acceptConnection();
 			while (true) {
 				this.volcarColaTmp(); // volcar cola temporaria a cola principal
 
 				synchronized (this.cola) {
 					//Procesar mensajes de cola primaria
-					Mensaje mensaje = this.cola.poll();
+					MensajeReplicacion mensaje = this.cola.poll();
 					while (mensaje != null) {
 				
 						this.procesarMensaje(mensaje);
@@ -58,11 +97,21 @@ public class Replicador extends Thread {
 		}
 	}
 
+	private boolean acceptConnection () {
+		try {
+			this.socket = this.serverSocket.accept();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+
 	private void volcarColaTmp() {
 		synchronized (this.cola) {
 			synchronized (this.colaTmp) {
 				//Mover mensajes de cola temporal a cola principal
-				Mensaje mensajeTmp = this.colaTmp.poll();
+				MensajeReplicacion mensajeTmp = this.colaTmp.poll();
 				while (mensajeTmp != null) {
 				
 					this.cola.add(mensajeTmp);
@@ -72,7 +121,7 @@ public class Replicador extends Thread {
 		}
 	}
 
-	private void procesarMensaje (Mensaje mensaje) {
+	private void procesarMensaje (MensajeReplicacion mensaje) {
 		// ENVIAR POR SOCKET
 	}
 }

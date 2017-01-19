@@ -43,9 +43,10 @@ public class Primario implements Runnable {
 	//otras variables
 	private BaseDatos baseDatos;
 	
+	private Replicador replicador;
 	
 	public Primario(String ip, String puerto){
-		//algo
+		
 		this.setIP(ip);
 		this.setPuerto(Integer.valueOf(puerto));
 		this.estado=EstadoServidor.desconectado;
@@ -102,7 +103,7 @@ public class Primario implements Runnable {
 			try {
 				Socket s = this.serverSO.accept();
 				this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
-				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos);
+				HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos,this.replicador);
 				//UNA VEZ Q CREO LA CONEXION HAGO QUE LA VISTA LA OBSERVE
 				nuevaConexion.addObserver(this.vista);
 				this.hilosConexiones.add(nuevaConexion);
@@ -137,7 +138,14 @@ public class Primario implements Runnable {
 	}
 	
 	protected boolean CrearReplicador(){
-		return false;
+		try {
+			replicador = new Replicador();
+			replicador.start ();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 	protected boolean verificarResultado(Tarea tarea) {
