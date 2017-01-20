@@ -20,7 +20,7 @@ public class HiloBackup implements Runnable{
 
 	public void conectarmeReplicador() {
 		try {
-			socket = new Socket("127.0.0.1",76167);
+			socket = new Socket("127.0.0.1",7567);
 			
 			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			

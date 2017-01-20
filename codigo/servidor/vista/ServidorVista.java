@@ -13,19 +13,13 @@ import javax.swing.JTextField;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Properties;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextPane;
 
-import baseDeDatos.BaseDatos;
 import baseDeDatos.Usuario;
 import bloquesYTareas.Bloque;
 import bloquesYTareas.EstadoTarea;
@@ -34,8 +28,6 @@ import bloquesYTareas.Tarea;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Rectangle;
-import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
@@ -105,6 +97,10 @@ public class ServidorVista extends JFrame implements Observer{
 		textFieldPuerto.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3), 180, 24);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
+		
+		
+		textFieldPuerto.setText("5555");
+		/*
 		Properties propiedades = new Properties();
 	    InputStream entrada = null;
 	    try {
@@ -119,7 +115,7 @@ public class ServidorVista extends JFrame implements Observer{
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		*/
 		//CUANDO PRESIONES EL BOTON, VOY A CHEQUEAR QUE EL PUERTO QUE INGRESE ESTE LIBRE
 		btnConectarServidor = new JButton("Conectar Servidor");
 		btnConectarServidor.addActionListener(new ActionListener() {
@@ -291,8 +287,8 @@ public class ServidorVista extends JFrame implements Observer{
 			Tarea tarea = (Tarea) objeto;
 			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
 			int id_tarea = tarea.getId();
-			Bloque bloque = tarea.getBloque();
-			int idBloque = bloque.getId();
+			//Bloque bloque = tarea.getBloque();
+			//int idBloque = bloque.getId();
 			EstadoTarea estado = tarea.getEstado();
 			// La clave del Hashmap es la id de la tarea
 			Integer clave = id_tarea;

@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -35,35 +34,62 @@ public class Servidor {
 		try {
 			ipPrimario=BusquedaUDP.buscarPrimario();
 		} catch (SocketException | UnknownHostException e1) {
+			System.out.println("no pude buscar el servidor primario en la red local");
+		}
+		
+		if(ipPrimario!=null){
+			Integer puerto= BusquedaUDP.puertoPrimario;
+			System.out.println("conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
+			this.crearServidorBackup(ipPrimario, puerto.toString());
+			return true;
 		}
 		
 		Properties propiedades = new Properties();
 	    InputStream entrada = null;
-	    Socket prueba;
+	   
 	    try {
+	    	
+	    	System.out.println("buscando servidores en base al archivo de configuracion");
 			entrada = new FileInputStream("configuracion.properties");
 			propiedades.load(entrada);
+			
+			//leo la lista de ip-puerto hasta que se acabe o me conecte con un servidor primario
+			
+		    Integer nro=1;
+		    boolean hayIP=true;	//para saber cuando se acabaron las ips
+		    boolean conectado=false;
 		    
-	    	//VOY A INTENTAR CONECTARME AL PRIMARIO
-		    String ipA = propiedades.getProperty("IPA");
-		    String puertoA = propiedades.getProperty("PUERTOA");
-		    
-		    String ipB = propiedades.getProperty("IPB");
-		    String puertoB = propiedades.getProperty("PUERTOB");
-		    
-		    //CHEQUEO SI EL SERVIDOR PRIMARIO ESTA ESCUCHANDO EN EL PUERTO
-		    try {
-		    	prueba = new Socket(ipA,Integer.parseInt(puertoA));	
-		    	System.out.println("El servidor primario ya esta levantado, se creara el backup");
-		       	this.crearServidorBackup(ipB, puertoB);
-		    }catch (ConnectException e){
-		    	System.out.println("Se creara el servidor primario");
-		    	this.crearServidorPrimario(ipA, puertoA);
-		    }
-		    
+			while(hayIP==true && conectado==false){
+				String ip = propiedades.getProperty("IP"+nro);
+			    String puerto = propiedades.getProperty("PUERTO"+nro);
+			    if(ip==null){
+			    	hayIP=false;
+			    }
+			    
+			  //CHEQUEO SI EL SERVIDOR PRIMARIO ESTA ESCUCHANDO EN EL PUERTO
+				if(hayIP){
+					try {
+				    	Socket prueba = new Socket(ip,Integer.parseInt(puerto));
+				    	System.out.println("El servidor primario ya esta levantado, se creara el backup");
+				    	conectado=true;
+				       	this.crearServidorBackup(ip, puerto);
+				    }catch (Exception e){
+				    	/*
+				    	System.out.println("Se creara el servidor primario");
+				    	this.crearServidorPrimario(ipA, puertoA);
+				    	*/
+				    }
+				}
+				nro++;
+			}
+			if(conectado==false && hayIP==false){
+				System.out.println("Creando servidor primario.");
+				this.crearServidorPrimario("david puto","5555");
+			}
+			
 	    } catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    	System.err.println("no se encontro el archivo de configuracion. cerrando programa");
+	    	return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

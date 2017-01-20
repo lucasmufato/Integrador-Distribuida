@@ -10,8 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
-import java.util.Observable;
-import java.util.Observer;
 
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.*;
@@ -42,8 +40,8 @@ public class Primario implements Runnable {
 	
 	//otras variables
 	private BaseDatos baseDatos;
-	
 	private Replicador replicador;
+	private BusquedaUDP servicioUDP;
 	
 	public Primario(String ip, String puerto){
 		
@@ -56,7 +54,6 @@ public class Primario implements Runnable {
 		this.baseDatos.conectarse();
 		this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 		this.crearGUI();
-		this.CrearReplicador();
 		try {
 			this.sha256 = MessageDigest.getInstance ("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
@@ -182,6 +179,13 @@ public class Primario implements Runnable {
 
 	@Override
 	public void run() {
+		//para el servicio UDP
+		this.servicioUDP= new BusquedaUDP(Integer.valueOf(puerto));
+		Thread hiloServicioUDP = new Thread(this.servicioUDP);
+		hiloServicioUDP.start();
+		
+		this.CrearReplicador();
+		
 		this.esperarClientes();		
 	}
 
@@ -342,13 +346,13 @@ public class Primario implements Runnable {
 		//cierro las conexiones con los clientes (de buena manera)
 		for(HiloConexionPrimario h: this.hilosConexiones){
 			h.desconectar();
-			
 		}
 		//libero recursos
 		try {	this.serverSO.close();	} catch (IOException e) {	}
 		this.serverSO = null;
 		this.baseDatos.desconectarse();
 		this.baseDatos=null;
+		BusquedaUDP.trabajando=false;
 	}
 	
 	
