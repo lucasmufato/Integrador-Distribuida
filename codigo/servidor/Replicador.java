@@ -23,6 +23,7 @@ public class Replicador extends Thread {
 	private ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 	private Queue<MensajeReplicacion> cola; // Esta es la cola principal de mensajes
 	private Queue<MensajeReplicacion> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
+	private Object pausa = new Object ();
 
 	public Replicador () throws IOException {
 		this.cola = new LinkedList();
@@ -36,8 +37,10 @@ public class Replicador extends Thread {
 		/* Guarda un mensaje en la cola */
 		synchronized (this.colaTmp) {
 			this.colaTmp.add (mensaje);
+			synchronized (this.pausa) {
+				this.pausa.notifyAll();
+			}
 		}
-		this.notify();
 	}
 
 	public void replicarParcialTarea (Tarea tarea, Usuario usuario) {
@@ -88,7 +91,9 @@ public class Replicador extends Thread {
 				}
 				if (this.colaTmp.peek() == null) {
 					/* Si la cola temporal esta vacia, detenemos la ejecucion */
-					this.wait();
+					synchronized (this.pausa) {
+						this.pausa.wait();
+					}
 				}
 			}
 		} catch (Exception e) {
