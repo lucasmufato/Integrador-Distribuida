@@ -71,9 +71,16 @@ public class Cliente {
 		//lo llama la vista para cerrar la conexion "bien"
 		this.estado=EstadoCliente.desconectado;
 		// this.hiloConexion.desconectarse(); al pedo, con cambiar el estado del cliente el hiloConecion va a terminar solo.
-		this.hiloMinero.detener();
+		if (this.hiloMinero != null) {
+			this.hiloMinero.detener();
+		}
 		this.liberarRecursos();
 		return false;
+	}
+
+	public void notificarDesconexion () {
+		this.desconectarse();
+		this.vista.desconectar ("El servidor ha cerrado la conexion");
 	}
 	
 	private void liberarRecursos(){
@@ -145,7 +152,9 @@ public class Cliente {
 			texto = "FINAL: " + HiloMinero.hashToString(tarea.getResultado());
 		}
 		vista.escribirResultado(texto);
-		this.hiloConexion.enviarResultado(tarea);
+		if (this.hiloConexion != null) {
+			this.hiloConexion.enviarResultado(tarea);
+		}
 	}
 	
 	public void setPuntos(Integer puntos) {
@@ -170,13 +179,15 @@ public class Cliente {
 
 	public void primarioDesconecto() {
 		// este metodo lo llama el hilo conexion en caso de que se desconecte del hilo primario(de buena o mala manera)
-		vista.mostrarMsjPorConsola("el cliente primario se ha desconectado!");
+		this.notificarDesconexion();
 		if(this.tengoServidorBackup() == true){
 			vista.mostrarMsjPorConsola("intentando conectar al servidor de backup, mientras sigo procesando la tarea");
 			//TODO cuando este lo de backup 
 		}else{
 			vista.mostrarMsjPorConsola("no tengo informacion del backup, asi que dejo de procesar y quedo en estado muerto");
-			this.hiloMinero.detener();
+			if (hiloMinero != null) {
+				this.hiloMinero.detener();
+			}
 		}
 	}
 

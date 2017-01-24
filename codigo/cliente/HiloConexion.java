@@ -96,7 +96,8 @@ public class HiloConexion implements Runnable {
 					break;
 				
 				}
-				
+			} catch (java.io.EOFException | java.net.SocketException e) {
+				this.cliente.notificarDesconexion();
 			} catch (java.net.SocketTimeoutException e) {
 				//no hago nada
 			} catch (ClassNotFoundException | IOException e) {
@@ -112,8 +113,12 @@ public class HiloConexion implements Runnable {
 		//VA A RECIBIR LA TAREA, Y VA A LLAMAR AL METODO TRABAJARDEL CLIENTE, PRIMERO VA A PONER EL ESTADO DEL CLIENTE
 		//EN ESPERANDO TRABAJO
 		this.cliente.setEstado(EstadoCliente.esperandoTrabajo);
-		this.cliente.trabajar(tarea);
-		return false;
+		if (tarea != null) {
+			this.cliente.trabajar(tarea);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public void enviarResultado(Tarea tarea) {

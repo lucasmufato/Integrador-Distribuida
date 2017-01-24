@@ -175,7 +175,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					this.morir();
 					return true;
 				default:
-					throw new IOException("tipo de mensaje indevido");
+					throw new IOException("tipo de mensaje indebido");
 				
 				}
 			}catch(java.net.SocketTimeoutException e){
@@ -253,25 +253,30 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
 		System.out.println("el usuario es: " + this.usuario.getNombre());
 		Tarea tarea = this.bd.getTarea(this.usuario.getId());
+		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		if (tarea == null) {
 			setChanged();
-		}
-		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
-		this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario);
-		try {
-			this.flujoSaliente.writeObject(mensaje);
-			this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
-			return true;
-		} catch (IOException e) {
-			//TODO si sale mal q hago?
-			e.printStackTrace();
+			this.wdt.stop();
+			this.tareaEnTrabajo = null;
 			return false;
+		} else {
+			this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario);
+			try {
+				this.flujoSaliente.writeObject(mensaje);
+				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
+				return true;
+			} catch (IOException e) {
+				//TODO si sale mal q hago?
+				e.printStackTrace();
+				return false;
+			}
 		}
+
 	}
 
 	protected boolean detenerTarea() {
 		boolean tareaSeDetuvo = false;
-		if (this.usuario != null) {
+		if (this.usuario != null && this.tareaEnTrabajo != null) {
 			tareaSeDetuvo = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
 			if (tareaSeDetuvo) {
 				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
@@ -331,5 +336,9 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		} catch (IOException e) {
 			//  no me importa si explota aca
 		}
+	}
+
+	public boolean estaTrabajando () {
+		return (this.tareaEnTrabajo != null);
 	}
 }//fin de la clase

@@ -8,6 +8,7 @@ import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
 import javax.swing.JTextPane;
+import javax.swing.JOptionPane;
 
 import cliente.Cliente;
 
@@ -246,6 +247,13 @@ public class ClienteJFrame extends JFrame {
 		
 		
 	}
+
+	public void desconectar (String msj) {
+		if (msj != null) {
+			JOptionPane.showMessageDialog(null, msj, "Desconexion", JOptionPane.ERROR_MESSAGE);
+		}
+		this.mostrarPanelLogueo();
+	}
 	
 	public void mostrarPanelLogeo(){
 		jpanel_trabajo.setVisible(false);
@@ -267,6 +275,11 @@ public class ClienteJFrame extends JFrame {
 		//CADA VEZ QUE SE FINALIZA UN BLOQUE Y EL SERVIDOR ME ENVIE LOS PUNTOS QUE GANE
 		lblUsuario_1.setText("Usuario: " + usuario);
 		lblPuntos.setText("Puntos: " + cliente.getPuntos());
+	}
+
+	public void mostrarPanelLogueo() {
+		jpanel_trabajo.setVisible(false);
+		jpanel_logeo.setVisible(true);
 	}
 	
 	//ESCRIBIR RESULTADO EN REALIDAD PUEDE ESCRIBIR CUALQUIER COSA AUNQUE NO SEA UN RESULTADO
