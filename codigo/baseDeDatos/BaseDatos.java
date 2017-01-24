@@ -409,6 +409,8 @@ public class BaseDatos {
 		//SETEA EL RESULTADO FINAL EN LA BD
 		tarea.setEstado (EstadoTarea.completada);
 		this.cacheTareas.put (tarea.getId(), tarea);
+		// Si cambio la tarea, el cache del bloque puede quedar desactualizado
+		this.cacheBloques.remove (tarea.getBloque().getId());
 
 
 		try {
@@ -740,6 +742,7 @@ public class BaseDatos {
 				"WHERE " +
 					"estado_bloque.estado = 'pendiente' " +
 					"AND estado_tarea.estado = 'pendiente' " +
+				"ORDER BY bloque ASC " +
 				"LIMIT 1"
 			); 
 

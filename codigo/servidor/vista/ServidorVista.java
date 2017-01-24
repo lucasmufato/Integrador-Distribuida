@@ -335,7 +335,10 @@ public class ServidorVista extends JFrame implements Observer{
 			// La clave del Hashmap es la id de la tarea
 			Integer clave = id_tarea;
 			//VEO A QUE ESTADO CAMBIO
-			tareas.get(clave).setBackground(colorEstado(estado));
+			try {
+				tareas.get(clave).setBackground(colorEstado(estado));
+			} catch (Exception e) {
+			}
 		
 		}else{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
