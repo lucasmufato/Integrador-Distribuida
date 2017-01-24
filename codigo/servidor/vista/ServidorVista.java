@@ -2,6 +2,7 @@ package servidor.vista;
 
 import javax.swing.JFrame;
 
+import servidor.Backup;
 import servidor.HiloConexionPrimario;
 import servidor.Primario;
 import javax.swing.JPanel;
@@ -37,35 +38,49 @@ import java.awt.SystemColor;
 public class ServidorVista extends JFrame implements Observer{
 	
 	//variables de la clase
-	private static final long serialVersionUID = 1L;
-	private Primario servidor;
+	protected static final long serialVersionUID = 1L;
+	protected Primario servidor;
+	protected Backup backup;
+	protected boolean secundario;
 	//private HashMap<String, JLabel> tareas = new HashMap<String, JLabel>();
-	private HashMap<Integer, JLabel> tareas =  new HashMap<Integer, JLabel>();
+	protected HashMap<Integer, JLabel> tareas =  new HashMap<Integer, JLabel>();
 	
 	//variables de la vista
-	private JPanel jpanel_servidor;
-	private JTextField textFieldPuerto;
-	private JButton btnConectarServidor;
-	private JTextPane textPaneConsola;
-	private JPanel panel;
-	private JPanel jpanel_trabajo;
-	private JTextPane textPaneConsolaTrabajo;
-	private JLabel lblIPServidor;
-	private JLabel lblPuertoServidor;
+	protected JPanel jpanel_servidor;
+	protected JTextField textFieldPuerto;
+	protected JButton btnConectarServidor;
+	protected JTextPane textPaneConsola;
+	protected JPanel panel;
+	protected JPanel jpanel_trabajo;
+	protected JTextPane textPaneConsolaTrabajo;
+	protected JLabel lblIPServidor;
+	protected JLabel lblPuertoServidor;
 
-	private JTextPane textPaneMsj;
-	private JPanel panel_bloques;
-	private JLabel label_logo;
-	private JScrollPane scrollBarBloques;
+	protected JTextPane textPaneMsj;
+	protected JPanel panel_bloques;
+	protected JLabel label_logo;
+	protected JScrollPane scrollBarBloques;
 
 	//TAMA�O
-	private Integer alto = 500;
-	private Integer ancho = 800;
+	protected Integer alto = 500;
+	protected Integer ancho = 800;
 	
 	public ServidorVista(Primario servidor){
 		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
 		setTitle("Servidor BitCoin Mining");
 		this.servidor=servidor;
+		this.crearVista(false);
+	}
+	
+	public ServidorVista(Backup backup){
+		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
+		setTitle("Servidor Backup BitCoin Mining");
+		this.backup = backup;
+		this.crearVista(true);
+	}
+	
+	public void crearVista(boolean secundario) {
+		this.secundario = secundario;
 		this.setVisible(true);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -74,7 +89,6 @@ public class ServidorVista extends JFrame implements Observer{
 		panel = new JPanel();
 		getContentPane().add(panel);
 		panel.setLayout(new CardLayout(0, 0));
-		
 		//---------------------------------------------------VISTA 1------------------------------------------------------------
 		jpanel_servidor = new JPanel();
 		jpanel_servidor.setBackground(new java.awt.Color(23, 26, 33));
@@ -98,8 +112,11 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
 		
-		
-		textFieldPuerto.setText("5555");
+		if (secundario) {
+			textFieldPuerto.setText("6666");
+		} else {
+			textFieldPuerto.setText("5555");
+		}
 		/*
 		Properties propiedades = new Properties();
 	    InputStream entrada = null;
@@ -125,8 +142,15 @@ public class ServidorVista extends JFrame implements Observer{
 					if(puerto<1024){
 						throw new NumberFormatException();
 					}
-					if(servidor.pedirPuerto(puerto)){
-						iniciarServidor();
+					if (secundario == false) {
+						if(servidor.pedirPuerto(puerto)){
+							iniciarServidor();
+						}
+					} else {
+						if (backup.pedirPuerto(puerto)) {
+							iniciarServidor();
+							
+						}
 					}
 				}catch(NumberFormatException e1){
 					//si el numero es muy grande tirar error al parsearlo a Integer
@@ -188,9 +212,14 @@ public class ServidorVista extends JFrame implements Observer{
 		btnDesconectar.setBackground(new Color(211, 211, 211));
 		btnDesconectar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//LAMARA A UN METODO DESCONECTAR EN LA CLASE PRIMARIO
-				servidor.desconectarse();
-				System.exit(0);
+				if (secundario == false) {
+					//LAMARA A UN METODO DESCONECTAR EN LA CLASE PRIMARIO
+					servidor.desconectarse();
+					System.exit(0);
+				}else{
+					//LLAMA A UN METODO DESCONECTAR EN LA CLASE BACKUP
+					backup.desconectarseB();
+				}
 			}
 		});
 		btnDesconectar.setBackground(new java.awt.Color(23, 26, 33));
@@ -214,7 +243,9 @@ public class ServidorVista extends JFrame implements Observer{
 		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
 		btnGenerarBloques.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				servidor.generarBloque();
+				if (secundario == false) {
+					servidor.generarBloque();
+				}
 			}
 		});
 		btnGenerarBloques.setBackground(SystemColor.inactiveCaption);
@@ -235,10 +266,15 @@ public class ServidorVista extends JFrame implements Observer{
 	}
 	
 	public boolean iniciarServidor(){
-		//ES LLAMADO POR EL BOTON CONECTAR SERVIDOR 
-		Thread ser =new Thread(this.servidor);
-		ser.start();
-		//UNA VEZ QUE DOY EL START, EL METODO RUN VA A LLAMAR AL ESPERARCLIENTES() DEL PRIMARIO
+		if (secundario == false) {
+			//ES LLAMADO POR EL BOTON CONECTAR SERVIDOR 
+			Thread ser =new Thread(this.servidor);
+			ser.start();
+			//UNA VEZ QUE DOY EL START, EL METODO RUN VA A LLAMAR AL ESPERARCLIENTES() DEL PRIMARIO
+		} else {
+			System.out.println("Es backup");
+			this.backup.esperarActualizaciones();
+		}
 		return true;
 	}
 	
@@ -273,8 +309,14 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.setVisible(true);
 		
 		//MUESTRO LA IP Y EL PUERTO
-		lblIPServidor.setText("Mi IP: " + this.servidor.getIP());
-		lblPuertoServidor.setText("Puerto: " + String.valueOf(this.servidor.getPuerto()));
+		if (secundario == false) {
+			lblIPServidor.setText("Mi IP: " + this.servidor.getIP());
+			lblPuertoServidor.setText("Puerto: " + String.valueOf(this.servidor.getPuerto()));
+		} else {
+			lblIPServidor.setText("Mi IP: " + this.backup.getIP());
+			lblPuertoServidor.setText("Puerto: " + String.valueOf(this.backup.getPuerto()));	
+		}
+		
 	}
 	
 	@Override

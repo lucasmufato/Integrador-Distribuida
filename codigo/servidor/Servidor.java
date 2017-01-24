@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -50,7 +51,7 @@ public class Servidor {
 	    try {
 	    	
 	    	System.out.println("buscando servidores en base al archivo de configuracion");
-			entrada = new FileInputStream("configuracion.properties");
+			entrada = new FileInputStream("C:/Users/jasmin/Documents/Integrador-Distribuida/codigo/servidor/configuracion.properties");
 			propiedades.load(entrada);
 			
 			//leo la lista de ip-puerto hasta que se acabe o me conecte con un servidor primario
@@ -84,9 +85,14 @@ public class Servidor {
 			}
 			if(conectado==false && hayIP==false){
 				System.out.println("Creando servidor primario.");
-				this.crearServidorPrimario("david puto","5555");
+				try {
+					String ip = (InetAddress.getLocalHost().getHostAddress());
+					this.crearServidorPrimario(ip, "5555");
+				} catch (UnknownHostException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
-			
 	    } catch (FileNotFoundException e) {
 	    	System.err.println("no se encontro el archivo de configuracion. cerrando programa");
 	    	return false;
@@ -110,3 +116,4 @@ public class Servidor {
 		return false;
 	}
 }
+
