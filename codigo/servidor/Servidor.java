@@ -51,7 +51,7 @@ public class Servidor {
 	    try {
 	    	
 	    	System.out.println("buscando servidores en base al archivo de configuracion");
-			entrada = new FileInputStream("C:/Users/jasmin/Documents/Integrador-Distribuida/codigo/servidor/configuracion.properties");
+			entrada = new FileInputStream("configuracion.properties");
 			propiedades.load(entrada);
 			
 			//leo la lista de ip-puerto hasta que se acabe o me conecte con un servidor primario
