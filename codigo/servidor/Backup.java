@@ -40,9 +40,9 @@ private HiloBackup conexionBackup;
 	public void esperarActualizaciones() {
 		this.crearGUIBackup2();
 		//DESPUES DE QUE YA TENGA LA VISTA, VOY A CREAR EL HILO Q SE COMUNICARA CON REPLICADOR
-		/*conexionBackup = new HiloBackup(this.ipPrimario, this.baseDatos);
+		conexionBackup = new HiloBackup(this.ipPrimario, this.baseDatos);
 		Thread hilo = new Thread(conexionBackup);
-		hilo.start();*/
+		hilo.start();
 	}
 	
 	public boolean pasarAPrimario(){

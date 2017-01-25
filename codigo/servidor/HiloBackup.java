@@ -39,7 +39,10 @@ public class HiloBackup extends Observable implements Runnable {
 
 	public void conectarmeReplicador() {
 		try {
-			socket = new Socket(this.ip,7567);
+			this.socket = new Socket(this.ip,7567);
+			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
+			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
+			System.out.println("[DEBUG] Conectado a Replicador");
 			
 			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			this.conectado=true;
@@ -47,6 +50,7 @@ public class HiloBackup extends Observable implements Runnable {
 			while(this.conectado){
 				try {
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
+					System.out.println("[DEBUG] Se ha recibido un mensaje del Replicador");
 					switch(msj.getCodigo()){
 					case asignacionTareaUsuario:
 						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario)msj;

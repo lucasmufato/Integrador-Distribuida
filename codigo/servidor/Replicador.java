@@ -17,6 +17,7 @@ import java.net.Socket;
 
 public class Replicador extends Thread {
 	private static int PUERTO_REPLICADOR = 7567;
+	private static int ESPERA_REINTENTO = 1000; // Tiempo de espera para reintentar enviar mensajes a servidor backup
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
@@ -75,8 +76,11 @@ public class Replicador extends Thread {
 
 	@Override
 	public void run () {
+		System.out.println("[DEBUG] Se ha iniciado la ejecucion del thread replicador");
 		try {
-		this.acceptConnection();
+			System.out.println("[DEBUG] Se espera que un backup se conecte");
+			this.acceptConnection();
+			System.out.println("[DEBUG] Un backup se ha conectado");
 			while (true) {
 				this.volcarColaTmp(); // volcar cola temporaria a cola principal
 
@@ -84,8 +88,11 @@ public class Replicador extends Thread {
 					//Procesar mensajes de cola primaria
 					MensajeReplicacion mensaje = this.cola.poll();
 					while (mensaje != null) {
-				
-						this.procesarMensaje(mensaje);
+						boolean enviado = this.enviarMensaje(mensaje);
+						while (!enviado) {
+							Thread.sleep (ESPERA_REINTENTO);
+							enviado = this.enviarMensaje(mensaje);
+						}
 						mensaje = this.cola.poll();
 					}
 				}
@@ -105,6 +112,8 @@ public class Replicador extends Thread {
 	private boolean acceptConnection () {
 		try {
 			this.socket = this.serverSocket.accept();
+			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
+			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -126,7 +135,13 @@ public class Replicador extends Thread {
 		}
 	}
 
-	private void procesarMensaje (MensajeReplicacion mensaje) {
-		// ENVIAR POR SOCKET
+	private boolean enviarMensaje (MensajeReplicacion mensaje) {
+		try {
+			this.flujoSaliente.writeObject (mensaje);
+		} catch (Exception exception) {
+			return false;
+		}
+
+		return true;
 	}
 }
