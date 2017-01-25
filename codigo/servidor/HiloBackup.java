@@ -5,20 +5,29 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import baseDeDatos.BaseDatos;
+import mensajes.replicacion.MensajeAsignacionPuntos;
+import mensajes.replicacion.MensajeAsignacionTareaUsuario;
+import mensajes.replicacion.MensajeCompletitudBloque;
+import mensajes.replicacion.MensajeDetencionTarea;
+import mensajes.replicacion.MensajeParcialTarea;
 import mensajes.replicacion.MensajeReplicacion;
+import mensajes.replicacion.MensajeResultadoTarea;
 
 public class HiloBackup implements Runnable{
 	//SOCKET PARA LA COMUNICACION CON EL REPLICADOR
-	protected Socket socket; 
-	protected ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
-	protected ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
+	private Socket socket; 
+	private ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
+	private ObjectInputStream flujoEntrante;  //ENVIAR OBJETOS
 
-	protected boolean conectado;
-	protected String ip;
+	private boolean conectado;
+	private String ip;
+	private BaseDatos bd;
 
-	public HiloBackup(String ipPrimario) {
+	public HiloBackup(String ipPrimario, BaseDatos bd) {
 		// TODO Auto-generated constructor stub
 		this.ip = ipPrimario;
+		this.bd = bd;
 	}
 
 	@Override
@@ -37,19 +46,25 @@ public class HiloBackup implements Runnable{
 				try {
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
 					switch(msj.getCodigo()){
-						case asignacionTareaUsuario:
-							break;
-						case parcialTarea:
-							break;
-						case resultadoTarea:
-							break;
-						case detencionTarea:
-							break;
-						case completitudBloque:
-							break;
-						case asignacionPuntos:
-							break;
-					}
+					case asignacionTareaUsuario:
+						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario)msj;
+						break;
+					case parcialTarea:
+						MensajeParcialTarea msjParcial = (MensajeParcialTarea)msj;
+						break;
+					case resultadoTarea:
+						MensajeResultadoTarea msjResultadoTarea = (MensajeResultadoTarea)msj;
+						break;
+					case detencionTarea:
+						MensajeDetencionTarea msjDetencionTarea = (MensajeDetencionTarea)msj;
+						break;
+					case completitudBloque:
+						MensajeCompletitudBloque msjBloque = (MensajeCompletitudBloque)msj;
+						break;
+					case asignacionPuntos:
+						MensajeAsignacionPuntos msjPts = (MensajeAsignacionPuntos)msj;
+						break;
+				}
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

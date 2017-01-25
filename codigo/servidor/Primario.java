@@ -47,8 +47,7 @@ public class Primario implements Runnable {
 			this.estado=EstadoServidor.desconectado;
 			this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 			this.hilos = new ArrayList<Thread>();
-			this.baseDatos= BaseDatos.getInstance();
-			this.baseDatos.conectarse();
+			this.conectarseBD();
 			this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 			this.crearGUI();
 			try {
@@ -59,6 +58,12 @@ public class Primario implements Runnable {
 		}
 		
 		public Primario() {
+			
+		}
+		
+		protected void conectarseBD() {
+			this.baseDatos = BaseDatos.getInstance();
+			this.baseDatos.conectarse();
 			
 		}
 		

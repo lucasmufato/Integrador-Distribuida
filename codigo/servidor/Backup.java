@@ -16,6 +16,7 @@ private HiloBackup conexionBackup;
 		super();
 		this.ipPrimario=ip;
 		this.puertoPrimario=puerto;
+		this.conectarseBD();
 		try {
 			String ipB = (InetAddress.getLocalHost().getHostAddress());
 			this.setIP(ipB);
@@ -33,13 +34,13 @@ private HiloBackup conexionBackup;
 	
 	private void crearGUIBackup2() {
 		this.vistaB.crearPanelTrabajo();
-		//this.vistaB.crearAreadeBloques(super.obtenerBloquesNoCompletados());
+		this.vistaB.crearAreadeBloques(super.obtenerBloquesNoCompletados());
 	}
 	
 	public void esperarActualizaciones() {
 		this.crearGUIBackup2();
 		//DESPUES DE QUE YA TENGA LA VISTA, VOY A CREAR EL HILO Q SE COMUNICARA CON REPLICADOR
-		/*conexionBackup = new HiloBackup(this.ipPrimario);
+		/*conexionBackup = new HiloBackup(this.ipPrimario, this.baseDatos);
 		Thread hilo = new Thread(conexionBackup);
 		hilo.start();*/
 	}
