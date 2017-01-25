@@ -35,15 +35,15 @@ public class Servidor {
 		
 		String ipPrimario=null;
 		try {
-			this.ventana.agregarLine("buscando un servidor primario en la red local(2 segundos)...");
+			this.ventana.agregarLine("Buscando un servidor primario en la red local(2 segundos)...");
 			ipPrimario=BusquedaUDP.buscarPrimario();
 		} catch (SocketException | UnknownHostException e1) {
-			this.ventana.agregarLine("no pude buscar el servidor primario en la red local");
+			this.ventana.agregarLine("No pude buscar el servidor primario en la red local");
 		}
 		
 		if(ipPrimario!=null){
 			Integer puerto= BusquedaUDP.puertoPrimario;
-			this.ventana.agregarLine("conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
+			this.ventana.agregarLine("Conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
 			this.crearServidorBackup(ipPrimario, puerto.toString());
 			return true;
 		}
@@ -53,7 +53,7 @@ public class Servidor {
 	   
 	    try {
 	    	
-	    	this.ventana.agregarLine("buscando servidores en base al archivo de configuracion");
+	    	this.ventana.agregarLine("Buscando servidores en base al archivo de configuracion");
 			entrada = new FileInputStream("configuracion.properties");
 			propiedades.load(entrada);
 			
@@ -103,8 +103,8 @@ public class Servidor {
 				}
 			}
 	    } catch (FileNotFoundException e) {
-	    	this.ventana.agregarLine("no se encontro el archivo de configuracion. cerrando programa");
-	    	System.err.println("no se encontro el archivo de configuracion. cerrando programa");
+	    	this.ventana.agregarLine("No se encontro el archivo de configuracion. Cerrando programa");
+	    	System.err.println("No se encontro el archivo de configuracion. Cerrando programa");
 	    	return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

@@ -3,12 +3,11 @@ package servidor;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import servidor.vista.ServidorBackupVista;
 import servidor.vista.ServidorVista;
 
 public class Backup extends Primario {
 	
-private ServidorBackupVista vistaB;	
+private ServidorVista vistaB;	
 private String ipPrimario;
 private String puertoPrimario;
 private HiloBackup conexionBackup;
@@ -29,7 +28,7 @@ private HiloBackup conexionBackup;
 	}
 	
 	private void crearGUIBackup() {
-		this.vistaB = new ServidorBackupVista(this);	
+		this.vistaB = new ServidorVista(this);	
 	}
 	
 	private void crearGUIBackup2() {
@@ -49,14 +48,12 @@ private HiloBackup conexionBackup;
 		return false;
 	}
 	
-	public boolean desconectarseB(){
-		System.out.println("desconectando el backup");
+	@Override
+	public void desconectarse(){
+		System.out.println("Desconectando el backup");
 		this.estado = EstadoServidor.desconectado;
 		//CIERO LA CONEXION DE HILO BACKUP
 		this.conexionBackup.desconectar();
-		//LIBERAR RECURSOS
-		
-		return false;
 	}
 
 }

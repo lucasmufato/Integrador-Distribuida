@@ -218,7 +218,7 @@ public class ServidorVista extends JFrame implements Observer{
 					System.exit(0);
 				}else{
 					//LLAMA A UN METODO DESCONECTAR EN LA CLASE BACKUP
-					backup.desconectarseB();
+					backup.desconectarse();
 				}
 			}
 		});
