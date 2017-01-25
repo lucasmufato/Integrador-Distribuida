@@ -325,7 +325,7 @@ public class ServidorVista extends JFrame implements Observer{
 		//y que objeto me pasa
 		if(objeto.getClass().equals(Tarea.class)){
 			//si una tarea cambio de datos cambio de estado
-			System.out.println("observe en una tarea:");
+			// System.out.println("observe en una tarea:");
 			Tarea tarea = (Tarea) objeto;
 			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
 			int id_tarea = tarea.getId();
@@ -335,11 +335,14 @@ public class ServidorVista extends JFrame implements Observer{
 			// La clave del Hashmap es la id de la tarea
 			Integer clave = id_tarea;
 			//VEO A QUE ESTADO CAMBIO
-			tareas.get(clave).setBackground(colorEstado(estado));
+			try {
+				tareas.get(clave).setBackground(colorEstado(estado));
+			} catch (Exception e) {
+			}
 		
 		}else{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
-				System.out.println("observe un cambio en HiloConexionPrimario:");
+				// System.out.println("observe un cambio en HiloConexionPrimario:");
 				//si el que me indica que cambio de estado es el hilo primario
 				//pregunto si cambio el estado del usuario u otra cosa
 				if(objeto.getClass().equals(Usuario.class)){

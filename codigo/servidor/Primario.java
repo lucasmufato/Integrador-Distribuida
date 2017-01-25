@@ -85,12 +85,26 @@ public class Primario implements Runnable {
 			if (this.baseDatos.generarBloques(1, numTareasPorBloque, numBytesPorTarea)) {
 				ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 				this.vista.actualizarAreadeBloques(bs);
+				this.asignarTareasDeNuevoBloque();
 				return true;
 			} else {
 				return false;
 			}
 		}
-		
+
+		public void asignarTareasDeNuevoBloque () {
+			//metodo que busca si tiene clientes inactivos, y les asigna tareas nuevas
+			HiloConexionPrimario hilo;
+			
+			for (int i = 0; i< this.hilosConexiones.size(); i++) {
+				hilo = this.hilosConexiones.get(i);
+				if (!hilo.estaTrabajando()) {
+					System.out.println ("Hilo "+i+" no esta trabajando");
+					hilo.enviarNuevaTarea();
+				}
+			}
+		}
+
 		protected boolean esperarClientes(){
 			//metodo que se queda esperando conexiones, cuando llegan crea una HiloConexionPrimario, lo agrega a la lista
 			// y lo inicia como Thread.

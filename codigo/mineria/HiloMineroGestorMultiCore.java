@@ -77,11 +77,11 @@ public class HiloMineroGestorMultiCore extends HiloMinero {
 				int i=0;
 				boolean bandera=true;
 				while(bandera){
-					if(parcial[i]>this.parcialComprobado[i]){
+					if((parcial[i]&0xFF) > (this.parcialComprobado[i]&0xFF)){
 						bandera=false;
 						System.arraycopy(parcial, 0, this.parcialComprobado, 0, parcial.length);
 					}else{
-						if(parcial[i]<this.parcialComprobado[i]){
+						if((parcial[i]&0xFF) < (this.parcialComprobado[i]&0xFF)){
 							bandera=false;
 						}else{
 							i++;
