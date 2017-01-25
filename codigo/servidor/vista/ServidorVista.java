@@ -3,6 +3,7 @@ package servidor.vista;
 import javax.swing.JFrame;
 
 import servidor.Backup;
+import servidor.HiloBackup;
 import servidor.HiloConexionPrimario;
 import servidor.Primario;
 import javax.swing.JPanel;
@@ -366,9 +367,14 @@ public class ServidorVista extends JFrame implements Observer{
 					textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
 				}
 			}else{
-				System.out.println("observe un cambio que no es ni de BD ni de HiloPrimarioConexion :O");
-				//por si despues necesitamos que observe a algo mas
-				this.mostrarError("fallo el observador! :(");
+                if(claseLLamadora.getClass().equals(HiloBackup.class)){
+                	System.out.println("Observe un cambio en hilo backup");
+    				//por si despues necesitamos que observe a algo mas
+    				String resultado = (String) objeto; 
+    				textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
+                }else{
+                	System.out.println("Fallo observador :O");
+                }	
 			}
 		}
 		

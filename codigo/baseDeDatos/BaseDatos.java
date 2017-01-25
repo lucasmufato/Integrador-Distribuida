@@ -784,7 +784,7 @@ public class BaseDatos {
 	}
 	
 	
-	private synchronized boolean asignarTareaUsuario (int id_tarea, int id_usuario) {
+	public synchronized boolean asignarTareaUsuario (int id_tarea, int id_usuario) {
 		try {
 			/* Insertamos el procesamiento */
 

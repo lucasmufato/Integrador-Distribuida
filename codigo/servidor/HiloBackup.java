@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Observable;
 
 import baseDeDatos.BaseDatos;
 import mensajes.replicacion.MensajeAsignacionPuntos;
@@ -14,7 +15,7 @@ import mensajes.replicacion.MensajeParcialTarea;
 import mensajes.replicacion.MensajeReplicacion;
 import mensajes.replicacion.MensajeResultadoTarea;
 
-public class HiloBackup implements Runnable{
+public class HiloBackup extends Observable implements Runnable {
 	//SOCKET PARA LA COMUNICACION CON EL REPLICADOR
 	private Socket socket; 
 	private ObjectOutputStream flujoSaliente;  //RECIBIR OBJETOS
@@ -42,27 +43,88 @@ public class HiloBackup implements Runnable{
 			
 			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			this.conectado=true;
+			String resultado;
 			while(this.conectado){
 				try {
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
 					switch(msj.getCodigo()){
 					case asignacionTareaUsuario:
 						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario)msj;
+						resultado = "Recibi actualización: Asignación de tarea a usuario.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+				        
+				        if(this.bd.asignarTareaUsuario(msjAsignacionTarea.getTarea().getId(), msjAsignacionTarea.getUsuario().getId()) == true){
+				        	setChanged();
+							notifyObservers(msjAsignacionTarea.getTarea());
+				        }
 						break;
 					case parcialTarea:
 						MensajeParcialTarea msjParcial = (MensajeParcialTarea)msj;
+						resultado = "Recibi actualización: Resultado parcial de tarea.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+				        
+				        if(this.bd.setParcial(msjParcial.getTarea(), msjParcial.getUsuario().getId()) == true){
+							setChanged();
+							notifyObservers(msjParcial.getTarea());
+						}
 						break;
 					case resultadoTarea:
 						MensajeResultadoTarea msjResultadoTarea = (MensajeResultadoTarea)msj;
-						break;
+						resultado = "Recibi actualización: Resultado final de tarea.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+						
+				        if (this.bd.setResultado(msjResultadoTarea.getTarea(), msjResultadoTarea.getUsuario().getId()) == true){
+							setChanged();
+							notifyObservers(msjResultadoTarea.getTarea());
+							}	
+				        break;
 					case detencionTarea:
 						MensajeDetencionTarea msjDetencionTarea = (MensajeDetencionTarea)msj;
+						resultado = "Recibi actualización: Detencion de tarea.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+				        
+				        boolean tareaSeDetuvo = false;
+						if (msjDetencionTarea.getUsuario() != null && msjDetencionTarea.getTarea() != null) {
+							tareaSeDetuvo = this.bd.detenerTarea(msjDetencionTarea.getTarea(), msjDetencionTarea.getUsuario().getId());
+							if (tareaSeDetuvo) {
+								setChanged();
+								notifyObservers(msjDetencionTarea.getTarea());
+							}
+						}
 						break;
 					case completitudBloque:
 						MensajeCompletitudBloque msjBloque = (MensajeCompletitudBloque)msj;
+						resultado = "Recibi actualización: Bloque completado.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+				        
+				        //
+				        //PARA LA BD, CHEQUEA SI ESTA COMPLETO CUANDO RECIBE UN RESULTADO FINAL, CON EL SETRESULTADO
+				        //
 						break;
 					case asignacionPuntos:
 						MensajeAsignacionPuntos msjPts = (MensajeAsignacionPuntos)msj;
+						resultado = "Recibi actualización: Asignación de puntos a usuario.";
+						//MARCO QUE CAMBIO EL OBJETO
+				        setChanged();
+				        //NOTIFICO EL CAMBIO
+				        notifyObservers(resultado);
+				        
+				        this.bd.actualizarPuntos(msjPts.getUsuario().getId(), msjPts.getPuntos());
 						break;
 				}
 				} catch (ClassNotFoundException e) {
