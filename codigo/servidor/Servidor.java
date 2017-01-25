@@ -5,25 +5,27 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-public class Servidor {
+import servidor.vista.VentanaInicioServidor;
 
+public class Servidor {
+	
+	private VentanaInicioServidor ventana;
+	private static int timeout=2000;
+	
 	public static void main(String[] args) {
 		@SuppressWarnings("unused")
 		Servidor servidor = new Servidor();
 	}
 	
 	public Servidor(){
+		this.ventana= new VentanaInicioServidor();
 		this.buscarServidorPrimario();
-	}
-	
-	public boolean buscarServidorPrimarioBroadcast(){
-		
-		return false;
 	}
 	
 	public boolean buscarServidorPrimario(){
@@ -33,14 +35,15 @@ public class Servidor {
 		
 		String ipPrimario=null;
 		try {
+			this.ventana.agregarLine("buscando un servidor primario en la red local(2 segundos)...");
 			ipPrimario=BusquedaUDP.buscarPrimario();
 		} catch (SocketException | UnknownHostException e1) {
-			System.out.println("no pude buscar el servidor primario en la red local");
+			this.ventana.agregarLine("no pude buscar el servidor primario en la red local");
 		}
 		
 		if(ipPrimario!=null){
 			Integer puerto= BusquedaUDP.puertoPrimario;
-			System.out.println("conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
+			this.ventana.agregarLine("conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
 			this.crearServidorBackup(ipPrimario, puerto.toString());
 			return true;
 		}
@@ -50,7 +53,7 @@ public class Servidor {
 	   
 	    try {
 	    	
-	    	System.out.println("buscando servidores en base al archivo de configuracion");
+	    	this.ventana.agregarLine("buscando servidores en base al archivo de configuracion");
 			entrada = new FileInputStream("configuracion.properties");
 			propiedades.load(entrada);
 			
@@ -70,10 +73,14 @@ public class Servidor {
 			  //CHEQUEO SI EL SERVIDOR PRIMARIO ESTA ESCUCHANDO EN EL PUERTO
 				if(hayIP){
 					try {
-				    	Socket prueba = new Socket(ip,Integer.parseInt(puerto));
-				    	System.out.println("El servidor primario ya esta levantado, se creara el backup");
+						this.ventana.agregarLine("--- Probando con: "+ip + ":"+puerto);
+				    	Socket prueba = new Socket();
+				    	prueba.connect(new InetSocketAddress(ip,Integer.parseInt(puerto)), timeout);
+				    	this.ventana.agregarLine("El servidor primario ya esta levantado, se creara el backup");
 				    	conectado=true;
 				       	this.crearServidorBackup(ip, puerto);
+				       	this.ventana.cerrarVentana();
+						this.ventana=null;
 				    }catch (Exception e){
 				    	/*
 				    	System.out.println("Se creara el servidor primario");
@@ -84,21 +91,26 @@ public class Servidor {
 				nro++;
 			}
 			if(conectado==false && hayIP==false){
-				System.out.println("Creando servidor primario.");
+				this.ventana.agregarLine("Creando servidor primario.");
 				try {
 					String ip = (InetAddress.getLocalHost().getHostAddress());
 					this.crearServidorPrimario(ip, "5555");
+					this.ventana.cerrarVentana();
+					this.ventana=null;
 				} catch (UnknownHostException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
 	    } catch (FileNotFoundException e) {
+	    	this.ventana.agregarLine("no se encontro el archivo de configuracion. cerrando programa");
 	    	System.err.println("no se encontro el archivo de configuracion. cerrando programa");
 	    	return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			this.ventana.cerrarVentana();
+			this.ventana=null;
 		}
 		return false;
 	}

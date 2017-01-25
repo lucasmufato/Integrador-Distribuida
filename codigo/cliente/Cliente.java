@@ -189,6 +189,14 @@ public class Cliente {
 		this.usuario = usuario;
 		this.puntos = usuario.getPuntos();
 	}
+
+	public ModoTrabajo getModoTrabajo() {
+		return modoTrabajo;
+	}
+
+	public void setModoTrabajo(ModoTrabajo modoTrabajo) {
+		this.modoTrabajo = modoTrabajo;
+	}
 	
 }
 

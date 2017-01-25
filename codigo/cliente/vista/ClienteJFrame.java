@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JTextPane;
 
 import cliente.Cliente;
+import cliente.ModoTrabajo;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -23,6 +24,7 @@ import java.awt.Font;
 import javax.swing.JDesktopPane;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
+import javax.swing.JComboBox;
 
 public class ClienteJFrame extends JFrame {
 	
@@ -45,8 +47,11 @@ public class ClienteJFrame extends JFrame {
 	private JLabel lblServidorBackup; 
 	private JLabel lblDireccionIp_1;
 	private JLabel lblPuerto_1;
+	private JLabel lblModoDeTrabajo;
+	private JComboBox<String> modoTrabajoComboBox;
 	
 	private JTextPane textPane;
+	private JLabel lblModo;
 
 	public ClienteJFrame(Cliente c) {
 		this.cliente=c;
@@ -139,6 +144,19 @@ public class ClienteJFrame extends JFrame {
 		lblAcaVaEl.setBounds(305, 71, 228, 187);
 		jpanel_logeo.add(lblAcaVaEl);
 		
+		lblModoDeTrabajo = new JLabel("Modo de Trabajo");
+		lblModoDeTrabajo.setBounds(25, 82, 114, 15);
+		lblModoDeTrabajo.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lblModoDeTrabajo.setForeground(new java.awt.Color(189, 187, 185));
+		jpanel_logeo.add(lblModoDeTrabajo);
+		
+		modoTrabajoComboBox = new JComboBox<String>();
+		modoTrabajoComboBox.setBounds(139, 77, 140, 24);
+		modoTrabajoComboBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		modoTrabajoComboBox.addItem(new String("MonoProcesador"));
+		modoTrabajoComboBox.addItem(new String("MultiProcesador"));
+		
+		jpanel_logeo.add(modoTrabajoComboBox);
 		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
 		
@@ -178,9 +196,14 @@ public class ClienteJFrame extends JFrame {
 		desktopPane.setBounds(10, 49, 191, 221);
 		jpanel_trabajo.add(desktopPane);
 		
+		lblModo = new JLabel("Modo: ");
+		lblModo.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblModo.setBounds(0, 0, 191, 15);
+		desktopPane.add(lblModo);
+		
 		JLabel lblConexionA = new JLabel("Conexi\u00F3n a: ");
 		lblConexionA.setFont(new Font("Tahoma", Font.BOLD, 13));
-		lblConexionA.setBounds(10, 11, 171, 14);
+		lblConexionA.setBounds(0, 18, 171, 14);
 		desktopPane.add(lblConexionA);
 		
 		lblServidorPrimario = new JLabel("");
@@ -237,7 +260,24 @@ public class ClienteJFrame extends JFrame {
 			if(password.equals("")){
 				throw new java.lang.NumberFormatException();
 			}
-			
+			int modoTrabajo = this.modoTrabajoComboBox.getSelectedIndex();
+			switch(modoTrabajo){
+				case 0:
+					System.out.println("seteo modo MONO");
+					this.cliente.setModoTrabajo(ModoTrabajo.monoThread);
+					lblModo.setText("Modo: MonoProcesador");
+					break;
+				case 1:
+					System.out.println("seteo modo MULTI");
+					this.cliente.setModoTrabajo(ModoTrabajo.multiThread);
+					lblModo.setText("Modo: MultiProcesador");
+					break;
+				default:
+					System.out.println("seteo modo DEFAULT");
+					this.cliente.setModoTrabajo(ModoTrabajo.video);
+					lblModo.setText("Modo: PlacaVideo");
+					break;					
+			}
 			this.cliente.conectarseServidorPrimario(ip, puerto, usuario, password);
 		}catch(java.lang.NumberFormatException e){
 			//error al leer de los campos
@@ -295,5 +335,4 @@ public class ClienteJFrame extends JFrame {
 			lblDireccionIp.setText("Direccion IP: - ");
 		}
 	}
-
 }
