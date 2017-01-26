@@ -8,5 +8,7 @@ public enum CodigoMensajeReplicacion implements Serializable {
 	completitudBloque,
 	asignacionTareaUsuario,
 	detencionTarea,
-	asignacionPuntos
+	asignacionPuntos,
+	generacionBloque,
+	generacionTarea
 }

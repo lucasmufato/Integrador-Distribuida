@@ -600,13 +600,14 @@ public class BaseDatos {
 		}
 	}
 
-	public synchronized boolean generarBloques (int numBloques, int numTareasPorBloque, int numBytesPorTarea) {
+	public synchronized int generarBloques (int numBloques, int numTareasPorBloque, int numBytesPorTarea) {
+		int id_bloque = -1;
+
 		try {
 			PreparedStatement stm_bloque = c.prepareStatement ("INSERT INTO bloque (estado) SELECT id_estado_bloque FROM estado_bloque WHERE estado = 'pendiente'",Statement.RETURN_GENERATED_KEYS);
 			PreparedStatement stm_tarea = c.prepareStatement ("INSERT INTO tarea (bloque, header_bytes, estado) SELECT ? as bloque, ? as header_bytes, id_estado_bloque as estado FROM estado_bloque where estado = 'pendiente'",Statement.RETURN_GENERATED_KEYS);
 			ResultSet generatedKeys;
 			Random random = new Random ();
-			int id_bloque;
 			byte[] b_tarea;
 
 			/* Genera tareas con bytes aleatorios y las inserta en la base de datos */
@@ -624,14 +625,38 @@ public class BaseDatos {
 					stm_tarea.executeUpdate(); // Asumimos que va a funcionar
 				}
 			}
-			return true;
 		} catch (Exception e) {
 			System.err.println ("Error al generar bloques en la base de datos: " + e.getMessage());
 			e.printStackTrace();
-			return false;
 		}
+		return id_bloque;
 	}
 
+	public synchronized boolean generarBloqueReplicado (int id_bloque) {
+		try {
+			PreparedStatement stm = c.prepareStatement ("INSERT INTO bloque (id_bloque, estado) SELECT ?, id_estado_bloque FROM estado_bloque WHERE estado = 'pendiente'");
+			stm.setInt (1, id_bloque);
+			return stm.execute();
+		} catch (Exception e) {
+			System.err.println ("Error al insertar bloque en la base de datos: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public synchronized boolean generarTareaReplicada (int id_tarea, int id_bloque, byte[] bytes_tarea) {
+		try {
+			PreparedStatement stm = c.prepareStatement ("INSERT INTO tarea (id_tarea, bloque, header_bytes, estado) SELECT ?, ?, ?, id_estado_tarea FROM estado_tarea WHERE estado = 'pendiente'");
+			stm.setInt (1, id_tarea);
+			stm.setInt (2, id_bloque);
+			stm.setBytes (3, bytes_tarea);
+			return stm.execute();
+		} catch (Exception e) {
+			System.err.println ("Error al insertar tarea en la base de datos: " + e.getMessage());
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	private synchronized boolean estaFinalizadoBloque(Bloque bloque){
 		//CHEQUEA QUE TODAS LAS TAREAS DEL BLOQUE ESTEN COMPLETAS
@@ -839,6 +864,62 @@ public class BaseDatos {
 		return true;
 	}
 
+	public synchronized boolean asignarTareaUsuarioReplicado (int id_tarea, int id_usuario, int id_procesamiento_tarea) {
+			/* Insertamos el procesamiento */
+		try {
+			PreparedStatement stm_procesamiento = c.prepareStatement(
+			"INSERT " +
+				"INTO procesamiento_tarea (id_procesamiento_tarea, tarea, usuario, parcial, estado) " +
+			"SELECT " +
+				"? as id_procesamiento_tarea, "+
+				"? as tarea, " +
+				"? as usuario, " +
+				"? as parcial, " +
+				"id_estado_tarea as estado " +
+			"FROM estado_tarea " +
+				"WHERE estado = 'en proceso'"
+			);
+
+			/* Y marcamos la tarea como "en proceso" */
+			PreparedStatement stm_update_tarea = c.prepareStatement(
+			"UPDATE " +
+				"tarea " +
+			"SET " +
+				"estado=subquery.id_estado_tarea " +
+			"FROM ( "+
+				"SELECT " +
+					"id_estado_tarea " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'en proceso' " +
+			") AS subquery " +
+			"WHERE " +
+				"id_tarea = ? "
+			);
+
+			stm_procesamiento.setInt(1, id_procesamiento_tarea);
+			stm_procesamiento.setInt(2, id_tarea);
+			stm_procesamiento.setInt(3, id_usuario);
+			stm_procesamiento.setBytes(4, this.getParcial(id_tarea));
+			stm_update_tarea.setInt(1, id_tarea);
+
+			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
+				System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
+
+			} else {
+				System.err.println ("Error al asignar una tarea al usuario");
+				return false;
+			}	
+		} catch (Exception e) {
+			System.err.println ("Error al asignar una tarea al usuario");
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+		}
+
 	public synchronized Usuario getUsuario(String nombreUsuario) {
 		Usuario u = null;
 		try {
@@ -864,7 +945,7 @@ public class BaseDatos {
 		return u;
 	}
 	
-	private synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {
+	public synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {
 		int id_procesamiento = -1;
 		try {
 			PreparedStatement stm = c.prepareStatement (

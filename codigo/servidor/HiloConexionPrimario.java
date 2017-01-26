@@ -253,6 +253,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
 		System.out.println("el usuario es: " + this.usuario.getNombre());
 		Tarea tarea = this.bd.getTarea(this.usuario.getId());
+		int idProcesamiento = this.bd.getIdProcesamiento (tarea.getId(), this.usuario.getId());
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		if (tarea == null) {
 			setChanged();
@@ -260,7 +261,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			this.tareaEnTrabajo = null;
 			return false;
 		} else {
-			this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario);
+			this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario, idProcesamiento);
 			try {
 				this.flujoSaliente.writeObject(mensaje);
 				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 

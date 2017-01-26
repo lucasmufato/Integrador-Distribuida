@@ -87,9 +87,11 @@ public class Primario implements Runnable {
 		}
 
 		public boolean generarBloque() {
-			if (this.baseDatos.generarBloques(1, numTareasPorBloque, numBytesPorTarea)) {
+			int id_generado = this.baseDatos.generarBloques(1, numTareasPorBloque, numBytesPorTarea);
+			if (id_generado != -1) {
 				ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 				this.vista.actualizarAreadeBloques(bs);
+				this.replicador.replicarGeneracionBloque (this.baseDatos.getBloque(id_generado));
 				this.asignarTareasDeNuevoBloque();
 				return true;
 			} else {

@@ -14,6 +14,8 @@ import mensajes.replicacion.MensajeDetencionTarea;
 import mensajes.replicacion.MensajeParcialTarea;
 import mensajes.replicacion.MensajeReplicacion;
 import mensajes.replicacion.MensajeResultadoTarea;
+import mensajes.replicacion.MensajeGeneracionBloque;
+import mensajes.replicacion.MensajeGeneracionTarea;
 
 public class HiloBackup extends Observable implements Runnable {
 	//SOCKET PARA LA COMUNICACION CON EL REPLICADOR
@@ -60,7 +62,7 @@ public class HiloBackup extends Observable implements Runnable {
 				        //NOTIFICO EL CAMBIO
 				        notifyObservers(resultado);
 				        
-				        if(this.bd.asignarTareaUsuario(msjAsignacionTarea.getTarea().getId(), msjAsignacionTarea.getUsuario().getId()) == true){
+				        if(this.bd.asignarTareaUsuarioReplicado(msjAsignacionTarea.getTarea().getId(), msjAsignacionTarea.getUsuario().getId(), msjAsignacionTarea.getIdProcesamiento()) == true){
 				        	setChanged();
 							notifyObservers(msjAsignacionTarea.getTarea());
 				        }
@@ -129,6 +131,20 @@ public class HiloBackup extends Observable implements Runnable {
 				        notifyObservers(resultado);
 				        
 				        this.bd.actualizarPuntos(msjPts.getUsuario().getId(), msjPts.getPuntos());
+						break;
+					case generacionBloque:
+						MensajeGeneracionBloque msjGenBloque = (MensajeGeneracionBloque) msj;
+						this.bd.generarBloqueReplicado (msjGenBloque.getIdBloque());
+						resultado = "Recibi actualización: Generacion de bloque.";
+						setChanged();
+						notifyObservers(resultado);
+						break;
+					case generacionTarea:
+						MensajeGeneracionTarea msjTarea = (MensajeGeneracionTarea) msj;
+						this.bd.generarTareaReplicada (msjTarea.getIdTarea(), msjTarea.getIdBloque(), msjTarea.getTarea());
+						resultado = "Recibi actualización: Generacion de tarea.";
+						setChanged();
+						notifyObservers(resultado);
 						break;
 				}
 				} catch (ClassNotFoundException e) {

@@ -59,8 +59,8 @@ public class Replicador extends Thread {
 		this.replicar (mensaje);
 	}
 
-	public void replicarAsignacionTareaUsuario (Tarea tarea, Usuario usuario) {
-		MensajeReplicacion mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario);
+	public void replicarAsignacionTareaUsuario (Tarea tarea, Usuario usuario, Integer idProcesamiento) {
+		MensajeReplicacion mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
 		this.replicar (mensaje);
 	}
 
@@ -72,6 +72,16 @@ public class Replicador extends Thread {
 	public void replicarAsignacionPuntos (Integer puntos, Usuario usuario) {
 		MensajeReplicacion mensaje = new MensajeAsignacionPuntos (puntos, usuario);
 		this.replicar (mensaje);
+	}
+
+	public void replicarGeneracionBloque (Bloque bloque) {
+		MensajeGeneracionBloque mensajeBloque = new MensajeGeneracionBloque (bloque.getId());
+		this.replicar (mensajeBloque);
+		
+		for (Tarea tarea: bloque.getTareas()) {
+			MensajeGeneracionTarea mensajeTarea = new MensajeGeneracionTarea (tarea.getId(), bloque.getId(), tarea.getTarea());
+			this.replicar (mensajeTarea);
+		}
 	}
 
 	@Override
