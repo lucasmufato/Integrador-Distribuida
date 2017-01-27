@@ -40,7 +40,10 @@ private HiloBackup conexionBackup;
 	public void esperarActualizaciones() {
 		this.crearGUIBackup2();
 		//DESPUES DE QUE YA TENGA LA VISTA, VOY A CREAR EL HILO Q SE COMUNICARA CON REPLICADOR
-		conexionBackup = new HiloBackup(this.ipPrimario, this.baseDatos);
+		conexionBackup = new HiloBackup(this, this.ipPrimario, this.baseDatos);
+		
+		conexionBackup.addObserver(this.vistaB);
+		
 		Thread hilo = new Thread(conexionBackup);
 		hilo.start();
 	}
