@@ -787,15 +787,17 @@ public class BaseDatos {
 		return res_tarea;
 	}
 
-	/* TODO: Reemplazar por metodos de bloque */
 	private synchronized boolean setEstadoBloque(int id_bloque, String estado) {
 		try {
 			PreparedStatement stmt_bloque = c.prepareStatement("UPDATE bloque set estado = (SELECT id_estado_bloque FROM estado_bloque WHERE estado = ?) WHERE bloque.id_bloque = ?");
 			stmt_bloque.setString(1, estado);
 			stmt_bloque.setInt(2, id_bloque);
 			if (stmt_bloque.executeUpdate() > 0){
-				System.out.println("DEBUG: se ha cambiado el estado del bloque "+id_bloque+" a 'en proceso'");
-				/* TODO: Actualizar en Cache */
+				// Actualizar cache
+				Bloque bloque = this.cacheBloques.get(id_bloque);
+				if (bloque != null) {
+					bloque.setEstado ((estado=="en proceso")?EstadoBloque.enProceso: (estado=="pendiente")?EstadoBloque.pendiente: EstadoBloque.completado);
+				}
 			} else {
 				System.err.println ("Error al cambiar el estado del bloque "+id_bloque);
 				return false;
@@ -1041,7 +1043,55 @@ public class BaseDatos {
 		}
 		return true;
 	}
-	
+
+	public synchronized Replicacion getReplicacion () {
+		Replicacion replicacion = new Replicacion ();
+		if (replicacion.cargar (this.c)) {
+			return replicacion;
+		} else {
+			return null;
+		}
+	}
+
+	public synchronized boolean replicar (Replicacion replicacion) {
+		if (this.borrarTodo ()) {
+			return replicacion.insertarTodo (this.c);
+		} else {
+			return false;
+		}
+	}
+
+	public synchronized boolean borrarTodo () {
+		this.limpiarCache ();
+		try {
+			this.c.setAutoCommit (false);
+			PreparedStatement dropProcesamientos = this.c.prepareStatement ("DELETE FROM PROCESAMIENTO_TAREA");
+			PreparedStatement dropBloques = this.c.prepareStatement ("DELETE FROM BLOQUES");
+			PreparedStatement dropTareas = this.c.prepareStatement ("DELETE FROM TAREAS");
+			PreparedStatement dropUsuarios = this.c.prepareStatement ("DELETE FROM USUARIOS");
+			dropProcesamientos.execute ();
+			dropProcesamientos.execute ();
+			dropProcesamientos.execute ();
+			dropProcesamientos.execute ();
+			this.c.commit ();
+		} catch (Exception e) {
+			try {
+				this.c.rollback ();
+				this.c.setAutoCommit (true);
+			} catch (Exception e2) {}
+			return false;
+		}
+		try {
+			this.c.setAutoCommit (true);
+		} catch (Exception e) {}
+		return true;
+	}
+
+	public synchronized void limpiarCache () {
+		this.cacheBloques = new HashMap <Integer, Bloque> ();
+		this.cacheTareas = new HashMap <Integer, Tarea> ();
+	}
+
 	public String cacheInfo () {
 		return	
 		"Tareas en cache: " + this.cacheTareas.size() +
