@@ -228,6 +228,7 @@ public class ServidorVista extends JFrame implements Observer{
 				}else{
 					//LLAMA A UN METODO DESCONECTAR EN LA CLASE BACKUP
 					backup.desconectarse();
+					System.exit(0);
 				}
 			}
 		});
@@ -250,6 +251,9 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.add(scrollBarMsj);
 		
 		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
+		if(secundario == true){
+			btnGenerarBloques.setVisible(false);
+		}
 		btnGenerarBloques.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (secundario == false) {

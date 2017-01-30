@@ -169,11 +169,24 @@ public class HiloBackup extends Observable implements Runnable {
 			}
 			//SI ESTOY ACA ES PORQUE CONECTADO YA ES FALSE
 			//EJECUTO METODOS PARA CERRAR LA CONEXION
+			this.morir();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private void morir() {
+		//RELACION CON BACKUP EN NULL
+		this.backup = null;
+		
+		//LIBERO RESURSOS Y CIERRO SOCKET
+		this.bd=null;
+		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
+		try {	this.socket.close();			} catch (IOException e) {}
+				
 	}
 
 	public void desconectar() {

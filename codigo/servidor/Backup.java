@@ -56,7 +56,7 @@ private HiloBackup conexionBackup;
 	public void desconectarse(){
 		System.out.println("Desconectando el backup");
 		this.estado = EstadoServidor.desconectado;
-		//CIERO LA CONEXION DE HILO BACKUP
+		//CIERRO LA CONEXION DE HILO BACKUP
 		this.conexionBackup.desconectar();
 	}
 
