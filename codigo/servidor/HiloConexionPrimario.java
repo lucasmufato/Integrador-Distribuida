@@ -152,7 +152,12 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		this.conectado=true;
 		while(this.conectado){
 			try {
-				Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
+				Object o = this.flujoEntrante.readObject();
+				if(o.getClass()!= Mensaje.class || o.getClass()!= MensajeTarea.class ){
+					System.out.println("tipo: "+o.getClass());
+				}
+				Mensaje msj= (Mensaje) o;
+				//Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
 				this.kickDog();
 				switch(msj.getCodigo()){
 				case logeo:
