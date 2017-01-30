@@ -26,9 +26,10 @@ public class HiloBackup extends Observable implements Runnable {
 	private boolean conectado;
 	private String ip;
 	private BaseDatos bd;
+	private Backup backup;
 
-	public HiloBackup(String ipPrimario, BaseDatos bd) {
-		// TODO Auto-generated constructor stub
+	public HiloBackup(Backup backup, String ipPrimario, BaseDatos bd) {
+		this.backup = backup;
 		this.ip = ipPrimario;
 		this.bd = bd;
 	}
@@ -49,14 +50,16 @@ public class HiloBackup extends Observable implements Runnable {
 			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			this.conectado=true;
 			String resultado;
+			Integer cont = 0;
 			while(this.conectado){
 				try {
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
 					System.out.println("[DEBUG] Se ha recibido un mensaje del Replicador");
 					switch(msj.getCodigo()){
 					case asignacionTareaUsuario:
-						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario)msj;
+						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario) msj;
 						resultado = "Recibi actualización: Asignación de tarea a usuario.";
+						System.out.println(resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -70,6 +73,7 @@ public class HiloBackup extends Observable implements Runnable {
 					case parcialTarea:
 						MensajeParcialTarea msjParcial = (MensajeParcialTarea)msj;
 						resultado = "Recibi actualización: Resultado parcial de tarea.";
+						System.out.println(resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -83,6 +87,7 @@ public class HiloBackup extends Observable implements Runnable {
 					case resultadoTarea:
 						MensajeResultadoTarea msjResultadoTarea = (MensajeResultadoTarea)msj;
 						resultado = "Recibi actualización: Resultado final de tarea.";
+						System.out.println(resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -96,6 +101,7 @@ public class HiloBackup extends Observable implements Runnable {
 					case detencionTarea:
 						MensajeDetencionTarea msjDetencionTarea = (MensajeDetencionTarea)msj;
 						resultado = "Recibi actualización: Detencion de tarea.";
+						System.out.println(resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -113,6 +119,7 @@ public class HiloBackup extends Observable implements Runnable {
 					case completitudBloque:
 						MensajeCompletitudBloque msjBloque = (MensajeCompletitudBloque)msj;
 						resultado = "Recibi actualización: Bloque completado.";
+						System.out.println(resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -125,9 +132,8 @@ public class HiloBackup extends Observable implements Runnable {
 					case asignacionPuntos:
 						MensajeAsignacionPuntos msjPts = (MensajeAsignacionPuntos)msj;
 						resultado = "Recibi actualización: Asignación de puntos a usuario.";
-						//MARCO QUE CAMBIO EL OBJETO
+						System.out.println(resultado);
 				        setChanged();
-				        //NOTIFICO EL CAMBIO
 				        notifyObservers(resultado);
 				        
 				        this.bd.actualizarPuntos(msjPts.getUsuario().getId(), msjPts.getPuntos());
@@ -136,15 +142,24 @@ public class HiloBackup extends Observable implements Runnable {
 						MensajeGeneracionBloque msjGenBloque = (MensajeGeneracionBloque) msj;
 						this.bd.generarBloqueReplicado (msjGenBloque.getIdBloque());
 						resultado = "Recibi actualización: Generacion de bloque.";
+						System.out.println(resultado);
 						setChanged();
 						notifyObservers(resultado);
+						
 						break;
 					case generacionTarea:
+						cont++;
 						MensajeGeneracionTarea msjTarea = (MensajeGeneracionTarea) msj;
 						this.bd.generarTareaReplicada (msjTarea.getIdTarea(), msjTarea.getIdBloque(), msjTarea.getTarea());
 						resultado = "Recibi actualización: Generacion de tarea.";
 						setChanged();
 						notifyObservers(resultado);
+						if(cont == this.backup.numTareasPorBloque){
+							cont=0;
+							
+							setChanged();
+							notifyObservers(msjTarea);
+						}
 						break;
 				}
 				} catch (ClassNotFoundException e) {
@@ -154,11 +169,24 @@ public class HiloBackup extends Observable implements Runnable {
 			}
 			//SI ESTOY ACA ES PORQUE CONECTADO YA ES FALSE
 			//EJECUTO METODOS PARA CERRAR LA CONEXION
+			this.morir();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private void morir() {
+		//RELACION CON BACKUP EN NULL
+		this.backup = null;
+		
+		//LIBERO RESURSOS Y CIERRO SOCKET
+		this.bd=null;
+		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
+		try {	this.socket.close();			} catch (IOException e) {}
+				
 	}
 
 	public void desconectar() {

@@ -6,20 +6,25 @@ import servidor.Backup;
 import servidor.HiloBackup;
 import servidor.HiloConexionPrimario;
 import servidor.Primario;
+
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JTextPane;
 
 import baseDeDatos.Usuario;
@@ -34,6 +39,9 @@ import java.awt.Font;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.JSpinner;
+
+import mensajes.replicacion.MensajeGeneracionTarea;
+
 import java.awt.SystemColor;
 
 public class ServidorVista extends JFrame implements Observer{
@@ -220,6 +228,7 @@ public class ServidorVista extends JFrame implements Observer{
 				}else{
 					//LLAMA A UN METODO DESCONECTAR EN LA CLASE BACKUP
 					backup.desconectarse();
+					System.exit(0);
 				}
 			}
 		});
@@ -242,6 +251,9 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.add(scrollBarMsj);
 		
 		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
+		if(secundario == true){
+			btnGenerarBloques.setVisible(false);
+		}
 		btnGenerarBloques.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (secundario == false) {
@@ -369,9 +381,12 @@ public class ServidorVista extends JFrame implements Observer{
 			}else{
                 if(claseLLamadora.getClass().equals(HiloBackup.class)){
                 	System.out.println("Observe un cambio en hilo backup");
-    				//por si despues necesitamos que observe a algo mas
-    				String resultado = (String) objeto; 
-    				textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
+                	if(objeto.getClass().equals(MensajeGeneracionTarea.class)){
+                		this.actualizarAreadeBloques(this.backup.obtenerBloquesNoCompletados());
+                	}else{
+                		String resultado = (String) objeto; 
+        				textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
+                	}
                 }else{
                 	System.out.println("Fallo observador :O");
                 }	

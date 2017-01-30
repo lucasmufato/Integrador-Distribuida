@@ -45,6 +45,14 @@ public class Servidor {
 			Integer puerto= BusquedaUDP.puertoPrimario;
 			this.ventana.agregarLine("Conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
 			this.crearServidorBackup(ipPrimario, puerto.toString());
+			try {
+				Thread.sleep(2000);
+				this.ventana.cerrarVentana();
+				this.ventana=null;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return true;
 		}
 		
@@ -80,7 +88,7 @@ public class Servidor {
 				    	conectado=true;
 				       	this.crearServidorBackup(ip, puerto);
 				       	this.ventana.cerrarVentana();
-						this.ventana=null;
+				       	this.ventana=null;
 				    }catch (Exception e){
 				    	/*
 				    	System.out.println("Se creara el servidor primario");

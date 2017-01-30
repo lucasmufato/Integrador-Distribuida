@@ -81,7 +81,7 @@ public class Primario implements Runnable {
 			return false;
 		}
 		
-		protected ArrayList<Bloque> obtenerBloquesNoCompletados() {
+		public ArrayList<Bloque> obtenerBloquesNoCompletados() {
 			ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 			return bs;
 		}
