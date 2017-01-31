@@ -12,8 +12,11 @@ import java.util.Observable;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 import bloquesYTareas.*;
+import mensajes.replicacion.*;
 
 public class BaseDatos {
 
@@ -946,6 +949,31 @@ public class BaseDatos {
 
 		return u;
 	}
+
+	public synchronized Usuario getUsuario(int idUsuario) {
+		Usuario u = null;
+		try {
+			String query = "SELECT USUARIO.NOMBRE, USUARIO.CONTRASENIA, USUARIO.PUNTOS, USUARIO.ID_USUARIO FROM USUARIO WHERE USUARIO.ID_USUARIO = ? ";
+
+			PreparedStatement stm = c.prepareStatement(query);
+			stm.setInt(1, idUsuario);
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				u = new Usuario();
+				u.setNombre(rs.getString("nombre"));
+				u.setPassword(rs.getString("contrasenia"));
+				u.setPuntos(rs.getInt("puntos"));
+				u.setId(rs.getInt("id_usuario"));
+			}
+			
+		} catch (SQLException e) {
+			System.err.println ("Error al recuperar Usuario");
+			e.printStackTrace();
+		}
+
+		return u;
+	}
 	
 	public synchronized int getIdProcesamiento (int id_tarea, int id_usuario) {
 		int id_procesamiento = -1;
@@ -1085,6 +1113,120 @@ public class BaseDatos {
 			this.c.setAutoCommit (true);
 		} catch (Exception e) {}
 		return true;
+	}
+
+	public synchronized List <MensajeReplicacion> getRegistrosCambios (int desdeVersion) {
+		List lista = new ArrayList();
+		try {
+			ResultSet registros = this.selectRegistrosCambios (desdeVersion);
+			while (registros.next ()) {
+				int version = registros.getInt("nro_version");
+				String tipo = registros.getString("tipo");
+				lista.add (this.getMensajeReplicacion (version, tipo));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return lista;
+	}
+
+	private ResultSet selectRegistrosCambios (int desdeVersion) throws Exception{
+		String query =
+		"SELECT "+
+			"LOG_REPLICACION.nro_version AS nro_version, "+
+			"TIPO_MENSAJE.nombre as tipo "+
+		"FROM "+
+			"LOG_REPLICACION JOIN TIPO_MENSAJE "+
+			"ON LOG_REPLICACION.tipo_mensaje = TIPO_MENSAJE.id_tipo_mensaje "+
+		"WHERE "+
+			"LOG_REPLICACION.nro_version > ? "+
+		"ORDER BY LOG_REPLICACION.nro_version ";
+		
+		PreparedStatement stm = this.c.prepareStatement (query);
+		stm.setInt (1, desdeVersion);
+		return stm.executeQuery ();
+		
+	}
+
+	private MensajeReplicacion getMensajeReplicacion(int version, String tipo) throws Exception {
+		MensajeReplicacion mensaje = null;
+			switch (tipo) {
+				case "parcialTarea":
+					mensaje = this.getMensajeParcialTarea (version);
+					break;
+				case "resultadoTarea":
+					mensaje = this.getMensajeResultadoTarea (version);
+					break;
+				case "completitudBloque":
+					mensaje = this.getMensajeCompletitudBloque (version);
+					break;
+				case "asignacionTareaUsuario":
+					mensaje = this.getMensajeAsignacionTareaUsuario (version);
+					break;
+				case "detencionTarea":
+					mensaje = this.getMensajeDetencionTarea (version);
+					break;
+				case "asignacionPuntos":
+					mensaje = this.getMensajeAsignacionPuntos (version);
+					break;
+				case "generacionBloque":
+					mensaje = this.getMensajeGeneracionBloque (version);
+					break;
+				case "generacionTarea":
+					mensaje = this.getMensajeGeneracionTarea (version);
+					break;
+			}
+		return mensaje;
+	}
+	
+	private MensajeReplicacion getMensajeParcialTarea (int version) {
+		return null;
+	}
+	private MensajeReplicacion getMensajeResultadoTarea (int version) {
+		return null;
+	}
+
+	private MensajeReplicacion getMensajeCompletitudBloque (int version) {
+		return null;
+	}
+
+	private MensajeReplicacion getMensajeAsignacionTareaUsuario (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		String query =
+		"SELECT "+
+			"fk_tarea, "+
+			"fk_usuario, "+
+			"fk_procesamiento_tarea "+
+		"FROM "+
+			"REP_ASIGNACION_TAREA_USUARIO "+
+		"WHERE "+
+			"nro_version = ?";
+		PreparedStatement stm = this.c.prepareStatement (query);
+		stm.setInt (1, version);
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			Tarea tarea = this.getTareaById (result.getInt ("fk_tarea"));
+			Usuario usuario = this.getUsuario (result.getInt ("fk_usuario"));
+			int idProcesamiento = result.getInt("fk_procesamiento_tarea");
+			mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
+		}
+		return mensaje;
+	}
+
+	private MensajeReplicacion getMensajeDetencionTarea (int version) {
+		return null;
+	}
+
+	private MensajeReplicacion getMensajeAsignacionPuntos (int version) {
+		return null;
+	}
+
+	private MensajeReplicacion getMensajeGeneracionBloque (int version) {
+		return null;
+	}
+
+	private MensajeReplicacion getMensajeGeneracionTarea (int version) {
+		return null;
 	}
 
 	public synchronized void limpiarCache () {
