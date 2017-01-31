@@ -80,9 +80,17 @@ CREATE TABLE TIPO_MENSAJE(
 CREATE TABLE LOG_REPLICACION(
 	nro_version serial not null,
 	tipo_mensaje integer not null,
+	fecha timestamp default current_timestamp
 	primary key(nro_version),
 	CONSTRAINT "fk_tipo_mensaje" FOREIGN key(tipo_mensaje) REFERENCES TIPO_MENSAJE(id_tipo_mensaje)
 );
+
+/*
+	PARA PABLO SI YA HABIA CREADO LAS TABLAS EN LA BD Y TIENE Q MODIFICAR
+	
+	alter table log_replicacion
+	add column fecha timestamp default current_timestamp
+*/
 
 CREATE TABLE REP_ASIGNACION_TAREA_USUARIO(
 	fk_tarea INTEGER NOT NULL,
@@ -94,6 +102,69 @@ CREATE TABLE REP_ASIGNACION_TAREA_USUARIO(
 	FOREIGN KEY(fk_procesamiento_tarea) REFERENCES procesamiento_tarea(id_procesamiento_tarea)
 ) INHERITS(log_replicacion);
 
+CREATE TABLE REP_ASIGNACION_PUNTOS(
+	puntos INTEGER NOT NULL,
+	fk_usuario INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_usuario) REFERENCES usuario(id_usuario)
+) INHERITS(log_replicacion);
+
+CREATE TABLE REP_COMPLETITUD_BLOQUE(
+	fk_bloque INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
+
+
+/*	NO ESTABA SEGURO SI ES NECESARIO EL ID DE BLOQUE, ASI Q LO PUSE PERO PUEDE SER NULL	*/
+CREATE TABLE REP_DETENCION_TAREA(
+	fk_usuario INTEGER NOT NULL,
+	fk_tarea INTEGER NOT NULL,
+	fk_bloque INTEGER,
+
+	FOREIGN KEY(fk_usuario) REFERENCES usuario(id_usuario),
+	FOREIGN KEY(fk_tarea) REFERENCES tarea(id_tarea),
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
+
+
+CREATE TABLE REP_GENERACION_BLOQUE(
+	fk_bloque INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
+
+CREATE TABLE REP_GENERACION_TAREA(
+	tarea bytea NOT NULL,
+	fk_tarea INTEGER NOT NULL,
+	fk_bloque INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_tarea) REFERENCES tarea(id_tarea),
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
+
+CREATE TABLE REP_PARCIAL_TAREA(
+	tarea bytea NOT NULL,
+	fk_tarea INTEGER NOT NULL,
+	fk_bloque INTEGER,
+	fk_usuario INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_usuario) REFERENCES usuario(id_usuario),
+	FOREIGN KEY(fk_tarea) REFERENCES tarea(id_tarea),
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
+
+
+CREATE TABLE REP_RESULTADO_TAREA(
+	tarea bytea NOT NULL,
+	fk_tarea INTEGER NOT NULL,
+	fk_bloque INTEGER,
+	fk_usuario INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_usuario) REFERENCES usuario(id_usuario),
+	FOREIGN KEY(fk_tarea) REFERENCES tarea(id_tarea),
+	FOREIGN KEY(fk_bloque) REFERENCES bloque(id_bloque)
+) INHERITS(log_replicacion);
 
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO distribuido;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO distribuido;

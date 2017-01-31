@@ -62,7 +62,7 @@ public class Servidor {
 	    try {
 	    	
 	    	this.ventana.agregarLine("Buscando servidores en base al archivo de configuracion");
-			entrada = new FileInputStream("/home/lucas/git/Integrador-Distribuida/codigo/servidor/configuracion.properties");
+			entrada = new FileInputStream("configuracion.properties");
 			propiedades.load(entrada);
 			
 			//leo la lista de ip-puerto hasta que se acabe o me conecte con un servidor primario
