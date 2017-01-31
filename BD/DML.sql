@@ -15,3 +15,27 @@ insert into estado_bloque (estado) values
 	('pendiente'),
 	('en proceso'),
 	('completado');
+
+/*	Tipos de mensajes guardados en el log de replicacion, tiene el mismo orden que el ENUM en java*/
+
+INSERT INTO tipo_mensaje(nombre) VALUES
+	('parcialTarea'),
+	('resultadoTarea'),
+	('completitudBloque'),
+	('asignacionTareaUsuario'),
+	('detencionTarea'),
+	('asignacionPuntos'),
+	('generacionBloque'),
+	('generacionTarea');
+
+/*
+para probar la herencia.
+
+Insert into log_replicacion(tipo_mensaje) values (1),(2);
+
+
+insert into rep_asignacion_tarea_usuario (tipo_mensaje,fk_tarea,fk_usuario,fk_procesamiento_tarea) values (4,1,1,1);
+
+select * from log_replicacion;
+select * from rep_asignacion_tarea_usuario;
+*/

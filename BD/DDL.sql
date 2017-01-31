@@ -69,6 +69,32 @@ CREATE TABLE procesamiento_tarea(
 	FOREIGN KEY (estado) REFERENCES estado_tarea (id_estado_tarea)
 );
 
+/*	replicacion	*/
+
+CREATE TABLE TIPO_MENSAJE(
+	id_tipo_mensaje serial not null,
+	nombre character varying(25) not null,
+	primary key(id_tipo_mensaje)
+);
+
+CREATE TABLE LOG_REPLICACION(
+	nro_version serial not null,
+	tipo_mensaje integer not null,
+	primary key(nro_version),
+	CONSTRAINT "fk_tipo_mensaje" FOREIGN key(tipo_mensaje) REFERENCES TIPO_MENSAJE(id_tipo_mensaje)
+);
+
+CREATE TABLE REP_ASIGNACION_TAREA_USUARIO(
+	fk_tarea INTEGER NOT NULL,
+	fk_usuario INTEGER NOT NULL,
+	fk_procesamiento_tarea INTEGER NOT NULL,
+
+	FOREIGN KEY(fk_tarea) REFERENCES tarea(id_tarea),
+	FOREIGN KEY(fk_usuario) REFERENCES usuario(id_usuario),
+	FOREIGN KEY(fk_procesamiento_tarea) REFERENCES procesamiento_tarea(id_procesamiento_tarea)
+) INHERITS(log_replicacion);
+
+
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO distribuido;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO distribuido;
 
