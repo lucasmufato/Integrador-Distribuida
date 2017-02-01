@@ -32,8 +32,8 @@ public class HiloConexion implements Runnable {
 		//hecho rapido para probar que algo ande
 		//La idea es que no sea asi
 		
-		Mensaje msj = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
-
+		MensajeLogeo msj = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
+		msj.setModoTrabajo(cliente.getModoTrabajo());
 		try {
 			this.socket = new Socket(ip,puerto);
 			this.socket.setSoTimeout(socketTimeout);

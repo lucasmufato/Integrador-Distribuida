@@ -5,6 +5,7 @@ import bloquesYTareas.*;
 public class MensajeTarea extends Mensaje {
 
 	protected Tarea tarea;
+	
 	private static final long serialVersionUID = 1L;
 	
 	public MensajeTarea(CodigoMensaje codigo, Integer ID_Sesion,Tarea tarea) {
@@ -19,7 +20,5 @@ public class MensajeTarea extends Mensaje {
 	public void setTarea(Tarea tarea) {
 		this.tarea = tarea;
 	}
-	
-	
 	
 }

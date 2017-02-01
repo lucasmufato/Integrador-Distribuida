@@ -1,6 +1,7 @@
 package mensajes;
 
 import baseDeDatos.Usuario;
+import cliente.ModoTrabajo;
 
 public class MensajeLogeo extends Mensaje {
 	
@@ -12,6 +13,8 @@ public class MensajeLogeo extends Mensaje {
 	protected String password;
 	protected Usuario usuario;
 	protected String usuario2;
+
+	protected ModoTrabajo modoTrabajo;
 	
 	public MensajeLogeo(CodigoMensaje codigo,Integer ID_Sesion,Usuario usuario,String password){
 		super(codigo,ID_Sesion);
@@ -48,6 +51,13 @@ public class MensajeLogeo extends Mensaje {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
+	public ModoTrabajo getModoTrabajo() {
+		return modoTrabajo;
+	}
+
+	public void setModoTrabajo(ModoTrabajo modoTrabajo) {
+		this.modoTrabajo = modoTrabajo;
+	}
 	
 }

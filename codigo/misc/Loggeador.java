@@ -7,6 +7,10 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
+import baseDeDatos.Usuario;
+import bloquesYTareas.Tarea;
+import cliente.ModoTrabajo;
+
 public class Loggeador {
 	
 	/**
@@ -116,6 +120,20 @@ public class Loggeador {
 		}
 		this.semaforo.release();
 		return true;
+	}
+	
+	public synchronized boolean guardarTiempo(Tarea tarea,Usuario user, Duration tiempo,ModoTrabajo modo,boolean rtaFinal){
+		System.out.println("Logger - guardar tiempo");
+		String s="bloque: "+tarea.getBloque().getId()+"- tarea: "+tarea.getId()+"- tiempo: "+tiempo.toString().substring(2)+ "-modo: "+modo.name();
+		if(rtaFinal){
+			s=s+"- Respuesta Final";
+		}else{
+			s=s+"- Respuesta Parcial";
+		}
+		System.out.println(s);
+		this.guardar("Tiempo", s);
+		
+		return false;
 	}
 	
 	public void cerrar(){

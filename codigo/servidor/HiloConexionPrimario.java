@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Observable;
 
@@ -11,6 +13,7 @@ import baseDeDatos.*;
 import bloquesYTareas.EstadoBloque;
 import bloquesYTareas.ProcesamientoTarea;
 import bloquesYTareas.Tarea;
+import cliente.ModoTrabajo;
 import mensajes.*;
 import servidor.vista.ServidorVista;
 import misc.*;
@@ -36,12 +39,17 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	protected Tarea tareaEnTrabajo;
 	protected Integer idSesion;
 	protected Usuario usuario;
+	protected ModoTrabajo modo;
 
 	//variables relacionadas con el watchdog timer (desconecta al cliente si tarda mucho en responder)
 	protected Watchdog wdt = null;
 	
 	//VARIABLE PARA HACER LA REPLICACION
 	protected Replicador replicador;
+	
+	//VARIABLES PARA CALCULAR CUANTO TARDA EL CLIENTE EN DAR LA RESPUESTA FINAL(O PARCIAL SI SE DESCONECTO)
+	private Instant tiempoFin = Instant.now();
+	private Instant tiempoInicio= Instant.now();
 	
 	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd,Replicador replicador) {
 		this.servidor=servidor;
@@ -112,6 +120,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				String usuario = msj.getUsuario();
 				String password = msj.getPassword();
 				this.idSesion = bd.autenticar(usuario, password); //SI DEVUELVE UN NUMERO, ES DECIR DISTINTO DE NULL, SE LOGRO AUTENTICAR BIEN
+				this.modo= msj.getModoTrabajo();
 				
 				this.usuario = bd.getUsuario(usuario);
 				MensajeLogeo mensaje;	//mensaje de respuesta
@@ -206,6 +215,10 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
         //NOTIFICO EL CAMBIO
         notifyObservers(resultado);
 		if (this.servidor.verificarResultado(tarea) == true){
+			this.tiempoFin= Instant.now();
+			Duration duracion =Duration.between(this.tiempoInicio, this.tiempoFin);
+			this.servidor.logger.guardarTiempo(tareaEnTrabajo, usuario, duracion,this.modo,true);
+			//TODO tiempo
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				setChanged();
 				notifyObservers(tarea);
@@ -268,6 +281,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
 		System.out.println("el usuario es: " + this.usuario.getNombre());
@@ -283,6 +297,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario, idProcesamiento);
 			try {
 				this.flujoSaliente.writeObject(mensaje);
+				this.tiempoInicio= Instant.now();
 				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
 				this.servidor.logger.guardar("Tarea","al usuario: "+this.usuario.getNombre()+" le asigne la tarea: "+tarea.getId() +" del bloque: "+tarea.getBloque().getId());
 				return true;
@@ -299,6 +314,10 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		boolean tareaSeDetuvo = false;
 		if (this.usuario != null && this.tareaEnTrabajo != null) {
 			tareaSeDetuvo = this.bd.detenerTarea(this.tareaEnTrabajo, this.usuario.getId());
+			this.tiempoFin= Instant.now();
+			Duration duracion =Duration.between(this.tiempoInicio, this.tiempoFin);
+			this.servidor.logger.guardarTiempo(tareaEnTrabajo, usuario, duracion,this.modo,false);
+			//TODO tiempo
 			if (tareaSeDetuvo) {
 				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
 				setChanged();
