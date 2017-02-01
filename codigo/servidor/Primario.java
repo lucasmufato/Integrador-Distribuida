@@ -15,6 +15,7 @@ import baseDeDatos.BaseDatos;
 import bloquesYTareas.*;
 import mensajes.CodigoMensaje;
 import mensajes.MensajePuntos;
+import misc.Loggeador;
 import servidor.vista.ServidorVista;
 
 
@@ -41,8 +42,9 @@ public class Primario implements Runnable {
 		protected BaseDatos baseDatos;
 		protected Replicador replicador;
 		protected BusquedaUDP servicioUDP;
+		public Loggeador logger;
 		
-		public Primario(String ip, String puerto){
+		public Primario(String ip, String puerto,Loggeador logger){
 			this.setPuerto(Integer.valueOf(puerto));
 			this.estado=EstadoServidor.desconectado;
 			this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
@@ -50,10 +52,12 @@ public class Primario implements Runnable {
 			this.conectarseBD();
 			this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 			this.crearGUI();
+			this.logger = logger;
+			this.logger.guardar("Servidor", "inicio el servicio");
 			try {
 				this.sha256 = MessageDigest.getInstance ("SHA-256");
 			} catch (NoSuchAlgorithmException e) {
-				/* */
+				this.logger.guardar(e);
 			}
 		}
 		
@@ -63,6 +67,7 @@ public class Primario implements Runnable {
 		
 		protected void conectarseBD() {
 			this.baseDatos = BaseDatos.getInstance();
+			this.baseDatos.setLogger(this.logger);
 			this.baseDatos.conectarse();
 			
 		}
@@ -116,6 +121,7 @@ public class Primario implements Runnable {
 			//metodo que se queda esperando conexiones, cuando llegan crea una HiloConexionPrimario, lo agrega a la lista
 			// y lo inicia como Thread.
 			this.estado=EstadoServidor.esperandoClientes;
+			this.logger.guardar("Servidor", "Esperando conexiones");
 			this.vista.mostrarMsjConsola("Esperando conexiones");
 			//CREO LA GUI2
 			this.crearGUI2();
@@ -124,6 +130,7 @@ public class Primario implements Runnable {
 				try {
 					Socket s = this.serverSO.accept();
 					this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
+					this.logger.guardar("Conexiones", "Se conecto: "+s.getRemoteSocketAddress() );
 					HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos,this.replicador);
 					//UNA VEZ Q CREO LA CONEXION HAGO QUE LA VISTA LA OBSERVE
 					nuevaConexion.addObserver(this.vista);
@@ -141,6 +148,7 @@ public class Primario implements Runnable {
 					e.printStackTrace();
 				}
 			}
+			this.logger.guardar("Servidor", "Dejo de esperar conexiones.");
 			System.out.println("ya no espero mas conexiones");
 			return false;
 		}
@@ -152,9 +160,11 @@ public class Primario implements Runnable {
 					this.serverSO = new ServerSocket(this.puerto);
 					this.serverSO.setSoTimeout(tiempoEspera);
 					this.vista.MostrarPopUp("Servidor conectado con exito");
+					this.logger.guardar("Servidor", "Solicite el puerto: "+this.puerto +" con exito.");
 				}
 				return true;
 			} catch (IOException e) {
+				this.logger.guardar(e);
 				this.vista.MostrarPopUp("El puerto ya esta siendo utilizado, ingrese otro");
 				return false;
 			}
@@ -162,10 +172,10 @@ public class Primario implements Runnable {
 		
 		protected boolean CrearReplicador(){
 			try {
-				replicador = new Replicador();
+				replicador = new Replicador(this.logger);
 				replicador.start ();
 			} catch (Exception e) {
-				e.printStackTrace();
+				this.logger.guardar(e);
 				return false;
 			}
 			return true;
@@ -173,7 +183,7 @@ public class Primario implements Runnable {
 
 		protected boolean verificarResultado(Tarea tarea) {
 			/* Comprueba que el hash de la concatenacion de tarea con n_sequencia es menor a limite_superior */
-			/* NO PROBADO */
+			
 			byte[] concatenacion = tarea.getTareaRespuesta();
 			byte[] hash = this.sha256.digest (concatenacion);
 
@@ -206,7 +216,7 @@ public class Primario implements Runnable {
 		@Override
 		public void run() {
 			//para el servicio UDP
-			this.servicioUDP= new BusquedaUDP(Integer.valueOf(puerto));
+			this.servicioUDP= new BusquedaUDP(Integer.valueOf(puerto),this.logger);
 			Thread hiloServicioUDP = new Thread(this.servicioUDP);
 			hiloServicioUDP.start();
 			
@@ -221,7 +231,8 @@ public class Primario implements Runnable {
 		}
 		
 		public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) { //RECIBE LISTA POR TAREA
-			System.out.println("Parciales sumados a sus combinaciones menores");
+			//System.out.println("Parciales sumados a sus combinaciones menores");
+			this.logger.guardar("Servidor", "Calculando puntos");
 			for(int i=0;i<lista_proc.size();i++){
 				BigInteger parcial = new BigInteger(1,lista_proc.get(i).getParcial());
 				BigInteger combinaciones = this.sumarParcial(lista_proc.get(i).getParcial().length-1);
@@ -348,7 +359,8 @@ public class Primario implements Runnable {
 						hp.enviarNotificacionPuntos(msj);
 					}
 				}
-			}		
+			}
+			this.logger.guardar("Servidor", "Puntos calculados.");
 		}
 
 		private BigInteger sumarParcial(int i) {
@@ -369,6 +381,7 @@ public class Primario implements Runnable {
 			//metodo que interrumpe a todos los HilosDeConexion, deja de esperar nuevas conexiones y libera recursos
 			//cambio la bandera que indica que sigo esperando conexiones
 			this.estado = EstadoServidor.desconectado;
+			this.logger.guardar("Servidor", "Desconectando");
 			//cierro las conexiones con los clientes (de buena manera)
 			for(HiloConexionPrimario h: this.hilosConexiones){
 				h.desconectar();
@@ -393,10 +406,6 @@ public class Primario implements Runnable {
 
 		public Integer getTiempoEspera() {
 			return tiempoEspera;
-		}
-
-		public void setTiempoEspera(Integer tiempoEsperaNuevo) {
-			//tiempoEspera = tiempoEsperaNuevo;		//lo comento por que creo q no se usa y la variables es una constante
 		}
 
 		public ServidorVista getVista() {

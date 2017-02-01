@@ -1,7 +1,7 @@
 package servidor;
 
-import mensajes.*;
 import mensajes.replicacion.*;
+import misc.Loggeador;
 import bloquesYTareas.*;
 import baseDeDatos.Usuario;
 import java.util.Queue;
@@ -25,13 +25,16 @@ public class Replicador extends Thread {
 	private Queue<MensajeReplicacion> cola; // Esta es la cola principal de mensajes
 	private Queue<MensajeReplicacion> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
 	private Object pausa = new Object ();
-
-	public Replicador () throws IOException {
-		this.cola = new LinkedList();
-		this.colaTmp = new LinkedList();
-
+	private Loggeador logger;
+	
+	public Replicador (Loggeador logger) throws IOException {
+		this.cola = new LinkedList<MensajeReplicacion>();
+		this.colaTmp = new LinkedList<MensajeReplicacion>();
+		this.logger=logger;
+		
 		// CREAR UN SOCKET PARA QUE EL SERVIDOR SECUNDARIO SE CONECTE
 		this.serverSocket = new ServerSocket (PUERTO_REPLICADOR);
+		this.logger.guardar("Replicador","cree un socket en el puerto: "+PUERTO_REPLICADOR);
 	}
 	
 	public void replicar (MensajeReplicacion mensaje) {
@@ -86,11 +89,13 @@ public class Replicador extends Thread {
 
 	@Override
 	public void run () {
+		this.logger.guardar("Replicador","Inicio la ejecucion del hilo, espero conexiones.");
 		System.out.println("[DEBUG] Se ha iniciado la ejecucion del thread replicador");
 		try {
 			System.out.println("[DEBUG] Se espera que un backup se conecte");
 			this.acceptConnection();
 			System.out.println("[DEBUG] Un backup se ha conectado");
+			this.logger.guardar("Replicador","Se conecto un Backup");
 			while (true) {
 				this.volcarColaTmp(); // volcar cola temporaria a cola principal
 
@@ -114,8 +119,7 @@ public class Replicador extends Thread {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error al iniciar el replicador " + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 	}
 
@@ -125,8 +129,7 @@ public class Replicador extends Thread {
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
 			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
 		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
+			this.logger.guardar(e);
 		}
 		return true;
 	}

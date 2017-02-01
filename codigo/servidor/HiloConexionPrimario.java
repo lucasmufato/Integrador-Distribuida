@@ -53,8 +53,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
-			//si hay error aca cagamos
-			e.printStackTrace();
+			this.servidor.logger.guardar(e);
 		}
 		this.bd = bd;
 		
@@ -106,9 +105,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					//leo lo que me manda (el usuario es el primero en mandar algo)
 					msj=(MensajeLogeo)this.flujoEntrante.readObject();
 				} catch (ClassNotFoundException | IOException e) {
-					//exploto todooo
-					System.out.println("Error de logeo :(");
-					e.printStackTrace();
+					this.servidor.logger.guardar(e);
 					return false;
 				}
 				//obtengo los datos para la autenticacion
@@ -119,23 +116,22 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				this.usuario = bd.getUsuario(usuario);
 				MensajeLogeo mensaje;	//mensaje de respuesta
 				if(this.idSesion != null){
-					System.out.println("Autenticacion de usuario correcta, el numero de la sesion es: " + this.idSesion);
+					this.servidor.logger.guardar("Hilo sesion: "+this.idSesion,"autenticacion correcta. user: "+usuario+ ".");
 					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,this.idSesion,this.usuario,password);
 					logeado=true;	//bandera para salir del bucle
 				}else{
-					System.out.println("Error en autenticacion de usuario.");
+					this.servidor.logger.guardar("Hilo sesion: "+this.idSesion,"autenticacion incorrecta para el user: "+usuario+".");
 					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
 				}
 				try {
 					this.flujoSaliente.writeObject(mensaje);
 				} catch (IOException e) {
-					//e.printStackTrace();
+					this.servidor.logger.guardar(e);
 					return false;
 				}
 			}	
 		}catch (Exception e1){
-			//si explota por algo que lo muestre y sale por falso
-			//e1.printStackTrace();
+			this.servidor.logger.guardar(e1);
 			return false;
 		}
 		return true;
@@ -146,6 +142,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		//entra en un bucle en el cual lee respuestas del cliente y las responde conforme sea necesario
 		if(this.enviarNuevaTarea() == false ){
 			//si se produjo algun error al enviar la tarea
+			this.servidor.logger.guardar("Hilo sesion: "+this.idSesion,"se produjo un error al enviar la tarea! ");
 			return false;
 		}
 		//DESPUES DEL ENVIARNUEVATAREA EN TAREAENTRABAJO VOY A TENER LA TAREA QUE ME ASIGNARON
@@ -154,7 +151,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			try {
 				Object o = this.flujoEntrante.readObject();
 				if(o.getClass()!= Mensaje.class || o.getClass()!= MensajeTarea.class ){
-					System.out.println("tipo: "+o.getClass());
+					//System.out.println("tipo: "+o.getClass());
 				}
 				Mensaje msj= (Mensaje) o;
 				//Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
@@ -169,6 +166,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					if(mensaje.getTarea().getResultado()!=null){
 						//si el mensaje tiene el resultado final
 						this.resultadoFinalTarea(mensaje.getTarea());
+						this.servidor.logger.guardar("Tarea","resultado final: "+ hashToString( mensaje.getTarea().getResultado()  )+" para la tarea "+mensaje.getTarea().getId() + "user: "+this.usuario.getNombre());
 					}else{
 						//si no tiene resultado final entonces tiene un resultado parcial
 						this.resultadoParcialTarea(mensaje.getTarea());						
@@ -186,7 +184,8 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			}catch(java.net.SocketTimeoutException e){
 				//entra aca por time out no pasa nada
 			} catch (ClassNotFoundException | IOException e) {
-				//e.printStackTrace();
+				
+				this.servidor.logger.guardar(e);
 				System.out.println("hubo un error en la conexion con un usuario. Desconectandolo.");
 				this.detenerTarea();
 				this.cerrarConexion();
@@ -198,9 +197,10 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	}
 	
 	protected boolean resultadoFinalTarea(Tarea tarea){
-		System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
+		//System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
 		String resultado;
 		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " FINAL: " + hashToString (tarea.getResultado());
+		
 		//MARCO QUE CAMBIO EL OBJETO
         setChanged();
         //NOTIFICO EL CAMBIO
@@ -209,8 +209,10 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				setChanged();
 				notifyObservers(tarea);
+				this.servidor.logger.guardar("Tarea",resultado);
 				//SI ESTA FINALIZADO EL BLOQUE ENTONCES
 				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
+					this.servidor.logger.guardar("bloque","El bloque "+tarea.getBloque().getId()+ "se a completado");
 					this.replicador.replicarCompletitudBloque(tarea.getBloque());
 					ArrayList<Tarea> tareas = this.bd.getTareasPorBloque(tarea.getBloque().getId());
 					ArrayList<ProcesamientoTarea> lista_proc;
@@ -226,10 +228,18 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				this.enviarNuevaTarea();
 				return true;
 			}else{
-				//TODO si la BD no lo pudo guardar que hago?
+				try{
+					throw new Exception("no se pudo guardar el resultado en la BD");
+				}catch(Exception e){
+					this.servidor.logger.guardar(e);
+				}
 			}
 		}else{
-			//TODO si no se verifica bien que hago?
+			try{
+				throw new Exception("El servidor no pudo verificar el resultado");
+			}catch(Exception e){
+				this.servidor.logger.guardar(e);
+			}
 		}
 		return false;
 	}
@@ -246,10 +256,14 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			setChanged();
 			notifyObservers(tarea);
 			this.replicador.replicarParcialTarea(tarea, this.usuario);
+			this.servidor.logger.guardar("Tarea","resultado parcial: "+ hashToString( tarea.getResultado()  )+" para la tarea "+tarea.getId() + "user: "+this.usuario.getNombre());
 			return true;
 		}else{
-			//TODO si sale mal que hago?
-			System.out.println("HiloConexionPrimario-"+this.usuario.getNombre()+": tuve problemas al guardar en la BD el resultado parcial de la tarea");
+			try{
+				throw new Exception("no pude guardar el resultado parcial");
+			}catch(Exception e){
+				this.servidor.logger.guardar(e);
+			}
 			return false;
 		}
 	}
@@ -270,10 +284,11 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			try {
 				this.flujoSaliente.writeObject(mensaje);
 				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
+				this.servidor.logger.guardar("Tarea","al usuario: "+this.usuario.getNombre()+" le asigne la tarea: "+tarea.getId() +" del bloque: "+tarea.getBloque().getId());
 				return true;
 			} catch (IOException e) {
 				//TODO si sale mal q hago?
-				e.printStackTrace();
+				this.servidor.logger.guardar(e);
 				return false;
 			}
 		}
@@ -288,6 +303,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
 				setChanged();
 				this.notifyObservers(this.tareaEnTrabajo);
+				this.servidor.logger.guardar("Tarea","se detuvo la tarea: "+this.tareaEnTrabajo.getId() + " del usuario: "+this.usuario.getNombre() );
 			}
 		}
 		
@@ -307,6 +323,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	public synchronized void timeout() {
 		setChanged();
 		this.notifyObservers("Se desconecto al cliente con id " + this.usuario.getId() + " por inactividad");
+		this.servidor.logger.guardar("Conexion","Se desconecto al cliente con id " + this.usuario.getId() + " por inactividad");
 		this.detenerTarea();
 		this.cerrarConexion();
 		this.morir();
@@ -327,9 +344,9 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		try {
 			this.replicador.replicarAsignacionPuntos (msj.getPuntos(), this.usuario);
 			this.flujoSaliente.writeObject(msj);
+			this.servidor.logger.guardar("Conexion","Se le informo al cliente con id " + this.usuario.getId() + " que se sus puntos son: "+ msj.getPuntos());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.servidor.logger.guardar(e);
 		}
 	}
 	
@@ -337,6 +354,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		//metodo que envia el mensaje de desconexion al cliente
 		this.conectado=false;
 		Mensaje msj = new Mensaje(CodigoMensaje.desconexion,this.idSesion);
+		this.servidor.logger.guardar("Conexion","Desconecto al cliente " + this.usuario.getNombre() );
 		try {
 			this.flujoSaliente.writeObject(msj);
 		} catch (IOException e) {

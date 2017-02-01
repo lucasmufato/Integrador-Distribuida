@@ -14,6 +14,7 @@ import mensajes.replicacion.MensajeDetencionTarea;
 import mensajes.replicacion.MensajeParcialTarea;
 import mensajes.replicacion.MensajeReplicacion;
 import mensajes.replicacion.MensajeResultadoTarea;
+import misc.Loggeador;
 import mensajes.replicacion.MensajeGeneracionBloque;
 import mensajes.replicacion.MensajeGeneracionTarea;
 
@@ -27,11 +28,13 @@ public class HiloBackup extends Observable implements Runnable {
 	private String ip;
 	private BaseDatos bd;
 	private Backup backup;
-
-	public HiloBackup(Backup backup, String ipPrimario, BaseDatos bd) {
+	private Loggeador logger;
+	
+	public HiloBackup(Backup backup, String ipPrimario, BaseDatos bd,Loggeador logger) {
 		this.backup = backup;
 		this.ip = ipPrimario;
 		this.bd = bd;
+		this.logger=logger;
 	}
 
 	@Override
@@ -46,6 +49,7 @@ public class HiloBackup extends Observable implements Runnable {
 			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
 			System.out.println("[DEBUG] Conectado a Replicador");
+			this.logger.guardar("HiloBackup", "conectado con el servidor primario en: "+ip+":"+7567);
 			
 			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			this.conectado=true;
@@ -58,8 +62,9 @@ public class HiloBackup extends Observable implements Runnable {
 					switch(msj.getCodigo()){
 					case asignacionTareaUsuario:
 						MensajeAsignacionTareaUsuario msjAsignacionTarea = (MensajeAsignacionTareaUsuario) msj;
-						resultado = "Recibi actualización: Asignación de tarea a usuario.";
+						resultado = "Recibi actualizaciï¿½n: Asignaciï¿½n de tarea a usuario.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -72,8 +77,9 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 					case parcialTarea:
 						MensajeParcialTarea msjParcial = (MensajeParcialTarea)msj;
-						resultado = "Recibi actualización: Resultado parcial de tarea.";
+						resultado = "Recibi actualizaciï¿½n: Resultado parcial de tarea.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -86,8 +92,9 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 					case resultadoTarea:
 						MensajeResultadoTarea msjResultadoTarea = (MensajeResultadoTarea)msj;
-						resultado = "Recibi actualización: Resultado final de tarea.";
+						resultado = "Recibi actualizaciï¿½n: Resultado final de tarea.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -100,8 +107,9 @@ public class HiloBackup extends Observable implements Runnable {
 				        break;
 					case detencionTarea:
 						MensajeDetencionTarea msjDetencionTarea = (MensajeDetencionTarea)msj;
-						resultado = "Recibi actualización: Detencion de tarea.";
+						resultado = "Recibi actualizaciï¿½n: Detencion de tarea.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -118,8 +126,9 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 					case completitudBloque:
 						MensajeCompletitudBloque msjBloque = (MensajeCompletitudBloque)msj;
-						resultado = "Recibi actualización: Bloque completado.";
+						resultado = "Recibi actualizaciï¿½n: Bloque completado.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						//MARCO QUE CAMBIO EL OBJETO
 				        setChanged();
 				        //NOTIFICO EL CAMBIO
@@ -131,8 +140,9 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 					case asignacionPuntos:
 						MensajeAsignacionPuntos msjPts = (MensajeAsignacionPuntos)msj;
-						resultado = "Recibi actualización: Asignación de puntos a usuario.";
+						resultado = "Recibi actualizaciï¿½n: Asignaciï¿½n de puntos a usuario.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 				        setChanged();
 				        notifyObservers(resultado);
 				        
@@ -141,8 +151,9 @@ public class HiloBackup extends Observable implements Runnable {
 					case generacionBloque:
 						MensajeGeneracionBloque msjGenBloque = (MensajeGeneracionBloque) msj;
 						this.bd.generarBloqueReplicado (msjGenBloque.getIdBloque());
-						resultado = "Recibi actualización: Generacion de bloque.";
+						resultado = "Recibi actualizaciï¿½n: Generacion de bloque.";
 						System.out.println(resultado);
+						this.logger.guardar("HiloBackup", resultado);
 						setChanged();
 						notifyObservers(resultado);
 						
@@ -151,7 +162,8 @@ public class HiloBackup extends Observable implements Runnable {
 						cont++;
 						MensajeGeneracionTarea msjTarea = (MensajeGeneracionTarea) msj;
 						this.bd.generarTareaReplicada (msjTarea.getIdTarea(), msjTarea.getIdBloque(), msjTarea.getTarea());
-						resultado = "Recibi actualización: Generacion de tarea.";
+						resultado = "Recibi actualizaciï¿½n: Generacion de tarea.";
+						this.logger.guardar("HiloBackup", resultado);
 						setChanged();
 						notifyObservers(resultado);
 						if(cont == this.backup.numTareasPorBloque){
@@ -163,8 +175,7 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 				}
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					this.logger.guardar(e);
 				}
 			}
 			//SI ESTOY ACA ES PORQUE CONECTADO YA ES FALSE
@@ -172,8 +183,7 @@ public class HiloBackup extends Observable implements Runnable {
 			this.morir();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 	}
 

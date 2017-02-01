@@ -3,6 +3,7 @@ package servidor;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import misc.Loggeador;
 import servidor.vista.ServidorVista;
 
 public class Backup extends Primario {
@@ -12,18 +13,19 @@ private String ipPrimario;
 private String puertoPrimario;
 private HiloBackup conexionBackup;
 
-	public Backup(String ip, String puerto) {
+	public Backup(String ip, String puerto, Loggeador logger) {
 		super();
+		this.logger=logger;
+		this.logger.guardar("Backup","Me creo como backup");
 		this.ipPrimario=ip;
 		this.puertoPrimario=puerto;
-		this.conectarseBD();
+		this.conectarseBD();	
 		try {
 			String ipB = (InetAddress.getLocalHost().getHostAddress());
 			this.setIP(ipB);
 			this.setPuerto(6666);
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		this.crearGUIBackup();
 	}
@@ -40,7 +42,7 @@ private HiloBackup conexionBackup;
 	public void esperarActualizaciones() {
 		this.crearGUIBackup2();
 		//DESPUES DE QUE YA TENGA LA VISTA, VOY A CREAR EL HILO Q SE COMUNICARA CON REPLICADOR
-		conexionBackup = new HiloBackup(this, this.ipPrimario, this.baseDatos);
+		conexionBackup = new HiloBackup(this, this.ipPrimario, this.baseDatos,this.logger);
 		
 		conexionBackup.addObserver(this.vistaB);
 		

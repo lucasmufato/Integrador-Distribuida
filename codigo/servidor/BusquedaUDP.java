@@ -8,6 +8,8 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import misc.Loggeador;
+
 public class BusquedaUDP implements Runnable {
 	//se usa tanto para buscar como para recibir msj
 	public static Integer puertoPrimario=null;
@@ -21,14 +23,18 @@ public class BusquedaUDP implements Runnable {
 	private static int timeoutEspera = 5000;	//para esperar conexiones
 	
 	public static boolean trabajando;
+	private Loggeador logger;
 	
-	public BusquedaUDP(Integer puerto){
+	public BusquedaUDP(Integer puerto,Loggeador logger){
 		BusquedaUDP.puertoPrimario=puerto;
+		this.logger=logger;
 	}
 	
-	public static String buscarPrimario() throws SocketException, UnknownHostException{
+	public static String buscarPrimario(Loggeador logger) throws SocketException, UnknownHostException{
+		
 		//metodo que envia un broadcast en la red preguntando por un servidor primario.
 		//si encuentra al ip le devuelve, sino devuelve null
+		
 		System.out.println("buscando servidor primario en la red local...");
 		
 		DatagramSocket socketDatagram= new DatagramSocket();
@@ -42,7 +48,7 @@ public class BusquedaUDP implements Runnable {
 		byte[] tamanio = new byte[codigoRespuesta.getBytes().length+Integer.BYTES];
 		DatagramPacket respuesta = new DatagramPacket(tamanio,tamanio.length);
 		boolean respondio=false;
-		
+		logger.guardar("BusquedaUDP","voy a mandar "+intentos+" mensajes UDP a la red local");
 		short nro=0;
 		while(nro<intentos && respondio==false ){
 			try {
@@ -53,8 +59,7 @@ public class BusquedaUDP implements Runnable {
 			}catch(SocketTimeoutException e){
 				//no hago nada
 			}catch (IOException e) {
-				// TODO borrar el print antes de enviar
-				e.printStackTrace();
+				logger.guardar(e);
 				nro=intentos;
 			}
 			//compruebo que tengo una respuesta
@@ -73,8 +78,11 @@ public class BusquedaUDP implements Runnable {
 					
 					socketDatagram.close();
 					System.out.println("encontre un servidor primario en: "+ip);
+					logger.guardar("BusquedaUDP","Encontre un servidor primario en: "+ip);
 					return ip;
 				}
+			}else{
+				logger.guardar("BusquedaUDP","intento nro: "+intentos+". Sin respuesta");
 			}
 			nro++;
 		}
@@ -87,6 +95,7 @@ public class BusquedaUDP implements Runnable {
 	public void run() {
 		// cuando se invoca de esta manera el se queda a la espera de mensajes udp para informar que hay un servidor primario
 		BusquedaUDP.trabajando=true;
+		this.logger.guardar("BusquedaUDP","Estoy esperando paquetes UDP en el puerto: "+ puertoServicioUDP);
 		System.out.println("BusquedaUDP:- estoy esperando paquetes UDP en el puerto: "+ puertoServicioUDP);
 		System.out.println("BusquedaUDP:- el servidor primario esta en el puerto: "+puertoPrimario);
 		DatagramSocket socket =null;
@@ -95,6 +104,7 @@ public class BusquedaUDP implements Runnable {
 			socket.setSoTimeout(timeoutEspera);
 		} catch (SocketException e) {
 			BusquedaUDP.trabajando=false;
+			this.logger.guardar(e);
 		}
 		while(BusquedaUDP.trabajando){
 			DatagramPacket paquete = new DatagramPacket(codigoEnvio.getBytes(),codigoEnvio.getBytes().length);
@@ -106,6 +116,7 @@ public class BusquedaUDP implements Runnable {
 					String ip = paquete.getAddress().getHostAddress();
 					int puerto = paquete.getPort();	//puerto al que le voy a responder
 					System.out.println("BusquedaUDP:- recibi un mensaje desde la ip: "+ip);
+					this.logger.guardar("BusquedaUDP","Recibi un mensaje desde la ip: "+ip);
 					
 					//paso a rta el codigo de respueta y el puerto del servidor primario
 					byte[] rta = new byte[codigoRespuesta.getBytes().length+Integer.BYTES];
@@ -116,17 +127,17 @@ public class BusquedaUDP implements Runnable {
 					socket.send(paqueteRespuesta);
 				}else{
 					System.out.println("BusquedaUDP:-recibi un mensaje no reconocido");
+					this.logger.guardar("BusquedaUDP","Recibi un mensaje desconocido desde: "+paquete.getSocketAddress());
 				}
 			}catch(SocketTimeoutException e){
 				//no hago nada
 			}catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				this.logger.guardar(e);
 				BusquedaUDP.trabajando=false;
 			}
 				
 		}
 	}
-		
-	
 	
 }

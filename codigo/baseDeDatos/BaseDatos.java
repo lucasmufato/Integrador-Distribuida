@@ -8,15 +8,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
-import java.util.Observable;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
-import java.util.ArrayList;
 
 import bloquesYTareas.*;
 import mensajes.replicacion.*;
+import misc.Loggeador;
 
 public class BaseDatos {
 
@@ -28,6 +27,7 @@ public class BaseDatos {
 	protected final static String user="distribuido";
 	protected final static String password="sistemas";
 	protected static Integer contadorSesiones;	//para que vaya devolviendo numero consecutivos de sesion
+	private Loggeador logger;
 
 	/* Los siguientes objetos son copias en memoria de lo que hay en la base de datos */
 	private Map <Integer, Bloque> cacheBloques;
@@ -53,7 +53,7 @@ public class BaseDatos {
 	         c = DriverManager.getConnection("jdbc:postgresql://"+host+":"+puertoBD+"/"+nombreBD,user, password);
 	         return true;
 	      } catch (Exception e) {
-	         e.printStackTrace();
+	    	 this.logger.guardar(e);
 	         return false;
 	      }
 	}
@@ -83,7 +83,7 @@ public class BaseDatos {
 				return contadorSesiones;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+	    	this.logger.guardar(e);
 			return null;
 		}
 	}
@@ -93,7 +93,7 @@ public class BaseDatos {
 			c.close();
 			return true;
 		} catch (SQLException e) {
-			e.printStackTrace();
+	    	this.logger.guardar(e);
 			return false;
 		}
 	}
@@ -155,8 +155,7 @@ public class BaseDatos {
 				}
 				
 			} catch (Exception e) {
-				System.err.println ("Error al recuperar tarea no iniciada");
-				e.printStackTrace();
+		    	this.logger.guardar(e);
 			}
 		}
 		return tarea;
@@ -197,8 +196,7 @@ public class BaseDatos {
 			tarea.SetLimite(3, (byte) 0x80);
 
 		} catch (Exception e){
-			System.err.println ("Error al recuperar tarea de la base de datos:\n" + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 			return tarea;
 
@@ -243,8 +241,7 @@ public class BaseDatos {
 					/* Nota: esto va  a producir que se carguen en memoria todas las tareas del bloque */
 				}
 			} catch (Exception e) {
-				System.err.println ("Error al recuperar bloque: " + e.getMessage());
-				e.printStackTrace();
+				this.logger.guardar(e);
 			}
 		}
 		return bloque;
@@ -271,8 +268,7 @@ public class BaseDatos {
 			}
 
 		} catch (Exception e) {
-				System.err.println ("Error al recuperar tareas de bloque: " + e.getMessage());
-				e.printStackTrace();
+				this.logger.guardar(e);
 				lista_bloques = null;
 		}
 		
@@ -299,8 +295,7 @@ public class BaseDatos {
 				lista_tareas.add (this.getTareaById(res.getInt("id_tarea")));
 			}
 		} catch (Exception e) {
-				System.err.println ("Error al recuperar tareas de bloque: " + e.getMessage());
-				e.printStackTrace();
+				this.logger.guardar(e);
 				lista_tareas = null;
 		}
 		
@@ -366,8 +361,7 @@ public class BaseDatos {
 				return false;
 			}
 		} catch (Exception e) {
-			System.err.println ("Error al guardar parcial en DB: "+e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 		return true;
@@ -396,7 +390,7 @@ public class BaseDatos {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error al obtener parcial: " + e.getMessage());
+			this.logger.guardar(e);
 			e.printStackTrace();
 		}
 		/* Si no se encontro parcial, devolvemos [0] */
@@ -498,8 +492,7 @@ public class BaseDatos {
 
 			}
 		} catch (Exception e) {
-			System.err.println ("Error al guardar resultado en DB: "+e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 		return true;
@@ -560,8 +553,7 @@ public class BaseDatos {
 	
 		tarea.setEstado(EstadoTarea.detenida);
 		} catch (Exception e) {
-			System.err.println("Error al detener tarea:" + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 
@@ -597,8 +589,7 @@ public class BaseDatos {
 			);
 			return stm.execute();
 		} catch (Exception e) {
-			System.err.println("Error al detener tareas en proceso: "+e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 	}
@@ -629,8 +620,7 @@ public class BaseDatos {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println ("Error al generar bloques en la base de datos: " + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return id_bloque;
 	}
@@ -642,7 +632,7 @@ public class BaseDatos {
 			return stm.execute();
 		} catch (Exception e) {
 			System.err.println ("Error al insertar bloque en la base de datos: " + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return false;
 	}
@@ -656,7 +646,7 @@ public class BaseDatos {
 			return stm.execute();
 		} catch (Exception e) {
 			System.err.println ("Error al insertar tarea en la base de datos: " + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return false;
 	}
@@ -683,7 +673,7 @@ public class BaseDatos {
 			return (restantes == 0);
 		} catch (Exception e) {
 			System.err.println ("Error al intentar determinar si bloque esta finalizado "+e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return false;
 	}
@@ -714,7 +704,7 @@ public class BaseDatos {
 			}
 		} catch (Exception e) {
 			System.err.println ("Error al recuperar tarea detenida");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return res_tarea;
 	}
@@ -748,7 +738,7 @@ public class BaseDatos {
 
 		} catch (Exception e) {
 			System.err.println ("Error al recuperar tarea no iniciada");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return res_tarea;
 	}
@@ -785,7 +775,7 @@ public class BaseDatos {
 			
 		} catch (Exception e) {
 			System.err.println ("Error al recuperar tarea no iniciada");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return res_tarea;
 	}
@@ -807,7 +797,7 @@ public class BaseDatos {
 			}
 		} catch (Exception e) {
 			System.err.println ("Error al cambiar el estado del bloque "+id_bloque);
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 		return true;
@@ -862,7 +852,7 @@ public class BaseDatos {
 			}	
 		} catch (Exception e) {
 			System.err.println ("Error al asignar una tarea al usuario");
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 
@@ -918,7 +908,7 @@ public class BaseDatos {
 			}	
 		} catch (Exception e) {
 			System.err.println ("Error al asignar una tarea al usuario");
-			e.printStackTrace();
+			this.logger.guardar(e);
 			return false;
 		}
 
@@ -944,7 +934,7 @@ public class BaseDatos {
 			
 		} catch (SQLException e) {
 			System.err.println ("Error al recuperar Usuario");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 
 		return u;
@@ -969,7 +959,7 @@ public class BaseDatos {
 			
 		} catch (SQLException e) {
 			System.err.println ("Error al recuperar Usuario");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 
 		return u;
@@ -998,7 +988,7 @@ public class BaseDatos {
 		
 		} catch (Exception e) {
 			System.err.println ("Error al recuperar ID de procesamiento de tarea");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		
 		return id_procesamiento;
@@ -1041,7 +1031,7 @@ public class BaseDatos {
 			}
 		} catch (SQLException e) {
 			System.err.println ("Error al recuperar los procesamientos de tareas: " + e.getMessage());
-			e.printStackTrace();
+			this.logger.guardar(e);
 			lista_pt = null;
 		}
 		
@@ -1067,7 +1057,7 @@ public class BaseDatos {
 			}
 		} catch (SQLException e) {
 			System.err.println("Error al actualizar los puntos del usuario");
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return true;
 	}
@@ -1125,7 +1115,7 @@ public class BaseDatos {
 				lista.add (this.getMensajeReplicacion (version, tipo));
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			this.logger.guardar(e);
 		}
 		return lista;
 	}
@@ -1227,6 +1217,10 @@ public class BaseDatos {
 
 	private MensajeReplicacion getMensajeGeneracionTarea (int version) {
 		return null;
+	}
+
+	public void setLogger(Loggeador logger) {
+		this.logger = logger;
 	}
 
 	public synchronized void limpiarCache () {
