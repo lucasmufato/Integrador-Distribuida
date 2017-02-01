@@ -85,13 +85,6 @@ CREATE TABLE LOG_REPLICACION(
 	CONSTRAINT "fk_tipo_mensaje" FOREIGN key(tipo_mensaje) REFERENCES TIPO_MENSAJE(id_tipo_mensaje)
 );
 
-/*
-	PARA PABLO SI YA HABIA CREADO LAS TABLAS EN LA BD Y TIENE Q MODIFICAR
-	
-	alter table log_replicacion
-	add column fecha timestamp default current_timestamp
-*/
-
 CREATE TABLE REP_ASIGNACION_TAREA_USUARIO(
 	fk_tarea INTEGER NOT NULL,
 	fk_usuario INTEGER NOT NULL,

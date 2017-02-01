@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
+import java.util.Date;
 
 import bloquesYTareas.*;
 import mensajes.replicacion.*;
@@ -1169,54 +1170,185 @@ public class BaseDatos {
 		return mensaje;
 	}
 	
-	private MensajeReplicacion getMensajeParcialTarea (int version) {
-		return null;
-	}
-	private MensajeReplicacion getMensajeResultadoTarea (int version) {
-		return null;
-	}
-
-	private MensajeReplicacion getMensajeCompletitudBloque (int version) {
-		return null;
-	}
-
-	private MensajeReplicacion getMensajeAsignacionTareaUsuario (int version) throws Exception {
+	private MensajeReplicacion getMensajeParcialTarea (int version) throws Exception {
 		MensajeReplicacion mensaje = null;
-		String query =
+		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
 			"fk_tarea, "+
 			"fk_usuario, "+
-			"fk_procesamiento_tarea "+
+			"fecha "+
 		"FROM "+
-			"REP_ASIGNACION_TAREA_USUARIO "+
+			"REP_PARCIAL_TAREA "+
 		"WHERE "+
-			"nro_version = ?";
-		PreparedStatement stm = this.c.prepareStatement (query);
-		stm.setInt (1, version);
+			"nro_version = ?"
+		);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
-			Tarea tarea = this.getTareaById (result.getInt ("fk_tarea"));
-			Usuario usuario = this.getUsuario (result.getInt ("fk_usuario"));
-			int idProcesamiento = result.getInt("fk_procesamiento_tarea");
-			mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
+			Tarea tarea = this.getTareaById (result.getInt(1));
+			Usuario usuario = this.getUsuario (result.getInt(2));
+			Date fecha = result.getDate (3);
+			mensaje = new MensajeParcialTarea (tarea, usuario);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
+	}
+	private MensajeReplicacion getMensajeResultadoTarea (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"fk_tarea, "+
+			"fk_usuario, "+
+			"fecha "+
+		"FROM "+
+			"REP_RESULTADO_TAREA "+
+		"WHERE "+
+			"nro_version = ?"
+		);
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			Tarea tarea = this.getTareaById (result.getInt(1));
+			Usuario usuario = this.getUsuario (result.getInt(2));
+			Date fecha = result.getDate (3);
+			mensaje = new MensajeResultadoTarea (tarea, usuario);
+			mensaje.setFecha (fecha);
 		}
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeDetencionTarea (int version) {
-		return null;
+	private MensajeReplicacion getMensajeCompletitudBloque (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"fk_bloque, "+
+			"fecha "+
+		"FROM "+
+			"REP_COMPLETITUD_BLOQUE "+
+		"WHERE "+
+			"nro_version = ?"
+		);
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			Bloque bloque = this.getBloque (result.getInt(1));
+			Date fecha = result.getDate (2);
+			mensaje = new MensajeCompletitudBloque (bloque);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionPuntos (int version) {
-		return null;
+	private MensajeReplicacion getMensajeAsignacionTareaUsuario (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"fk_tarea, "+
+			"fk_usuario, "+
+			"fk_procesamiento_tarea, "+
+			"fecha "+
+		"FROM "+
+			"REP_ASIGNACION_TAREA_USUARIO "+
+		"WHERE "+
+			"nro_version = ?");
+		stm.setInt (1, version);
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			Tarea tarea = this.getTareaById (result.getInt (1));
+			Usuario usuario = this.getUsuario (result.getInt (2));
+			int idProcesamiento = result.getInt(3);
+			Date fecha = result.getDate (4);
+			mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionBloque (int version) {
-		return null;
+	private MensajeReplicacion getMensajeAsignacionPuntos (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"puntos, "+
+			"fk_usuario, " +
+			"fecha "+
+		"FROM "+
+			"REP_ASIGNACION_PUNTOS "+
+		"WHERE "+
+			"nro_version = ?");
+		stm.setInt (1, version);
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			int puntos = result.getInt (1);
+			Usuario usuario = this.getUsuario (result.getInt(2));
+			Date fecha = result.getDate (3);
+			mensaje = new MensajeAsignacionPuntos (puntos, usuario);
+			mensaje.setFecha (fecha);
+		}
+
+		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionTarea (int version) {
-		return null;
+	private MensajeReplicacion getMensajeDetencionTarea (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"fk_tarea, "+
+			"fk_usuario, "+
+			"fecha "+
+		"FROM "+
+			"REP_DETENCION_TAREA "+
+		"WHERE "+
+			"nro_version = ?" );
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			Tarea tarea = this.getTareaById (result.getInt (1));
+			Usuario usuario = this.getUsuario (result.getInt (2));
+			Date fecha = result.getDate ("fecha");
+			mensaje = new MensajeDetencionTarea (tarea, usuario);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
+	}
+
+	private MensajeReplicacion getMensajeGeneracionBloque (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"fk_bloque, "+
+			"fecha "+
+		"FROM "+
+			"REP_GENERACION_BLOQUE "+
+		"WHERE "+
+			"nro_version = ?" );
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			int idBloque = result.getInt (1);
+			Date fecha = result.getDate (2);
+			mensaje = new MensajeGeneracionBloque (idBloque);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
+	}
+
+	private MensajeReplicacion getMensajeGeneracionTarea (int version) throws Exception {
+		MensajeReplicacion mensaje = null;
+		PreparedStatement stm = this.c.prepareStatement (
+		"SELECT "+
+			"tarea, "+
+			"fk_tarea, "+
+			"fk_bloque, "+
+			"fecha "+
+		"FROM "+
+			"REP_GENERACION_TAREA "+
+		"WHERE "+
+			"nro_version = ?");
+		ResultSet result = stm.executeQuery ();
+		if (result.next()) {
+			byte[] bytesTarea = result.getBytes (1);
+			int idTarea = result.getInt (2);
+			int idBloque = result.getInt(3);
+			Date fecha = result.getDate (4);
+			mensaje = new MensajeGeneracionTarea (idTarea, idBloque, bytesTarea);
+			mensaje.setFecha (fecha);
+		}
+		return mensaje;
 	}
 
 	public void setLogger(Loggeador logger) {
