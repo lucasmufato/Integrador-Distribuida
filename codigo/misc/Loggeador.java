@@ -7,31 +7,78 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
+<<<<<<< HEAD
 import baseDeDatos.BaseDatos;
+=======
+/*
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+*/
+
+>>>>>>> 763db123922212d3896e07e9ef30522cb31797d1
 import baseDeDatos.Usuario;
+import bloquesYTareas.Bloque;
 import bloquesYTareas.Tarea;
 import cliente.ModoTrabajo;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 import mensajes.replicacion.*;
 
 public class Loggeador {
 	
 	/**
 	 * Esta clase se encarga de mantener el/los archivos de log del lado del servidor, ya sea primario o secundario.
+	 * Y las estadisticas de las tareas realizadas
 	 */	
 	
 	private static Loggeador logger=null;
 	
 	private static final String pathlog = "log.csv";
 	private static final String pathErrores = "log errores.csv";
+<<<<<<< HEAD
 
+=======
+	private static final String pathEstadisticas = "Estadisticas tiempo.xls";
+	
+>>>>>>> 763db123922212d3896e07e9ef30522cb31797d1
 	private File archivoLog;
 	private File archivoErrores;
+	private File archivoExcel;
 	
+	//para el manejo del excel
+	private Workbook excel;
+	private WritableWorkbook excelEscritura;
+	private WritableSheet hojaDatos;
+	private Integer ultimaFila;
+    //sincronizacion
 	private Semaphore semaforo;
+	
+	//manejo de archivos de logs
 	private FileWriter writer;
 	private FileWriter errorWriter;
 	
 	private BaseDatos baseDatos;
+
+	public static void main(String[] args){
+		//para pŕobar el logeador
+		Loggeador l=Loggeador.getLoggeador();
+		Tarea t= new Tarea(new Bloque(1),new byte[1],new byte[2]);
+		t.setId(1);
+		Usuario u=new Usuario();
+		u.setNombre("prueba");
+		Instant t1= Instant.now();
+		Instant t2= Instant.now();
+		Duration d = Duration.between(t1, t2);
+		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
+		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
+		l.cerrar();
+	}
 	
 	public static Loggeador getLoggeador(){
 		if(logger==null){
@@ -39,6 +86,7 @@ public class Loggeador {
 				logger = new Loggeador();
 				return logger;
 			} catch (IOException e) {
+				e.printStackTrace();
 				return null;
 			}
 		}else{
@@ -58,12 +106,13 @@ public class Loggeador {
 		}else{
 			this.writer = new FileWriter(this.archivoLog,true);
 		}
-		
 		this.errorWriter = new FileWriter(this.archivoErrores,true);
-		this.semaforo= new Semaphore(1);
+		
+		this.archivoExcel=new File(Loggeador.pathEstadisticas);
+		this.semaforo= new Semaphore(1);        
 		
 	}
-	
+
 	public boolean guardar(String tipoRegistro,String informacion){
 		
 		try {
@@ -118,9 +167,7 @@ public class Loggeador {
 	}
 	
 	public boolean guardar(Exception e){
-		
 		System.err.println("Se ha detectado un error. Por favor revise el log. Error: "+e.toString());
-		
 		try {
 			this.semaforo.acquire();
 		} catch (InterruptedException e1) {
@@ -128,7 +175,6 @@ public class Loggeador {
 		}
 		LocalDate fecha = LocalDate.now();
 		LocalTime hora = LocalTime.now();
-		
 		try {
 			this.writer.write(fecha+" , "+hora+" , " + "ERROR" + " , " + e.toString() + System.lineSeparator());
 			this.writer.flush();
@@ -136,7 +182,6 @@ public class Loggeador {
 			this.semaforo.release();
 			return false;
 		}
-		
 		try {
 			this.errorWriter.write(fecha+" , "+hora + " , " + e.toString() + System.lineSeparator() );
 			this.errorWriter.write("---------> Message: "+e.getMessage() + System.lineSeparator() );
@@ -147,6 +192,7 @@ public class Loggeador {
 			for (StackTraceElement s: Arrays.asList( e.getStackTrace() ) ){
 				this.errorWriter.write("+++++++++++++> "+s.toString() + System.lineSeparator() );
 			}
+			
 			this.errorWriter.write( System.lineSeparator() );
 			this.errorWriter.flush();
 		} catch (IOException e1) {
@@ -156,17 +202,51 @@ public class Loggeador {
 		this.semaforo.release();
 		return true;
 	}
-	
+
 	public synchronized boolean guardarTiempo(Tarea tarea,Usuario user, Duration tiempo,ModoTrabajo modo,boolean rtaFinal){
-		System.out.println("Logger - guardar tiempo");
+		
 		String s="bloque: "+tarea.getBloque().getId()+"- tarea: "+tarea.getId()+"- tiempo: "+tiempo.toString().substring(2)+ "-modo: "+modo.name();
 		if(rtaFinal){
 			s=s+"- Respuesta Final";
 		}else{
 			s=s+"- Respuesta Parcial";
 		}
-		System.out.println(s);
 		this.guardar("Tiempo", s);
+		
+		
+		try {
+			this.excel = Workbook.getWorkbook(this.archivoExcel);
+			this.excelEscritura = Workbook.createWorkbook(this.archivoExcel, this.excel);
+			this.hojaDatos = this.excelEscritura.getSheet(0); 
+			this.ultimaFila=this.hojaDatos.getRows();
+			System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
+			Label l2 = new Label(0,this.ultimaFila,LocalDate.now().toString());
+			Label l3 = new Label(1,this.ultimaFila,LocalTime.now().toString());
+			Label l4 = new Label(2,this.ultimaFila,tarea.getBloque().getId().toString());
+			Label l5 = new Label(3,this.ultimaFila,tarea.getId().toString());
+			Label l6 = new Label(4,this.ultimaFila,user.getNombre());
+			Label l7 = new Label(5,this.ultimaFila,tiempo.toString());
+			Label l8 = new Label(6,this.ultimaFila,modo.name());
+			Label l9=null;
+			if(rtaFinal){
+				l9 = new Label(7,this.ultimaFila,"Final");
+			}else{
+				l9 = new Label(7,this.ultimaFila,"Incompleto");
+			}
+			this.hojaDatos.addCell(l2);
+			this.hojaDatos.addCell(l3);
+			this.hojaDatos.addCell(l4);
+			this.hojaDatos.addCell(l5);
+			this.hojaDatos.addCell(l6);
+			this.hojaDatos.addCell(l7);
+			this.hojaDatos.addCell(l8);
+			this.hojaDatos.addCell(l9);
+			this.excelEscritura.write();
+			this.excelEscritura.close();
+			this.excel.close();
+		} catch (IOException | WriteException | BiffException e) {
+			this.guardar(e);
+		}
 		
 		return false;
 	}
@@ -187,7 +267,7 @@ public class Loggeador {
 
 			this.errorWriter.flush();
 			this.errorWriter.close();
-			this.errorWriter=null;
+			this.errorWriter=null;			
 		} catch (IOException e) {
 		}
 	}
