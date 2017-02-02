@@ -49,10 +49,10 @@ public class Primario implements Runnable {
 			this.estado=EstadoServidor.desconectado;
 			this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 			this.hilos = new ArrayList<Thread>();
+			this.logger = logger;
 			this.conectarseBD();
 			this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 			this.crearGUI();
-			this.logger = logger;
 			this.logger.guardar("Servidor", "inicio el servicio");
 			try {
 				this.sha256 = MessageDigest.getInstance ("SHA-256");
