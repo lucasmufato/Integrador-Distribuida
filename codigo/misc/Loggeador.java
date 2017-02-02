@@ -1,22 +1,29 @@
 package misc;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.*;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.concurrent.Semaphore;
 
+/*
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+*/
 
 import baseDeDatos.Usuario;
+import bloquesYTareas.Bloque;
 import bloquesYTareas.Tarea;
 import cliente.ModoTrabajo;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 import mensajes.replicacion.*;
 
 public class Loggeador {
@@ -30,17 +37,17 @@ public class Loggeador {
 	
 	private static final String pathlog = "log.csv";
 	private static final String pathErrores = "log errores.csv";
-	private static final String pathEstadisticas = "Estadisticas tiempo.xlsx";
+	private static final String pathEstadisticas = "Estadisticas tiempo.xls";
 	
 	private File archivoLog;
 	private File archivoErrores;
 	private File archivoExcel;
 	
 	//para el manejo del excel
-	private XSSFWorkbook excel;
-    private XSSFSheet hojaDatos;
+	private Workbook excel;
+	private WritableWorkbook excelEscritura;
+	private WritableSheet hojaDatos;
 	private Integer ultimaFila;
-    private FileOutputStream excelWriter;
     //sincronizacion
 	private Semaphore semaforo;
 	
@@ -49,7 +56,18 @@ public class Loggeador {
 	private FileWriter errorWriter;
 	
 	public static void main(String[] args){
-		Loggeador.getLoggeador();
+		//para pŕobar el logeador
+		Loggeador l=Loggeador.getLoggeador();
+		Tarea t= new Tarea(new Bloque(1),new byte[1],new byte[2]);
+		t.setId(1);
+		Usuario u=new Usuario();
+		u.setNombre("prueba");
+		Instant t1= Instant.now();
+		Instant t2= Instant.now();
+		Duration d = Duration.between(t1, t2);
+		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
+		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
+		l.cerrar();
 	}
 	
 	public static Loggeador getLoggeador(){
@@ -78,53 +96,11 @@ public class Loggeador {
 		}else{
 			this.writer = new FileWriter(this.archivoLog,true);
 		}
-		
 		this.errorWriter = new FileWriter(this.archivoErrores,true);
-		this.semaforo= new Semaphore(1);
 		
-		this.archivoExcel= new File(pathEstadisticas);
-		if (this.archivoExcel.exists()){
-			System.out.println("el archivo existe");
-			FileInputStream excelFile = new FileInputStream(this.archivoExcel);
-			excelWriter = new FileOutputStream(this.archivoExcel,true);
-			//System.out.println("antes de crear elworbok");
-			this.excel = new XSSFWorkbook(excelFile);
-	        this.hojaDatos = this.excel.getSheet("Datos");
-	        this.conseguirUltimaFila();
-		}else{
-			//TODO aca no entra, si el archivo no esta explota todo
-			this.archivoExcel.createNewFile();
-			System.out.println("Creando archivo de estadisticas");
-			//si no existe el archivo lo creo y creo las cabeceras.
-			FileInputStream excelFile = new FileInputStream(this.archivoExcel);
-			this.excel = new XSSFWorkbook(excelFile);
-	        this.hojaDatos = this.excel.createSheet("Datos");
-	        Row row = this.hojaDatos.createRow(0);
-	        row.createCell(1).setCellValue("fecha");
-	        row.createCell(2).setCellValue("hora");
-	        row.createCell(3).setCellValue("Nro bloque");
-	        row.createCell(4).setCellValue("Nro tarea");
-	        row.createCell(5).setCellValue("Usuario");
-	        row.createCell(6).setCellValue("Tiempo");
-	        row.createCell(7).setCellValue("Modo Trabajo");
-	        row.createCell(8).setCellValue("Respuesta");
-	        this.ultimaFila=1;
-	        FileOutputStream outputStream = new FileOutputStream(this.archivoExcel);
-            this.excel.write(outputStream);
-		}
+		this.archivoExcel=new File(Loggeador.pathEstadisticas);
+		this.semaforo= new Semaphore(1);        
 		
-        
-		
-	}
-	
-	private void conseguirUltimaFila() {
-		 Iterator<Row> iterator = this.hojaDatos.iterator();
-		 this.ultimaFila=0;
-         while (iterator.hasNext()) {
-             iterator.next();
-             this.ultimaFila++;
-         }
-         System.out.println("El archivo tiene "+this.ultimaFila+ " filas");
 	}
 
 	public boolean guardar(String tipoRegistro,String informacion){
@@ -155,9 +131,7 @@ public class Loggeador {
 	}
 	
 	public boolean guardar(Exception e){
-		
 		System.err.println("Se ha detectado un error. Por favor revise el log. Error: "+e.toString());
-		
 		try {
 			this.semaforo.acquire();
 		} catch (InterruptedException e1) {
@@ -165,7 +139,6 @@ public class Loggeador {
 		}
 		LocalDate fecha = LocalDate.now();
 		LocalTime hora = LocalTime.now();
-		
 		try {
 			this.writer.write(fecha+" , "+hora+" , " + "ERROR" + " , " + e.toString() + System.lineSeparator());
 			this.writer.flush();
@@ -173,7 +146,6 @@ public class Loggeador {
 			this.semaforo.release();
 			return false;
 		}
-		
 		try {
 			this.errorWriter.write(fecha+" , "+hora + " , " + e.toString() + System.lineSeparator() );
 			this.errorWriter.write("---------> Message: "+e.getMessage() + System.lineSeparator() );
@@ -184,6 +156,7 @@ public class Loggeador {
 			for (StackTraceElement s: Arrays.asList( e.getStackTrace() ) ){
 				this.errorWriter.write("+++++++++++++> "+s.toString() + System.lineSeparator() );
 			}
+			
 			this.errorWriter.write( System.lineSeparator() );
 			this.errorWriter.flush();
 		} catch (IOException e1) {
@@ -193,39 +166,49 @@ public class Loggeador {
 		this.semaforo.release();
 		return true;
 	}
-	
+
 	public synchronized boolean guardarTiempo(Tarea tarea,Usuario user, Duration tiempo,ModoTrabajo modo,boolean rtaFinal){
-		System.out.println("Logger - guardar tiempo");
-		/*
+		
 		String s="bloque: "+tarea.getBloque().getId()+"- tarea: "+tarea.getId()+"- tiempo: "+tiempo.toString().substring(2)+ "-modo: "+modo.name();
 		if(rtaFinal){
 			s=s+"- Respuesta Final";
 		}else{
 			s=s+"- Respuesta Parcial";
 		}
-		System.out.println(s);
 		this.guardar("Tiempo", s);
-		*/
-		System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
-		Row row = this.hojaDatos.createRow(this.ultimaFila);
-		row.createCell(0).setCellValue(LocalDate.now().toString());
-		row.createCell(1).setCellValue(LocalTime.now().toString());
-		row.createCell(2).setCellValue(tarea.getBloque().getId().toString());
-		row.createCell(3).setCellValue(tarea.getId().toString());
-		row.createCell(4).setCellValue(user.getNombre());
-		row.createCell(5).setCellValue(tiempo.toString());
-		row.createCell(6).setCellValue(modo.name());
-		if(rtaFinal){
-			row.createCell(7).setCellValue("Final");
-		}else{
-			row.createCell(7).setCellValue("Incompleto");
-		}
 		
-        try {
-			this.excel.write(this.excelWriter);
-			this.excelWriter.flush();
-			this.ultimaFila++;
-		} catch (IOException e) {
+		
+		try {
+			this.excel = Workbook.getWorkbook(this.archivoExcel);
+			this.excelEscritura = Workbook.createWorkbook(this.archivoExcel, this.excel);
+			this.hojaDatos = this.excelEscritura.getSheet(0); 
+			this.ultimaFila=this.hojaDatos.getRows();
+			System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
+			Label l2 = new Label(0,this.ultimaFila,LocalDate.now().toString());
+			Label l3 = new Label(1,this.ultimaFila,LocalTime.now().toString());
+			Label l4 = new Label(2,this.ultimaFila,tarea.getBloque().getId().toString());
+			Label l5 = new Label(3,this.ultimaFila,tarea.getId().toString());
+			Label l6 = new Label(4,this.ultimaFila,user.getNombre());
+			Label l7 = new Label(5,this.ultimaFila,tiempo.toString());
+			Label l8 = new Label(6,this.ultimaFila,modo.name());
+			Label l9=null;
+			if(rtaFinal){
+				l9 = new Label(7,this.ultimaFila,"Final");
+			}else{
+				l9 = new Label(7,this.ultimaFila,"Incompleto");
+			}
+			this.hojaDatos.addCell(l2);
+			this.hojaDatos.addCell(l3);
+			this.hojaDatos.addCell(l4);
+			this.hojaDatos.addCell(l5);
+			this.hojaDatos.addCell(l6);
+			this.hojaDatos.addCell(l7);
+			this.hojaDatos.addCell(l8);
+			this.hojaDatos.addCell(l9);
+			this.excelEscritura.write();
+			this.excelEscritura.close();
+			this.excel.close();
+		} catch (IOException | WriteException | BiffException e) {
 			this.guardar(e);
 		}
 		
@@ -244,14 +227,7 @@ public class Loggeador {
 
 			this.errorWriter.flush();
 			this.errorWriter.close();
-			this.errorWriter=null;
-			
-			this.excelWriter.flush();
-			this.excelWriter.close();
-			this.excel.close();
-			this.excel=null;
-			this.excelWriter=null;
-			
+			this.errorWriter=null;			
 		} catch (IOException e) {
 		}
 	}
