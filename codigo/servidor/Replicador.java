@@ -35,6 +35,7 @@ public class Replicador extends Thread {
 		this.cola = new LinkedList<MensajeReplicacion>();
 		this.colaTmp = new LinkedList<MensajeReplicacion>();
 		this.logger=logger;
+		this.logger.setBaseDatos (baseDatos);
 		
 		// CREAR UN SOCKET PARA QUE EL SERVIDOR SECUNDARIO SE CONECTE
 		this.serverSocket = new ServerSocket (PUERTO_REPLICADOR);

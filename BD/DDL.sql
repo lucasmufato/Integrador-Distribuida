@@ -138,7 +138,7 @@ CREATE TABLE REP_GENERACION_TAREA(
 ) INHERITS(log_replicacion);
 
 CREATE TABLE REP_PARCIAL_TAREA(
-	tarea bytea NOT NULL,
+	parcial bytea NOT NULL,
 	fk_tarea INTEGER NOT NULL,
 	fk_bloque INTEGER,
 	fk_usuario INTEGER NOT NULL,
@@ -150,7 +150,7 @@ CREATE TABLE REP_PARCIAL_TAREA(
 
 
 CREATE TABLE REP_RESULTADO_TAREA(
-	tarea bytea NOT NULL,
+	resultado bytea NOT NULL,
 	fk_tarea INTEGER NOT NULL,
 	fk_bloque INTEGER,
 	fk_usuario INTEGER NOT NULL,

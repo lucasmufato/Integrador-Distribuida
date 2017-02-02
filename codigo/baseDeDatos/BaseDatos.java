@@ -1369,6 +1369,156 @@ public class BaseDatos {
 			return 0;
 		}
 	}
+	
+	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj) {
+		String query =
+		"INSERT INTO REP_PARCIAL_TAREA "+
+			"(parcial, fk_tarea, fk_bloque, fk_usuario) "+
+		"VALUES "+
+			"(?, ?, ?, ?)";
+
+		Object parametros[] = {
+			msj.getTarea().getParcial(),
+			msj.getTarea().getId(),
+			msj.getTarea().getBloque().getId(),
+			msj.getUsuario()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeResultadoTarea (MensajeResultadoTarea msj) {
+		String query = 
+		"INSERT INTO REP_RESULTADO_TAREA "+
+			"(resultado, fk_tarea, fk_bloque, fk_usuario) "+
+		"VALUES "+
+			"(?, ?, ?, ?)";
+
+		Object parametros[] = {
+			msj.getTarea().getResultado(),
+			msj.getTarea().getId(),
+			msj.getTarea().getBloque().getId(),
+			msj.getUsuario()
+		};
+	}
+
+	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_COMPLETITUD_BLOQUE "+
+			"(fk_bloque) "+
+		"VALUES "+
+			"(?)";
+
+		Object parametros[] = {
+			msj.getBloque().getId()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_ASIGNACION_TAREA_USUARIO "+
+			"(fk_tarea, fk_usuario, fk_procesamiento_tarea) "+
+		"VALUES "+
+			"(?, ?, ?)";
+
+		Object parametros[] = {
+			msj.getTarea().getId(),
+			msj.getUsuario().getId(),
+			msj.getIdProcesamiento()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeDetencionTarea (MensajeDetencionTarea msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_DETENCION_TAREA "+
+			"(fk_usuario, fk_tarea, fk_bloque) "+
+		"VALUES "+
+			"(?, ?, ?)";
+
+		Object parametros[] = {
+			msj.getUsuario().getId(),
+			msj.getTarea().getId(),
+			msj.getTarea().getBloque().getId()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeAsignacionPuntos (MensajeAsignacionPuntos msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_ASIGNACION_PUNTOS "+
+			"(puntos, fk_usuario) "+
+		"VALUES "+
+			"(?, ?)";
+		
+		Object parametros[] = {
+			msj.getPuntos(),
+			msj.getUsuario().getId()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeGeneracionBloque (MensajeGeneracionBloque msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_GENERACION_BLOQUE "+
+			"(fk_bloque) "+
+		"VALUES "+
+			"(?)";
+
+		Object parametros[] = {
+			msj.getIdBloque()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized void logMensajeGeneracionTarea (MensajeGeneracionTarea msj) {
+		String query =
+		"INSERT INTO REP_MENSAJE_GENERACION_TAREA "+
+			"(tarea, fk_tarea, fk_bloque) "+
+		"VALUES "+
+			"(?, ?, ?)";
+		
+		Object parametros[] = {
+			msj.getTarea(),
+			msj.getIdTarea(),
+			msj.getIdBloque()
+		};
+
+		this.insertParametrizado (query, parametros);
+	}
+
+	public synchronized boolean insertParametrizado (String query, Object[] parametros) {
+		try {
+			PreparedStatement stm = this.c.prepareStatement (query);
+			this.setParametrosStatement (stm, parametros);
+			return stm.execute ();
+		} catch (Exception e) {
+			this.logger.guardar (e);
+			return false;
+		}
+	}
+
+	private void setParametrosStatement (PreparedStatement stm, Object[] params) throws Exception {
+		for (int i = 0; i < params.length; i++) {
+			if (params[i] instanceof Integer) {
+				stm.setInt(i, (Integer) params[i]);
+			} else if (params[i] instanceof String) {
+				stm.setString(i, (String) params[i]);
+			} else if (params[i] instanceof byte[]) {
+				stm.setBytes (i, (byte[]) params[i]);
+			} else if (params[i] instanceof Long) {
+				stm.setLong (i, (Long) params[i]);
+			} else {
+				throw new Exception ("Error al hacer casting para insert");
+			}
+		}
+	}
 
 	public void setLogger(Loggeador logger) {
 		this.logger = logger;

@@ -7,6 +7,7 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
+import baseDeDatos.BaseDatos;
 import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import cliente.ModoTrabajo;
@@ -22,13 +23,15 @@ public class Loggeador {
 	
 	private static final String pathlog = "log.csv";
 	private static final String pathErrores = "log errores.csv";
-	
+
 	private File archivoLog;
 	private File archivoErrores;
 	
 	private Semaphore semaforo;
 	private FileWriter writer;
 	private FileWriter errorWriter;
+	
+	private BaseDatos baseDatos;
 	
 	public static Loggeador getLoggeador(){
 		if(logger==null){
@@ -84,7 +87,33 @@ public class Loggeador {
 	}
 
 	public boolean guardar (MensajeReplicacion mensajeReplicacion) {
-		// IMPLEMENTAR !
+		switch (mensajeReplicacion.getCodigo()) {
+			case parcialTarea :
+				this.baseDatos.logMensajeParcialTarea ((MensajeParcialTarea) mensajeReplicacion);
+				break;
+			case resultadoTarea :
+				this.baseDatos.logMensajeResultadoTarea ((MensajeResultadoTarea) mensajeReplicacion);
+				break;
+			case completitudBloque :
+				this.baseDatos.logMensajeCompletitudBloque ((MensajeCompletitudBloque) mensajeReplicacion);
+				break;
+			case asignacionTareaUsuario :
+				this.baseDatos.logMensajeAsignacionTareaUsuario ((MensajeAsignacionTareaUsuario) mensajeReplicacion);
+				break;
+			case detencionTarea :
+				this.baseDatos.logMensajeDetencionTarea ((MensajeDetencionTarea) mensajeReplicacion);
+				break;
+			case asignacionPuntos :
+				this.baseDatos.logMensajeAsignacionPuntos ((MensajeAsignacionPuntos) mensajeReplicacion);
+				break;
+			case generacionBloque :
+				this.baseDatos.logMensajeGeneracionBloque ((MensajeGeneracionBloque) mensajeReplicacion);
+				break;
+			case generacionTarea :
+				this.baseDatos.logMensajeGeneracionTarea ((MensajeGeneracionTarea) mensajeReplicacion);
+				break;
+		}
+		
 		return true;
 	}
 	
@@ -140,6 +169,10 @@ public class Loggeador {
 		this.guardar("Tiempo", s);
 		
 		return false;
+	}
+
+	public void setBaseDatos (BaseDatos bd) {
+		this.baseDatos = bd;
 	}
 	
 	public void cerrar(){
