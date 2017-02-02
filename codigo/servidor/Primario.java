@@ -172,7 +172,7 @@ public class Primario implements Runnable {
 		
 		protected boolean CrearReplicador(){
 			try {
-				replicador = new Replicador(this.logger);
+				replicador = new Replicador(this.logger, this.baseDatos);
 				replicador.start ();
 			} catch (Exception e) {
 				this.logger.guardar(e);
