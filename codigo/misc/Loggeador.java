@@ -7,9 +7,7 @@ import java.time.*;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
-<<<<<<< HEAD
 import baseDeDatos.BaseDatos;
-=======
 /*
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -17,7 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 */
 
->>>>>>> 763db123922212d3896e07e9ef30522cb31797d1
 import baseDeDatos.Usuario;
 import bloquesYTareas.Bloque;
 import bloquesYTareas.Tarea;
@@ -41,12 +38,8 @@ public class Loggeador {
 	
 	private static final String pathlog = "log.csv";
 	private static final String pathErrores = "log errores.csv";
-<<<<<<< HEAD
-
-=======
 	private static final String pathEstadisticas = "Estadisticas tiempo.xls";
 	
->>>>>>> 763db123922212d3896e07e9ef30522cb31797d1
 	private File archivoLog;
 	private File archivoErrores;
 	private File archivoExcel;
