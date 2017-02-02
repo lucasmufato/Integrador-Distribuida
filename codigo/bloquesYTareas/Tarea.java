@@ -7,7 +7,7 @@ public class Tarea implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
-	protected int id;
+	protected Integer id;
 	protected Bloque bloque;
 	protected byte[] tarea;
 	protected byte[] parcial;
@@ -43,11 +43,11 @@ public class Tarea implements Serializable{
 		return todo;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return this.id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 	
