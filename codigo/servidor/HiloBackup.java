@@ -7,16 +7,8 @@ import java.net.Socket;
 import java.util.Observable;
 
 import baseDeDatos.BaseDatos;
-import mensajes.replicacion.MensajeAsignacionPuntos;
-import mensajes.replicacion.MensajeAsignacionTareaUsuario;
-import mensajes.replicacion.MensajeCompletitudBloque;
-import mensajes.replicacion.MensajeDetencionTarea;
-import mensajes.replicacion.MensajeParcialTarea;
-import mensajes.replicacion.MensajeReplicacion;
-import mensajes.replicacion.MensajeResultadoTarea;
+import mensajes.replicacion.*;
 import misc.Loggeador;
-import mensajes.replicacion.MensajeGeneracionBloque;
-import mensajes.replicacion.MensajeGeneracionTarea;
 
 public class HiloBackup extends Observable implements Runnable {
 	//SOCKET PARA LA COMUNICACION CON EL REPLICADOR
@@ -57,6 +49,7 @@ public class HiloBackup extends Observable implements Runnable {
 			Integer cont = 0;
 			while(this.conectado){
 				try {
+					this.enviarVersionDB ();
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
 					System.out.println("[DEBUG] Se ha recibido un mensaje del Replicador");
 					switch(msj.getCodigo()){
@@ -183,6 +176,15 @@ public class HiloBackup extends Observable implements Runnable {
 			this.morir();
 			
 		} catch (IOException e) {
+			this.logger.guardar(e);
+		}
+	}
+
+	private void enviarVersionDB () {
+		long version = this.bd.getVersion ();
+		MensajeVersion msg = new MensajeVersion (version);
+		try {
+		} catch (Exception e) {
 			this.logger.guardar(e);
 		}
 	}

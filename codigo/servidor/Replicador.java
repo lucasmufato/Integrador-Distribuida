@@ -4,7 +4,9 @@ import mensajes.replicacion.*;
 import misc.Loggeador;
 import bloquesYTareas.*;
 import baseDeDatos.Usuario;
+import baseDeDatos.BaseDatos;
 import java.util.Queue;
+import java.util.List;
 import java.util.LinkedList;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,8 +28,10 @@ public class Replicador extends Thread {
 	private Queue<MensajeReplicacion> colaTmp; // Esta cola se utiliza para no bloquear la principal. Todo lo que este en esta cola pasara a la principal en algun momento.
 	private Object pausa = new Object ();
 	private Loggeador logger;
+	private boolean backupEstaConectado = false;
+	private BaseDatos baseDatos;
 	
-	public Replicador (Loggeador logger) throws IOException {
+	public Replicador (Loggeador logger, BaseDatos baseDatos) throws IOException {
 		this.cola = new LinkedList<MensajeReplicacion>();
 		this.colaTmp = new LinkedList<MensajeReplicacion>();
 		this.logger=logger;
@@ -38,11 +42,16 @@ public class Replicador extends Thread {
 	}
 	
 	public void replicar (MensajeReplicacion mensaje) {
-		/* Guarda un mensaje en la cola */
-		synchronized (this.colaTmp) {
-			this.colaTmp.add (mensaje);
-			synchronized (this.pausa) {
-				this.pausa.notifyAll();
+		/* Guardar mensaje en db/log */
+		this.logger.guardar (mensaje);
+
+		/* Si hay un backup conectado, encolamos el mensaje para enviarselo */
+		if (this.backupEstaConectado) {
+			synchronized (this.colaTmp) {
+				this.colaTmp.add (mensaje);
+				synchronized (this.pausa) {
+					this.pausa.notifyAll();
+				}
 			}
 		}
 	}
@@ -90,12 +99,11 @@ public class Replicador extends Thread {
 	@Override
 	public void run () {
 		this.logger.guardar("Replicador","Inicio la ejecucion del hilo, espero conexiones.");
-		System.out.println("[DEBUG] Se ha iniciado la ejecucion del thread replicador");
 		try {
-			System.out.println("[DEBUG] Se espera que un backup se conecte");
 			this.acceptConnection();
-			System.out.println("[DEBUG] Un backup se ha conectado");
+			this.backupEstaConectado = true;
 			this.logger.guardar("Replicador","Se conecto un Backup");
+			this.enviarCambiosPendientesDB();
 			while (true) {
 				this.volcarColaTmp(); // volcar cola temporaria a cola principal
 
@@ -119,6 +127,7 @@ public class Replicador extends Thread {
 				}
 			}
 		} catch (Exception e) {
+			this.backupEstaConectado = false;
 			this.logger.guardar(e);
 		}
 	}
@@ -132,6 +141,28 @@ public class Replicador extends Thread {
 			this.logger.guardar(e);
 		}
 		return true;
+	}
+
+	private void enviarCambiosPendientesDB (){
+		try {
+			MensajeVersion msg = (MensajeVersion) this.flujoEntrante.readObject();
+			long version = msg.getVersion();
+			List <MensajeReplicacion> cambios = this.baseDatos.getRegistrosCambios (version);
+			this.encolarCambios (cambios);
+		} catch (Exception e) {
+			this.logger.guardar(e);
+		}
+	}
+
+	private void encolarCambios (List <MensajeReplicacion> cambios) {
+		synchronized (this.colaTmp) {
+			for (MensajeReplicacion mensaje: cambios) {
+				this.colaTmp.add (mensaje);
+				synchronized (this.pausa) {
+					this.pausa.notifyAll();
+				}
+			}
+		}
 	}
 
 	private void volcarColaTmp() {

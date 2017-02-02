@@ -80,7 +80,8 @@ CREATE TABLE TIPO_MENSAJE(
 CREATE TABLE LOG_REPLICACION(
 	nro_version serial not null,
 	tipo_mensaje integer not null,
-	fecha timestamp default current_timestamp
+	fecha timestamp default current_timestamp,
+
 	primary key(nro_version),
 	CONSTRAINT "fk_tipo_mensaje" FOREIGN key(tipo_mensaje) REFERENCES TIPO_MENSAJE(id_tipo_mensaje)
 );

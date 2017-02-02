@@ -1106,7 +1106,7 @@ public class BaseDatos {
 		return true;
 	}
 
-	public synchronized List <MensajeReplicacion> getRegistrosCambios (int desdeVersion) {
+	public synchronized List <MensajeReplicacion> getRegistrosCambios (long desdeVersion) {
 		List lista = new ArrayList();
 		try {
 			ResultSet registros = this.selectRegistrosCambios (desdeVersion);
@@ -1121,7 +1121,7 @@ public class BaseDatos {
 		return lista;
 	}
 
-	private ResultSet selectRegistrosCambios (int desdeVersion) throws Exception{
+	private ResultSet selectRegistrosCambios (long desdeVersion) throws Exception{
 		String query =
 		"SELECT "+
 			"LOG_REPLICACION.nro_version AS nro_version, "+
@@ -1134,7 +1134,7 @@ public class BaseDatos {
 		"ORDER BY LOG_REPLICACION.nro_version ";
 		
 		PreparedStatement stm = this.c.prepareStatement (query);
-		stm.setInt (1, desdeVersion);
+		stm.setLong (1, desdeVersion);
 		return stm.executeQuery ();
 		
 	}
@@ -1349,6 +1349,25 @@ public class BaseDatos {
 			mensaje.setFecha (fecha);
 		}
 		return mensaje;
+	}
+
+	public long getVersion () {
+		try {
+			Statement stm = this.c.createStatement ();
+			ResultSet result = stm.executeQuery(
+				"SELECT nro_version FROM LOG_REPLICACION "+
+				"ORDER BY nro_version DESC LIMIT 1"
+			);
+			if (result.next()) {
+				return result.getInt(1);
+			} else {
+				return 0;
+			}
+			
+		} catch (Exception e) {
+			this.logger.guardar (e);
+			return 0;
+		}
 	}
 
 	public void setLogger(Loggeador logger) {

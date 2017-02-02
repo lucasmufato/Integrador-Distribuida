@@ -17,6 +17,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import cliente.ModoTrabajo;
+import mensajes.replicacion.*;
 
 public class Loggeador {
 	
@@ -145,6 +146,11 @@ public class Loggeador {
 			return false;
 		}
 		this.semaforo.release();
+		return true;
+	}
+
+	public boolean guardar (MensajeReplicacion mensajeReplicacion) {
+		// IMPLEMENTAR !
 		return true;
 	}
 	
