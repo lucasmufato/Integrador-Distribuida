@@ -1,7 +1,8 @@
 ﻿insert into usuario (id_usuario,nombre,contrasenia,puntos) values (1,'usuario','usuario123',0);
-insert into usuario (id_usuario, nombre, contrasenia, puntos) values (2, 'usuario2', 'usuario123', 0);
-insert into usuario (id_usuario, nombre, contrasenia, puntos) values (3, 'usuario3', 'usuario123', 0);
-insert into usuario (id_usuario, nombre, contrasenia, puntos) values (4, 'usuario4', 'usuario123', 0);
+insert into usuario (id_usuario, nombre, contrasenia, puntos) values (2, 'lucas', 'mufato', 0);
+insert into usuario (id_usuario, nombre, contrasenia, puntos) values (3, 'jasmin', 'paolino', 0);
+insert into usuario (id_usuario, nombre, contrasenia, puntos) values (4, 'pablo', 'cabrera', 0);
+insert into usuario (id_usuario, nombre, contrasenia, puntos) values (5, 'luz', 'barcena', 0);
 
 /* Estados en los que puede estar una tarea */
 insert into estado_tarea (estado) values 
@@ -27,15 +28,3 @@ INSERT INTO tipo_mensaje(id_tipo_mensaje, nombre) VALUES
 	(6, 'asignacionPuntos'),
 	(7, 'generacionBloque'),
 	(8, 'generacionTarea');
-
-/*
-para probar la herencia.
-
-Insert into log_replicacion(tipo_mensaje) values (1),(2);
-
-
-insert into rep_asignacion_tarea_usuario (tipo_mensaje,fk_tarea,fk_usuario,fk_procesamiento_tarea) values (4,1,1,1);
-
-select * from log_replicacion;
-select * from rep_asignacion_tarea_usuario;
-*/

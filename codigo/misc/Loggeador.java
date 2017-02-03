@@ -8,12 +8,6 @@ import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 
 import baseDeDatos.BaseDatos;
-/*
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-*/
 
 import baseDeDatos.Usuario;
 import bloquesYTareas.Bloque;
@@ -49,6 +43,7 @@ public class Loggeador {
 	private WritableWorkbook excelEscritura;
 	private WritableSheet hojaDatos;
 	private Integer ultimaFila;
+	
     //sincronizacion
 	private Semaphore semaforo;
 	
@@ -64,12 +59,13 @@ public class Loggeador {
 		Tarea t= new Tarea(new Bloque(1),new byte[1],new byte[2]);
 		t.setId(1);
 		Usuario u=new Usuario();
-		u.setNombre("prueba");
+		u.setNombre("usuario");
 		Instant t1= Instant.now();
 		Instant t2= Instant.now();
 		Duration d = Duration.between(t1, t2);
 		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
-		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
+		u.setNombre("lucas");
+		l.guardarTiempo(t, u,d,ModoTrabajo.multiThread, false);
 		l.cerrar();
 	}
 	
@@ -102,6 +98,10 @@ public class Loggeador {
 		this.errorWriter = new FileWriter(this.archivoErrores,true);
 		
 		this.archivoExcel=new File(Loggeador.pathEstadisticas);
+		if(!this.archivoExcel.exists()){
+			System.err.println("no se encontro el archivo de estadisticas");
+			this.guardar("Error", "no se encontro el archivo de estaditicas");
+		}
 		this.semaforo= new Semaphore(1);        
 		
 	}
@@ -154,6 +154,8 @@ public class Loggeador {
 			case generacionTarea :
 				this.baseDatos.logMensajeGeneracionTarea ((MensajeGeneracionTarea) mensajeReplicacion);
 				break;
+		default:
+			break;
 		}
 		
 		return true;
@@ -197,7 +199,9 @@ public class Loggeador {
 	}
 
 	public synchronized boolean guardarTiempo(Tarea tarea,Usuario user, Duration tiempo,ModoTrabajo modo,boolean rtaFinal){
-		
+		if(this.archivoExcel==null){
+			return false;
+		}
 		String s="bloque: "+tarea.getBloque().getId()+"- tarea: "+tarea.getId()+"- tiempo: "+tiempo.toString().substring(2)+ "-modo: "+modo.name();
 		if(rtaFinal){
 			s=s+"- Respuesta Final";
@@ -205,8 +209,25 @@ public class Loggeador {
 			s=s+"- Respuesta Parcial";
 		}
 		this.guardar("Tiempo", s);
+		String nroTarea="0";
+		String nroBloque="0";
+		if(tarea!=null){
+			nroBloque=tarea.getBloque().getId().toString();
+			nroTarea=tarea.getId().toString();
+		}
 		
-		
+		String userName="falta";
+		if(user!=null){
+			userName=user.getNombre();
+		}
+		String stringTiempo="0";
+		if(tiempo!=null){
+			stringTiempo=Long.toString(tiempo.getSeconds() );
+		}
+		String modoTrabajo="monoThread";
+		if(modo!=null){
+			modoTrabajo=modo.name();
+		}
 		try {
 			this.excel = Workbook.getWorkbook(this.archivoExcel);
 			this.excelEscritura = Workbook.createWorkbook(this.archivoExcel, this.excel);
@@ -215,11 +236,12 @@ public class Loggeador {
 			System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
 			Label l2 = new Label(0,this.ultimaFila,LocalDate.now().toString());
 			Label l3 = new Label(1,this.ultimaFila,LocalTime.now().toString());
-			Label l4 = new Label(2,this.ultimaFila,tarea.getBloque().getId().toString());
-			Label l5 = new Label(3,this.ultimaFila,tarea.getId().toString());
-			Label l6 = new Label(4,this.ultimaFila,user.getNombre());
-			Label l7 = new Label(5,this.ultimaFila,tiempo.toString());
-			Label l8 = new Label(6,this.ultimaFila,modo.name());
+			Label l4 = new Label(2,this.ultimaFila,nroBloque);
+			Label l5 = new Label(3,this.ultimaFila,nroTarea);
+			Label l6 = new Label(4,this.ultimaFila,userName);
+			
+			Label l7 = new Label(5,this.ultimaFila,stringTiempo);
+			Label l8 = new Label(6,this.ultimaFila,modoTrabajo);
 			Label l9=null;
 			if(rtaFinal){
 				l9 = new Label(7,this.ultimaFila,"Final");
