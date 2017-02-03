@@ -32,6 +32,7 @@ public class Replicador extends Thread {
 	private BaseDatos baseDatos;
 	
 	public Replicador (Loggeador logger, BaseDatos baseDatos) throws IOException {
+		this.baseDatos = baseDatos;
 		this.cola = new LinkedList<MensajeReplicacion>();
 		this.colaTmp = new LinkedList<MensajeReplicacion>();
 		this.logger=logger;
@@ -148,6 +149,7 @@ public class Replicador extends Thread {
 		try {
 			MensajeVersion msg = (MensajeVersion) this.flujoEntrante.readObject();
 			long version = msg.getVersion();
+			System.out.println ("DEBUG: Se ha recibido el numero de version"+version);
 			List <MensajeReplicacion> cambios = this.baseDatos.getRegistrosCambios (version);
 			this.encolarCambios (cambios);
 		} catch (Exception e) {

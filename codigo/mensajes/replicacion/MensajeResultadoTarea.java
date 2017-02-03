@@ -2,6 +2,7 @@ package mensajes.replicacion;
 
 import java.io.Serializable;
 import bloquesYTareas.Tarea;
+import bloquesYTareas.EstadoTarea;
 import baseDeDatos.Usuario;
 
 public class MensajeResultadoTarea extends MensajeReplicacion implements Serializable {
@@ -14,6 +15,7 @@ public class MensajeResultadoTarea extends MensajeReplicacion implements Seriali
 		super (CodigoMensajeReplicacion.resultadoTarea);
 		this.tarea = tarea;
 		this.usuario = usuario;
+		this.tarea.setEstado (EstadoTarea.completada);
 	}
 
 	public Tarea getTarea () {

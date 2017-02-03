@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 import java.util.Date;
+import java.util.Properties;
+import java.io.FileInputStream;
 
 import bloquesYTareas.*;
 import mensajes.replicacion.*;
@@ -22,11 +24,12 @@ public class BaseDatos {
 
 	private static BaseDatos instance = null; //Esto es para el singleton
 	protected Connection c;
-	protected final static String host="localhost";
-	protected final static String nombreBD="finaldistribuido";
-	protected final static Integer puertoBD=5432;
-	protected final static String user="distribuido";
-	protected final static String password="sistemas";
+	protected final static String CONFIG_FILE = "configuracion.properties";
+	protected String hostBD="localhost";
+	protected String nombreBD="finaldistribuido";
+	protected Integer puertoBD=5432;
+	protected String userBD="distribuido";
+	protected String passwordBD="sistemas";
 	protected static Integer contadorSesiones;	//para que vaya devolviendo numero consecutivos de sesion
 	private Loggeador logger;
 
@@ -34,7 +37,8 @@ public class BaseDatos {
 	private Map <Integer, Bloque> cacheBloques;
 	private Map <Integer, Tarea> cacheTareas;
 
-	private BaseDatos(){
+	private BaseDatos(Properties config) {
+		this.cargarConfiguracion (config);
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
@@ -42,19 +46,34 @@ public class BaseDatos {
 	}
 
 	public static BaseDatos getInstance () {
-		if(BaseDatos.instance == null) {
-			BaseDatos.instance = new BaseDatos();
+		try {
+			if(BaseDatos.instance == null) {
+				Properties config = new Properties();
+				config.load (new FileInputStream (CONFIG_FILE));
+				BaseDatos.instance = new BaseDatos (config);
+			}
+			return BaseDatos.instance;
+		} catch (Exception e) {
+				Loggeador.getLoggeador().guardar(e);
+			return null;
 		}
-		return BaseDatos.instance;
+	}
+
+	public void cargarConfiguracion (Properties config) {
+		this.hostBD = config.getProperty ("host", "localhost");
+		this.nombreBD = config.getProperty ("nombreBD", "finaldistribuido");
+		this.puertoBD = Integer.parseInt (config.getProperty ("puertoBD", "5432"));
+		this.userBD = config.getProperty ("user", "distribuido");
+		this.passwordBD = config.getProperty ("password", "sistemas");
 	}
 
 	public boolean conectarse(){
 		try {
 	         Class.forName("org.postgresql.Driver");
-	         c = DriverManager.getConnection("jdbc:postgresql://"+host+":"+puertoBD+"/"+nombreBD,user, password);
+	         c = DriverManager.getConnection("jdbc:postgresql://"+this.hostBD+":"+this.puertoBD+"/"+this.nombreBD, this.userBD, this.passwordBD);
 	         return true;
 	      } catch (Exception e) {
-	    	 this.logger.guardar(e);
+	    	 Loggeador.getLoggeador().guardar(e);
 	         return false;
 	      }
 	}
@@ -1170,7 +1189,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 	
-	private MensajeReplicacion getMensajeParcialTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeParcialTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1182,6 +1201,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
@@ -1192,7 +1212,7 @@ public class BaseDatos {
 		}
 		return mensaje;
 	}
-	private MensajeReplicacion getMensajeResultadoTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeResultadoTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1204,6 +1224,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
@@ -1215,7 +1236,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeCompletitudBloque (int version) throws Exception {
+	private MensajeReplicacion getMensajeCompletitudBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1226,6 +1247,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Bloque bloque = this.getBloque (result.getInt(1));
@@ -1236,7 +1258,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionTareaUsuario (int version) throws Exception {
+	private MensajeReplicacion getMensajeAsignacionTareaUsuario (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1248,7 +1270,7 @@ public class BaseDatos {
 			"REP_ASIGNACION_TAREA_USUARIO "+
 		"WHERE "+
 			"nro_version = ?");
-		stm.setInt (1, version);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt (1));
@@ -1261,7 +1283,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionPuntos (int version) throws Exception {
+	private MensajeReplicacion getMensajeAsignacionPuntos (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1272,7 +1294,7 @@ public class BaseDatos {
 			"REP_ASIGNACION_PUNTOS "+
 		"WHERE "+
 			"nro_version = ?");
-		stm.setInt (1, version);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			int puntos = result.getInt (1);
@@ -1285,7 +1307,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeDetencionTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeDetencionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1296,6 +1318,7 @@ public class BaseDatos {
 			"REP_DETENCION_TAREA "+
 		"WHERE "+
 			"nro_version = ?" );
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt (1));
@@ -1307,7 +1330,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionBloque (int version) throws Exception {
+	private MensajeReplicacion getMensajeGeneracionBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1317,6 +1340,7 @@ public class BaseDatos {
 			"REP_GENERACION_BLOQUE "+
 		"WHERE "+
 			"nro_version = ?" );
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			int idBloque = result.getInt (1);
@@ -1327,7 +1351,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeGeneracionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1339,6 +1363,7 @@ public class BaseDatos {
 			"REP_GENERACION_TAREA "+
 		"WHERE "+
 			"nro_version = ?");
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			byte[] bytesTarea = result.getBytes (1);
@@ -1368,6 +1393,10 @@ public class BaseDatos {
 			this.logger.guardar (e);
 			return 0;
 		}
+	}
+
+	public synchronized void guardarMensajeReplicado (MensajeReplicacion msj) {
+		//IMPLEMENTAR !
 	}
 	
 	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj) {
@@ -1400,6 +1429,8 @@ public class BaseDatos {
 			msj.getTarea().getBloque().getId(),
 			msj.getUsuario().getId()
 		};
+
+		this.insertParametrizado (query, parametros);
 	}
 
 	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj) {
