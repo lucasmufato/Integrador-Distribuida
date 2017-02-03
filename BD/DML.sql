@@ -18,15 +18,15 @@ insert into estado_bloque (estado) values
 
 /*	Tipos de mensajes guardados en el log de replicacion, tiene el mismo orden que el ENUM en java*/
 
-INSERT INTO tipo_mensaje(nombre) VALUES
-	('parcialTarea'),
-	('resultadoTarea'),
-	('completitudBloque'),
-	('asignacionTareaUsuario'),
-	('detencionTarea'),
-	('asignacionPuntos'),
-	('generacionBloque'),
-	('generacionTarea');
+INSERT INTO tipo_mensaje(id_tipo_mensaje, nombre) VALUES
+	(1, 'parcialTarea'),
+	(2, 'resultadoTarea'),
+	(3, 'completitudBloque'),
+	(4, 'asignacionTareaUsuario'),
+	(5, 'detencionTarea'),
+	(6, 'asignacionPuntos'),
+	(7, 'generacionBloque'),
+	(8, 'generacionTarea');
 
 /*
 para probar la herencia.

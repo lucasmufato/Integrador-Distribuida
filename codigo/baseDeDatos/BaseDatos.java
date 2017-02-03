@@ -1373,15 +1373,15 @@ public class BaseDatos {
 	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj) {
 		String query =
 		"INSERT INTO REP_PARCIAL_TAREA "+
-			"(parcial, fk_tarea, fk_bloque, fk_usuario) "+
+			"(tipo_mensaje, parcial, fk_tarea, fk_bloque, fk_usuario) "+
 		"VALUES "+
-			"(?, ?, ?, ?)";
+			"(1, ?, ?, ?, ?)";
 
 		Object parametros[] = {
 			msj.getTarea().getParcial(),
 			msj.getTarea().getId(),
 			msj.getTarea().getBloque().getId(),
-			msj.getUsuario()
+			msj.getUsuario().getId()
 		};
 
 		this.insertParametrizado (query, parametros);
@@ -1390,24 +1390,24 @@ public class BaseDatos {
 	public synchronized void logMensajeResultadoTarea (MensajeResultadoTarea msj) {
 		String query = 
 		"INSERT INTO REP_RESULTADO_TAREA "+
-			"(resultado, fk_tarea, fk_bloque, fk_usuario) "+
+			"(tipo_mensaje, resultado, fk_tarea, fk_bloque, fk_usuario) "+
 		"VALUES "+
-			"(?, ?, ?, ?)";
+			"(2, ?, ?, ?, ?)";
 
 		Object parametros[] = {
 			msj.getTarea().getResultado(),
 			msj.getTarea().getId(),
 			msj.getTarea().getBloque().getId(),
-			msj.getUsuario()
+			msj.getUsuario().getId()
 		};
 	}
 
 	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_COMPLETITUD_BLOQUE "+
-			"(fk_bloque) "+
+		"INSERT INTO REP_COMPLETITUD_BLOQUE "+
+			"(tipo_mensaje, fk_bloque) "+
 		"VALUES "+
-			"(?)";
+			"(3, ?)";
 
 		Object parametros[] = {
 			msj.getBloque().getId()
@@ -1418,10 +1418,10 @@ public class BaseDatos {
 
 	public synchronized void logMensajeAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_ASIGNACION_TAREA_USUARIO "+
-			"(fk_tarea, fk_usuario, fk_procesamiento_tarea) "+
+		"INSERT INTO REP_ASIGNACION_TAREA_USUARIO "+
+			"(tipo_mensaje, fk_tarea, fk_usuario, fk_procesamiento_tarea) "+
 		"VALUES "+
-			"(?, ?, ?)";
+			"(4, ?, ?, ?)";
 
 		Object parametros[] = {
 			msj.getTarea().getId(),
@@ -1434,10 +1434,10 @@ public class BaseDatos {
 
 	public synchronized void logMensajeDetencionTarea (MensajeDetencionTarea msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_DETENCION_TAREA "+
-			"(fk_usuario, fk_tarea, fk_bloque) "+
+		"INSERT INTO REP_DETENCION_TAREA "+
+			"(tipo_mensaje, fk_usuario, fk_tarea, fk_bloque) "+
 		"VALUES "+
-			"(?, ?, ?)";
+			"(5, ?, ?, ?)";
 
 		Object parametros[] = {
 			msj.getUsuario().getId(),
@@ -1450,10 +1450,10 @@ public class BaseDatos {
 
 	public synchronized void logMensajeAsignacionPuntos (MensajeAsignacionPuntos msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_ASIGNACION_PUNTOS "+
-			"(puntos, fk_usuario) "+
+		"INSERT INTO REP_ASIGNACION_PUNTOS "+
+			"(tipo_mensaje, puntos, fk_usuario) "+
 		"VALUES "+
-			"(?, ?)";
+			"(6, ?, ?)";
 		
 		Object parametros[] = {
 			msj.getPuntos(),
@@ -1465,10 +1465,10 @@ public class BaseDatos {
 
 	public synchronized void logMensajeGeneracionBloque (MensajeGeneracionBloque msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_GENERACION_BLOQUE "+
-			"(fk_bloque) "+
+		"INSERT INTO REP_GENERACION_BLOQUE "+
+			"(tipo_mensaje, fk_bloque) "+
 		"VALUES "+
-			"(?)";
+			"(7, ?)";
 
 		Object parametros[] = {
 			msj.getIdBloque()
@@ -1479,10 +1479,10 @@ public class BaseDatos {
 
 	public synchronized void logMensajeGeneracionTarea (MensajeGeneracionTarea msj) {
 		String query =
-		"INSERT INTO REP_MENSAJE_GENERACION_TAREA "+
-			"(tarea, fk_tarea, fk_bloque) "+
+		"INSERT INTO REP_GENERACION_TAREA "+
+			"(tipo_mensaje, tarea, fk_tarea, fk_bloque) "+
 		"VALUES "+
-			"(?, ?, ?)";
+			"(8, ?, ?, ?)";
 		
 		Object parametros[] = {
 			msj.getTarea(),
@@ -1507,15 +1507,15 @@ public class BaseDatos {
 	private void setParametrosStatement (PreparedStatement stm, Object[] params) throws Exception {
 		for (int i = 0; i < params.length; i++) {
 			if (params[i] instanceof Integer) {
-				stm.setInt(i, (Integer) params[i]);
+				stm.setInt(i+1, (Integer) params[i]);
 			} else if (params[i] instanceof String) {
-				stm.setString(i, (String) params[i]);
+				stm.setString(i+1, (String) params[i]);
 			} else if (params[i] instanceof byte[]) {
-				stm.setBytes (i, (byte[]) params[i]);
+				stm.setBytes (i+1, (byte[]) params[i]);
 			} else if (params[i] instanceof Long) {
-				stm.setLong (i, (Long) params[i]);
+				stm.setLong (i+1, (Long) params[i]);
 			} else {
-				throw new Exception ("Error al hacer casting para insert");
+				throw new Exception ("Error al hacer casting para insert (clase "+ params[i].getClass().getName());
 			}
 		}
 	}
