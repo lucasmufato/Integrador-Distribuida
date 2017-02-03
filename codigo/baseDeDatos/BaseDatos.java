@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.List;
 import java.util.Date;
+import java.util.Properties;
+import java.io.FileInputStream;
 
 import bloquesYTareas.*;
 import mensajes.replicacion.*;
@@ -22,11 +24,12 @@ public class BaseDatos {
 
 	private static BaseDatos instance = null; //Esto es para el singleton
 	protected Connection c;
-	protected final static String host="localhost";
-	protected final static String nombreBD="finaldistribuido";
-	protected final static Integer puertoBD=5432;
-	protected final static String user="distribuido";
-	protected final static String password="sistemas";
+	protected final static String CONFIG_FILE = "configuracion.properties";
+	protected String hostBD="localhost";
+	protected String nombreBD="finaldistribuido";
+	protected Integer puertoBD=5432;
+	protected String userBD="distribuido";
+	protected String passwordBD="sistemas";
 	protected static Integer contadorSesiones;	//para que vaya devolviendo numero consecutivos de sesion
 	private Loggeador logger;
 
@@ -34,7 +37,8 @@ public class BaseDatos {
 	private Map <Integer, Bloque> cacheBloques;
 	private Map <Integer, Tarea> cacheTareas;
 
-	private BaseDatos(){
+	private BaseDatos(Properties config) {
+		this.cargarConfiguracion (config);
 		this.cacheBloques = new HashMap <Integer, Bloque> ();
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 		this.conectarse();
@@ -42,16 +46,31 @@ public class BaseDatos {
 	}
 
 	public static BaseDatos getInstance () {
-		if(BaseDatos.instance == null) {
-			BaseDatos.instance = new BaseDatos();
+		try {
+			if(BaseDatos.instance == null) {
+				Properties config = new Properties();
+				config.load (new FileInputStream (CONFIG_FILE));
+				BaseDatos.instance = new BaseDatos (config);
+			}
+			return BaseDatos.instance;
+		} catch (Exception e) {
+				Loggeador.getLoggeador().guardar(e);
+			return null;
 		}
-		return BaseDatos.instance;
+	}
+
+	public void cargarConfiguracion (Properties config) {
+		this.hostBD = config.getProperty ("host", "localhost");
+		this.nombreBD = config.getProperty ("nombreBD", "finaldistribuido");
+		this.puertoBD = Integer.parseInt (config.getProperty ("puertoBD", "5432"));
+		this.userBD = config.getProperty ("user", "distribuido");
+		this.passwordBD = config.getProperty ("password", "sistemas");
 	}
 
 	public boolean conectarse(){
 		try {
 	         Class.forName("org.postgresql.Driver");
-	         c = DriverManager.getConnection("jdbc:postgresql://"+host+":"+puertoBD+"/"+nombreBD,user, password);
+	         c = DriverManager.getConnection("jdbc:postgresql://"+this.hostBD+":"+this.puertoBD+"/"+this.nombreBD, this.userBD, this.passwordBD);
 	         return true;
 	      } catch (Exception e) {
 	    	 this.logger.guardar(e);
