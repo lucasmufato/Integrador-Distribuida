@@ -16,6 +16,7 @@ import cliente.ModoTrabajo;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import jxl.write.Label;
+import jxl.write.Number;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
@@ -209,20 +210,20 @@ public class Loggeador {
 			s=s+"- Respuesta Parcial";
 		}
 		this.guardar("Tiempo", s);
-		String nroTarea="0";
-		String nroBloque="0";
+		Integer nroTarea=0;
+		Integer nroBloque=0;
 		if(tarea!=null){
-			nroBloque=tarea.getBloque().getId().toString();
-			nroTarea=tarea.getId().toString();
+			nroBloque=tarea.getBloque().getId();
+			nroTarea=tarea.getId();
 		}
 		
 		String userName="falta";
 		if(user!=null){
 			userName=user.getNombre();
 		}
-		String stringTiempo="0";
+		Long intTiempo=(long) 0;
 		if(tiempo!=null){
-			stringTiempo=Long.toString(tiempo.getSeconds() );
+			intTiempo=tiempo.getSeconds() ;
 		}
 		String modoTrabajo="monoThread";
 		if(modo!=null){
@@ -236,11 +237,10 @@ public class Loggeador {
 			System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
 			Label l2 = new Label(0,this.ultimaFila,LocalDate.now().toString());
 			Label l3 = new Label(1,this.ultimaFila,LocalTime.now().toString());
-			Label l4 = new Label(2,this.ultimaFila,nroBloque);
-			Label l5 = new Label(3,this.ultimaFila,nroTarea);
+			Number l4 = new Number(2,this.ultimaFila,nroBloque);
+			Number l5 = new Number(3,this.ultimaFila,nroTarea);
 			Label l6 = new Label(4,this.ultimaFila,userName);
-			
-			Label l7 = new Label(5,this.ultimaFila,stringTiempo);
+			Number l7 = new Number(5,this.ultimaFila,intTiempo);
 			Label l8 = new Label(6,this.ultimaFila,modoTrabajo);
 			Label l9=null;
 			if(rtaFinal){
