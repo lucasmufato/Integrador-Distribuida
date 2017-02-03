@@ -222,6 +222,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				setChanged();
 				notifyObservers(tarea);
+				this.replicador.replicarResultadoTarea(tarea, this.usuario);
 				this.servidor.logger.guardar("Tarea",resultado);
 				//SI ESTA FINALIZADO EL BLOQUE ENTONCES
 				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
@@ -237,7 +238,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					}
 					
 				}	
-				this.replicador.replicarResultadoTarea(tarea, this.usuario);
 				this.enviarNuevaTarea();
 				return true;
 			}else{

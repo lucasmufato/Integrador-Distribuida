@@ -28,7 +28,7 @@ public class Primario implements Runnable {
 		protected Integer puerto;
 		protected String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
 		protected static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
-		protected static final int numTareasPorBloque = 4;
+		protected static final int numTareasPorBloque = 16;
 		protected static final int numBytesPorTarea = 40;
 		
 		//variables para la vista

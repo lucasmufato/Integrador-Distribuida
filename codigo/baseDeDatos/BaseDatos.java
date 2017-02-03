@@ -73,7 +73,7 @@ public class BaseDatos {
 	         c = DriverManager.getConnection("jdbc:postgresql://"+this.hostBD+":"+this.puertoBD+"/"+this.nombreBD, this.userBD, this.passwordBD);
 	         return true;
 	      } catch (Exception e) {
-	    	 this.logger.guardar(e);
+	    	 Loggeador.getLoggeador().guardar(e);
 	         return false;
 	      }
 	}
@@ -1189,7 +1189,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 	
-	private MensajeReplicacion getMensajeParcialTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeParcialTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1201,6 +1201,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
@@ -1211,7 +1212,7 @@ public class BaseDatos {
 		}
 		return mensaje;
 	}
-	private MensajeReplicacion getMensajeResultadoTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeResultadoTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1223,6 +1224,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
@@ -1234,7 +1236,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeCompletitudBloque (int version) throws Exception {
+	private MensajeReplicacion getMensajeCompletitudBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1245,6 +1247,7 @@ public class BaseDatos {
 		"WHERE "+
 			"nro_version = ?"
 		);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Bloque bloque = this.getBloque (result.getInt(1));
@@ -1255,7 +1258,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionTareaUsuario (int version) throws Exception {
+	private MensajeReplicacion getMensajeAsignacionTareaUsuario (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1267,7 +1270,7 @@ public class BaseDatos {
 			"REP_ASIGNACION_TAREA_USUARIO "+
 		"WHERE "+
 			"nro_version = ?");
-		stm.setInt (1, version);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt (1));
@@ -1280,7 +1283,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionPuntos (int version) throws Exception {
+	private MensajeReplicacion getMensajeAsignacionPuntos (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1291,7 +1294,7 @@ public class BaseDatos {
 			"REP_ASIGNACION_PUNTOS "+
 		"WHERE "+
 			"nro_version = ?");
-		stm.setInt (1, version);
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			int puntos = result.getInt (1);
@@ -1304,7 +1307,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeDetencionTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeDetencionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1315,6 +1318,7 @@ public class BaseDatos {
 			"REP_DETENCION_TAREA "+
 		"WHERE "+
 			"nro_version = ?" );
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt (1));
@@ -1326,7 +1330,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionBloque (int version) throws Exception {
+	private MensajeReplicacion getMensajeGeneracionBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1336,6 +1340,7 @@ public class BaseDatos {
 			"REP_GENERACION_BLOQUE "+
 		"WHERE "+
 			"nro_version = ?" );
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			int idBloque = result.getInt (1);
@@ -1346,7 +1351,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionTarea (int version) throws Exception {
+	private MensajeReplicacion getMensajeGeneracionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1358,6 +1363,7 @@ public class BaseDatos {
 			"REP_GENERACION_TAREA "+
 		"WHERE "+
 			"nro_version = ?");
+		stm.setLong (1, version);
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			byte[] bytesTarea = result.getBytes (1);
@@ -1387,6 +1393,10 @@ public class BaseDatos {
 			this.logger.guardar (e);
 			return 0;
 		}
+	}
+
+	public synchronized void guardarMensajeReplicado (MensajeReplicacion msj) {
+		//IMPLEMENTAR !
 	}
 	
 	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj) {
@@ -1419,6 +1429,8 @@ public class BaseDatos {
 			msj.getTarea().getBloque().getId(),
 			msj.getUsuario().getId()
 		};
+
+		this.insertParametrizado (query, parametros);
 	}
 
 	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj) {
