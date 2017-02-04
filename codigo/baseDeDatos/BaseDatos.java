@@ -1586,7 +1586,7 @@ public class BaseDatos {
 		if (replicado) {
 			query += ", ?, ?";
 		}
-		query += ")";
+		query += ") ";
 
 		if (replicado) {
 			Object[] param2 = new Object[parametros.length+2];
@@ -1599,9 +1599,27 @@ public class BaseDatos {
 			param2[i+1] = msj.getFecha ();
 			this.insertParametrizado (query, param2);
 		} else {
-			this.insertParametrizado (query, parametros);
+			query += "RETURNING nro_version, fecha";
+			this.insertarMensajeReplicable (msj, query, parametros);
 		}
 
+	}
+
+	private void insertarMensajeReplicable (MensajeReplicacion msj, String query, Object[] parametros) {
+		try {
+			PreparedStatement stm = this.c.prepareStatement (query);
+			this.setParametrosStatement (stm, parametros);
+			ResultSet result = stm.executeQuery ();
+			if (result.next ()) {
+				msj.setNroVersion (result.getLong(1));
+				msj.setFecha (result.getTimestamp(2));
+			} else {
+				System.err.println ("ERROR AL ESTABLECER nroVersion Y fecha a mensaje replicado");
+			}
+
+		} catch (Exception e) {
+			this.logger.guardar (e);
+		}
 	}
 
 	public synchronized boolean insertParametrizado (String query, Object[] parametros) {
