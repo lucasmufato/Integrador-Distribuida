@@ -129,31 +129,31 @@ public class Loggeador {
 		return true;
 	}
 
-	public boolean guardar (MensajeReplicacion mensajeReplicacion) {
+	public boolean guardar (MensajeReplicacion mensajeReplicacion, boolean replicado) {
 		switch (mensajeReplicacion.getCodigo()) {
 			case parcialTarea :
-				this.baseDatos.logMensajeParcialTarea ((MensajeParcialTarea) mensajeReplicacion);
+				this.baseDatos.logMensajeParcialTarea ((MensajeParcialTarea) mensajeReplicacion, replicado);
 				break;
 			case resultadoTarea :
-				this.baseDatos.logMensajeResultadoTarea ((MensajeResultadoTarea) mensajeReplicacion);
+				this.baseDatos.logMensajeResultadoTarea ((MensajeResultadoTarea) mensajeReplicacion, replicado);
 				break;
 			case completitudBloque :
-				this.baseDatos.logMensajeCompletitudBloque ((MensajeCompletitudBloque) mensajeReplicacion);
+				this.baseDatos.logMensajeCompletitudBloque ((MensajeCompletitudBloque) mensajeReplicacion, replicado);
 				break;
 			case asignacionTareaUsuario :
-				this.baseDatos.logMensajeAsignacionTareaUsuario ((MensajeAsignacionTareaUsuario) mensajeReplicacion);
+				this.baseDatos.logMensajeAsignacionTareaUsuario ((MensajeAsignacionTareaUsuario) mensajeReplicacion, replicado);
 				break;
 			case detencionTarea :
-				this.baseDatos.logMensajeDetencionTarea ((MensajeDetencionTarea) mensajeReplicacion);
+				this.baseDatos.logMensajeDetencionTarea ((MensajeDetencionTarea) mensajeReplicacion, replicado);
 				break;
 			case asignacionPuntos :
-				this.baseDatos.logMensajeAsignacionPuntos ((MensajeAsignacionPuntos) mensajeReplicacion);
+				this.baseDatos.logMensajeAsignacionPuntos ((MensajeAsignacionPuntos) mensajeReplicacion, replicado);
 				break;
 			case generacionBloque :
-				this.baseDatos.logMensajeGeneracionBloque ((MensajeGeneracionBloque) mensajeReplicacion);
+				this.baseDatos.logMensajeGeneracionBloque ((MensajeGeneracionBloque) mensajeReplicacion, replicado);
 				break;
 			case generacionTarea :
-				this.baseDatos.logMensajeGeneracionTarea ((MensajeGeneracionTarea) mensajeReplicacion);
+				this.baseDatos.logMensajeGeneracionTarea ((MensajeGeneracionTarea) mensajeReplicacion, replicado);
 				break;
 		default:
 			break;

@@ -53,7 +53,7 @@ public class HiloBackup extends Observable implements Runnable {
 			while(this.conectado){
 				try {
 					MensajeReplicacion msj= (MensajeReplicacion)this.flujoEntrante.readObject();
-					this.bd.guardarMensajeReplicado (msj);
+					System.out.println("[DEBUG] Recibido mensaje "+ msj.getClass().getName());
 					switch(msj.getCodigo()){
 					case asignacionTareaUsuario:
 						this.procesarAsignacionTareaUsuario ((MensajeAsignacionTareaUsuario) msj);
@@ -89,7 +89,8 @@ public class HiloBackup extends Observable implements Runnable {
 						}
 						id_ultimo_bloque = msjTarea.getIdBloque();
 						break;
-				}
+					}
+				this.bd.guardarMensajeReplicado (msj);
 				} catch (ClassNotFoundException e) {
 					this.logger.guardar(e);
 				}

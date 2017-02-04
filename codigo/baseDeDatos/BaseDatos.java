@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -1232,6 +1233,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (3);
 			mensaje = new MensajeResultadoTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1254,6 +1256,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (2);
 			mensaje = new MensajeCompletitudBloque (bloque);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1279,6 +1282,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (4);
 			mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1302,6 +1306,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (3);
 			mensaje = new MensajeAsignacionPuntos (puntos, usuario);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 
 		return mensaje;
@@ -1326,6 +1331,7 @@ public class BaseDatos {
 			Date fecha = result.getDate ("fecha");
 			mensaje = new MensajeDetencionTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1347,6 +1353,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (2);
 			mensaje = new MensajeGeneracionBloque (idBloque);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1372,6 +1379,7 @@ public class BaseDatos {
 			Date fecha = result.getDate (4);
 			mensaje = new MensajeGeneracionTarea (idTarea, idBloque, bytesTarea);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
@@ -1396,15 +1404,36 @@ public class BaseDatos {
 	}
 
 	public synchronized void guardarMensajeReplicado (MensajeReplicacion msj) {
-		//IMPLEMENTAR !
+		if (msj instanceof MensajeParcialTarea) {
+			this.logMensajeParcialTarea ((MensajeParcialTarea) msj, true);
+		} else 
+		if (msj instanceof MensajeResultadoTarea) {
+			this.logMensajeResultadoTarea ((MensajeResultadoTarea) msj, true);
+		} else 
+		if (msj instanceof MensajeCompletitudBloque) {
+			this.logMensajeCompletitudBloque ((MensajeCompletitudBloque) msj, true);
+		} else 
+		if (msj instanceof MensajeAsignacionTareaUsuario) {
+			this.logMensajeAsignacionTareaUsuario ((MensajeAsignacionTareaUsuario) msj, true);
+		} else 
+		if (msj instanceof MensajeDetencionTarea) {
+			this.logMensajeDetencionTarea ((MensajeDetencionTarea) msj, true);
+		} else 
+		if (msj instanceof MensajeAsignacionPuntos) {
+			this.logMensajeAsignacionPuntos ((MensajeAsignacionPuntos) msj, true);
+		} else 
+		if (msj instanceof MensajeGeneracionBloque) {
+			this.logMensajeGeneracionBloque ((MensajeGeneracionBloque) msj, true);
+		} else 
+		if (msj instanceof MensajeGeneracionTarea) {
+			this.logMensajeGeneracionTarea ((MensajeGeneracionTarea) msj, true);
+		} else {
+			this.logger.guardar (new Exception ("Tipo de MensajeReplicacion desconocido: "+msj.getClass().getName()));
+		}
+
 	}
 	
-	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj) {
-		String query =
-		"INSERT INTO REP_PARCIAL_TAREA "+
-			"(tipo_mensaje, parcial, fk_tarea, fk_bloque, fk_usuario) "+
-		"VALUES "+
-			"(1, ?, ?, ?, ?)";
+	public synchronized void logMensajeParcialTarea (MensajeParcialTarea msj, boolean replicado) {
 
 		Object parametros[] = {
 			msj.getTarea().getParcial(),
@@ -1413,16 +1442,17 @@ public class BaseDatos {
 			msj.getUsuario().getId()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_PARCIAL_TAREA",
+			"parcial, fk_tarea, fk_bloque, fk_usuario",
+			parametros,
+			1,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeResultadoTarea (MensajeResultadoTarea msj) {
-		String query = 
-		"INSERT INTO REP_RESULTADO_TAREA "+
-			"(tipo_mensaje, resultado, fk_tarea, fk_bloque, fk_usuario) "+
-		"VALUES "+
-			"(2, ?, ?, ?, ?)";
-
+	public synchronized void logMensajeResultadoTarea (MensajeResultadoTarea msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getTarea().getResultado(),
 			msj.getTarea().getId(),
@@ -1430,98 +1460,148 @@ public class BaseDatos {
 			msj.getUsuario().getId()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_RESULTADO_TAREA",
+			"resultado, fk_tarea, fk_bloque, fk_usuario",
+			parametros,
+			2,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj) {
-		String query =
-		"INSERT INTO REP_COMPLETITUD_BLOQUE "+
-			"(tipo_mensaje, fk_bloque) "+
-		"VALUES "+
-			"(3, ?)";
-
+	public synchronized void logMensajeCompletitudBloque (MensajeCompletitudBloque msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getBloque().getId()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_COMPLETITUD_BLOQUE",
+			"fk_bloque",
+			parametros,
+			3,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msj) {
-		String query =
-		"INSERT INTO REP_ASIGNACION_TAREA_USUARIO "+
-			"(tipo_mensaje, fk_tarea, fk_usuario, fk_procesamiento_tarea) "+
-		"VALUES "+
-			"(4, ?, ?, ?)";
-
+	public synchronized void logMensajeAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getTarea().getId(),
 			msj.getUsuario().getId(),
 			msj.getIdProcesamiento()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_ASIGNACION_TAREA_USUARIO",
+			"fk_tarea, fk_usuario, fk_procesamiento_tarea",
+			parametros,
+			4,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeDetencionTarea (MensajeDetencionTarea msj) {
-		String query =
-		"INSERT INTO REP_DETENCION_TAREA "+
-			"(tipo_mensaje, fk_usuario, fk_tarea, fk_bloque) "+
-		"VALUES "+
-			"(5, ?, ?, ?)";
-
+	public synchronized void logMensajeDetencionTarea (MensajeDetencionTarea msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getUsuario().getId(),
 			msj.getTarea().getId(),
 			msj.getTarea().getBloque().getId()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_DETENCION_TAREA",
+			"fk_usuario, fk_tarea, fk_bloque",
+			parametros,
+			5,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeAsignacionPuntos (MensajeAsignacionPuntos msj) {
-		String query =
-		"INSERT INTO REP_ASIGNACION_PUNTOS "+
-			"(tipo_mensaje, puntos, fk_usuario) "+
-		"VALUES "+
-			"(6, ?, ?)";
-		
+	public synchronized void logMensajeAsignacionPuntos (MensajeAsignacionPuntos msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getPuntos(),
 			msj.getUsuario().getId()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_ASIGNACION_PUNTOS",
+			"puntos, fk_usuario",
+			parametros,
+			6,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeGeneracionBloque (MensajeGeneracionBloque msj) {
-		String query =
-		"INSERT INTO REP_GENERACION_BLOQUE "+
-			"(tipo_mensaje, fk_bloque) "+
-		"VALUES "+
-			"(7, ?)";
-
+	public synchronized void logMensajeGeneracionBloque (MensajeGeneracionBloque msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getIdBloque()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_GENERACION_BLOQUE",
+			"fk_bloque",
+			parametros,
+			7,
+			replicado
+		);
 	}
 
-	public synchronized void logMensajeGeneracionTarea (MensajeGeneracionTarea msj) {
-		String query =
-		"INSERT INTO REP_GENERACION_TAREA "+
-			"(tipo_mensaje, tarea, fk_tarea, fk_bloque) "+
-		"VALUES "+
-			"(8, ?, ?, ?)";
-		
+	public synchronized void logMensajeGeneracionTarea (MensajeGeneracionTarea msj, boolean replicado) {
 		Object parametros[] = {
 			msj.getTarea(),
 			msj.getIdTarea(),
 			msj.getIdBloque()
 		};
 
-		this.insertParametrizado (query, parametros);
+		this.insertarMensajeReplicacion (
+			msj,
+			"REP_GENERACION_TAREA",
+			"tarea, fk_tarea, fk_bloque",
+			parametros,
+			8,
+			replicado
+		);
+	}
+
+	private synchronized void insertarMensajeReplicacion (
+		MensajeReplicacion msj,
+		String tabla,
+		String atributos,
+		Object parametros[],
+		int tipo_mensaje,
+		boolean replicado
+	) {
+		String query = "INSERT INTO " + tabla + " (tipo_mensaje, "+atributos;
+		if (replicado) {
+			query += ", nro_version, fecha";
+		}
+		query += ") VALUES (" + tipo_mensaje;
+		for (int i = 0; i<parametros.length; i++) {
+			query += ", ?";
+			}
+		if (replicado) {
+			query += ", ?, ?";
+		}
+		query += ")";
+
+		if (replicado) {
+			Object[] param2 = new Object[parametros.length+2];
+			int i = 0;
+			while (i<parametros.length) {
+				param2[i] = parametros[i];
+				i++;
+			}
+			param2[i] = new Long (msj.getNroVersion ());
+			param2[i+1] = msj.getFecha ();
+			this.insertParametrizado (query, param2);
+		} else {
+			this.insertParametrizado (query, parametros);
+		}
+
 	}
 
 	public synchronized boolean insertParametrizado (String query, Object[] parametros) {
@@ -1545,6 +1625,10 @@ public class BaseDatos {
 				stm.setBytes (i+1, (byte[]) params[i]);
 			} else if (params[i] instanceof Long) {
 				stm.setLong (i+1, (Long) params[i]);
+			} else if (params[i] instanceof Date) {
+				stm.setTimestamp (i+1, new Timestamp ( ((Date)params[i]).getTime()) );
+			} else if (params[i] == null) {
+				stm.setNull (i+1, java.sql.Types.NULL);
 			} else {
 				throw new Exception ("Error al hacer casting para insert (clase "+ params[i].getClass().getName());
 			}

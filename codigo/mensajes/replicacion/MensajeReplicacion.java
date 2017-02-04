@@ -7,6 +7,7 @@ public class MensajeReplicacion implements Serializable {
 
 	protected static final long serialVersionUID = 1L;
 	protected CodigoMensajeReplicacion codigo;
+	protected long nroVersion;
 	protected Date fecha;
 	
 	public MensajeReplicacion (CodigoMensajeReplicacion codigo) {
@@ -29,4 +30,11 @@ public class MensajeReplicacion implements Serializable {
 		this.fecha = fecha;
 	}
 
+	public long getNroVersion () {
+		return this.nroVersion;
+	}
+
+	public void setNroVersion (long nroVersion) {
+		this.nroVersion = nroVersion;
+	}
 }

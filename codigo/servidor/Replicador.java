@@ -45,7 +45,7 @@ public class Replicador extends Thread {
 	
 	public void replicar (MensajeReplicacion mensaje) {
 		/* Guardar mensaje en db/log */
-		this.logger.guardar (mensaje);
+		this.logger.guardar (mensaje, false);
 
 		/* Si hay un backup conectado, encolamos el mensaje para enviarselo */
 		if (this.backupEstaConectado) {
@@ -149,7 +149,7 @@ public class Replicador extends Thread {
 		try {
 			MensajeVersion msg = (MensajeVersion) this.flujoEntrante.readObject();
 			long version = msg.getVersion();
-			System.out.println ("DEBUG: Se ha recibido el numero de version"+version);
+			System.out.println ("DEBUG: Se ha recibido el numero de version "+version);
 			List <MensajeReplicacion> cambios = this.baseDatos.getRegistrosCambios (version);
 			this.encolarCambios (cambios);
 		} catch (Exception e) {
