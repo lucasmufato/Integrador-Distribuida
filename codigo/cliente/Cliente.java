@@ -169,6 +169,9 @@ public class Cliente {
 	public void actualizarIPConexion(boolean primario) {
 		vista.actualizarInfoServidor(primario, hiloConexion.getIPConexion(), hiloConexion.getPuertoConexion());
 	}
+	public void actualizarIPConexionBackup(boolean primario, String ip, Integer puerto) {
+		vista.actualizarInfoServidor(primario, ip, puerto);
+	}
 	
 	public void notificarPuntos(MensajePuntos msj) {
 		Integer puntos = msj.getPuntos();

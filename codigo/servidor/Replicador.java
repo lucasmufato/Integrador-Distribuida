@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -30,13 +31,15 @@ public class Replicador extends Thread {
 	private Loggeador logger;
 	private boolean backupEstaConectado = false;
 	private BaseDatos baseDatos;
+	private Primario primario;
 	
-	public Replicador (Loggeador logger, BaseDatos baseDatos) throws IOException {
+	public Replicador (Loggeador logger, BaseDatos baseDatos, Primario primario) throws IOException {
 		this.baseDatos = baseDatos;
 		this.cola = new LinkedList<MensajeReplicacion>();
 		this.colaTmp = new LinkedList<MensajeReplicacion>();
 		this.logger=logger;
 		this.logger.setBaseDatos (baseDatos);
+		this.primario = primario;
 		
 		// CREAR UN SOCKET PARA QUE EL SERVIDOR SECUNDARIO SE CONECTE
 		this.serverSocket = new ServerSocket (PUERTO_REPLICADOR);
@@ -137,6 +140,7 @@ public class Replicador extends Thread {
 	private boolean acceptConnection () {
 		try {
 			this.socket = this.serverSocket.accept();
+			this.primario.mandarNotificacion(socket);
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
 			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
 		} catch (Exception e) {
@@ -144,7 +148,7 @@ public class Replicador extends Thread {
 		}
 		return true;
 	}
-
+	
 	private void enviarCambiosPendientesDB (){
 		try {
 			MensajeVersion msg = (MensajeVersion) this.flujoEntrante.readObject();
