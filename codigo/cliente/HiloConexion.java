@@ -88,6 +88,10 @@ public class HiloConexion implements Runnable {
 					MensajePuntos msj = (MensajePuntos) mensajeRecibido;
 					this.cliente.notificarPuntos(msj);
 					break;
+				case notificacion:
+					MensajeNotificacion mensaje1 = (MensajeNotificacion) mensajeRecibido;
+					this.actualizarDatosBackup(mensaje1);
+					break;
 				case desconexion:
 					this.cliente.primarioDesconecto();
 				default:
@@ -109,6 +113,10 @@ public class HiloConexion implements Runnable {
 		this.cerrarConexiones();
 	}
 
+	private void actualizarDatosBackup(MensajeNotificacion mensaje){
+		this.cliente.actualizarIPConexionBackup(false, mensaje.getIpBackup(), mensaje.getPuertoBackup());
+	}
+	
 	private boolean tarea(Tarea tarea){
 		//VA A RECIBIR LA TAREA, Y VA A LLAMAR AL METODO TRABAJARDEL CLIENTE, PRIMERO VA A PONER EL ESTADO DEL CLIENTE
 		//EN ESPERANDO TRABAJO

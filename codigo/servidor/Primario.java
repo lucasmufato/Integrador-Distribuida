@@ -172,7 +172,7 @@ public class Primario implements Runnable {
 		
 		protected boolean CrearReplicador(){
 			try {
-				replicador = new Replicador(this.logger, this.baseDatos);
+				replicador = new Replicador(this.logger, this.baseDatos, this);
 				replicador.start ();
 			} catch (Exception e) {
 				this.logger.guardar(e);
@@ -394,6 +394,11 @@ public class Primario implements Runnable {
 			BusquedaUDP.trabajando=false;
 		}
 		
+		public void mandarNotificacion(Socket socket) {
+			for (HiloConexionPrimario hilo : this.hilosConexiones) {
+				hilo.enviarIPBackup(socket.getInetAddress(), socket.getPort());
+			}
+		}
 		
 		/** 	SETTERS Y GETTERS		**/
 		public Integer getPuerto() {

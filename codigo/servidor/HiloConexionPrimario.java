@@ -3,6 +3,7 @@ package servidor;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.time.Duration;
 import java.time.Instant;
@@ -40,7 +41,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	protected Integer idSesion;
 	protected Usuario usuario;
 	protected ModoTrabajo modo;
-
+	
 	//variables relacionadas con el watchdog timer (desconecta al cliente si tarda mucho en responder)
 	protected Watchdog wdt = null;
 	
@@ -383,5 +384,15 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 
 	public boolean estaTrabajando () {
 		return (this.tareaEnTrabajo != null);
+	}
+	
+	public void enviarIPBackup(InetAddress ip, Integer puerto) {
+		MensajeNotificacion mensaje = new MensajeNotificacion(CodigoMensaje.notificacion,this.idSesion,ip.toString(), puerto);
+		try {
+			this.flujoSaliente.writeObject(mensaje);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }//fin de la clase
