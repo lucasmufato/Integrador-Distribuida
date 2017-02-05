@@ -185,7 +185,6 @@ public class BaseDatos {
 	public synchronized Tarea getTarea(Integer idUsuario){
 		Tarea tarea = null;
 		ResultSet res_tarea = null;
-		PreparedStatement stm_tarea;
 
 		try {
 			/* Primero buscamos tareas detenidas incompletas */
@@ -297,7 +296,6 @@ public class BaseDatos {
 	}
 
 	public synchronized ArrayList<Tarea> getTareasPorBloque(int id_bloque) {
-		Bloque bloque = this.getBloque (id_bloque);
 		ArrayList <Tarea> lista_tareas;
 		try {
 			PreparedStatement stm = c.prepareStatement(
@@ -1100,6 +1098,7 @@ public class BaseDatos {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public synchronized boolean borrarTodo () {
 		this.limpiarCache ();
 		try {

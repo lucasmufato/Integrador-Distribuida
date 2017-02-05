@@ -221,4 +221,12 @@ public class HiloBackup extends Observable implements Runnable {
 		this.conectado = false;
 	}
 
+	public boolean isConectado() {
+		return conectado;
+	}
+
+	public void setConectado(boolean conectado) {
+		this.conectado = conectado;
+	}
+
 }

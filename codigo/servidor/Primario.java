@@ -53,6 +53,7 @@ public class Primario implements Runnable {
 			this.conectarseBD();
 			this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 			this.crearGUI();
+			this.vista.setServidorText("Servidor Primario");
 			this.logger.guardar("Servidor", "inicio el servicio");
 			try {
 				this.sha256 = MessageDigest.getInstance ("SHA-256");
@@ -145,11 +146,10 @@ public class Primario implements Runnable {
 					//cambiamos de estado asi sale del bucle
 					this.estado=EstadoServidor.desconectado;
 					this.vista.mostrarError(e.getMessage());
-					e.printStackTrace();
+					this.logger.guardar(e);
 				}
 			}
 			this.logger.guardar("Servidor", "Dejo de esperar conexiones.");
-			System.out.println("ya no espero mas conexiones");
 			return false;
 		}
 		
@@ -194,7 +194,7 @@ public class Primario implements Runnable {
 			}
 
 			boolean seguir = true;
-			int posicion_comparar = 0;	//TODO acomodar
+			int posicion_comparar = 0;
 
 			while (seguir) {
 				if (hash[posicion_comparar] < tarea.getLimiteSuperior()[posicion_comparar]) {
@@ -222,7 +222,7 @@ public class Primario implements Runnable {
 			
 			this.CrearReplicador();
 			
-			this.esperarClientes();		
+			this.esperarClientes();
 		}
 
 		public void eliminarHiloConexion(HiloConexionPrimario hiloConexionPrimario) {

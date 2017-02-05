@@ -49,9 +49,6 @@ public class ServidorVista extends JFrame implements Observer{
 	//variables de la clase
 	protected static final long serialVersionUID = 1L;
 	protected Primario servidor;
-	protected Backup backup;
-	protected boolean secundario;
-	//private HashMap<String, JLabel> tareas = new HashMap<String, JLabel>();
 	protected HashMap<Integer, JLabel> tareas =  new HashMap<Integer, JLabel>();
 	
 	//variables de la vista
@@ -69,11 +66,14 @@ public class ServidorVista extends JFrame implements Observer{
 	protected JPanel panel_bloques;
 	protected JLabel label_logo;
 	protected JScrollPane scrollBarBloques;
-
+	protected JLabel servidorLabel;
 	//TAMA�O
 	protected Integer alto = 500;
 	protected Integer ancho = 800;
 	
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public ServidorVista(Primario servidor){
 		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
 		setTitle("Servidor BitCoin Mining");
@@ -84,12 +84,11 @@ public class ServidorVista extends JFrame implements Observer{
 	public ServidorVista(Backup backup){
 		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
 		setTitle("Servidor Backup BitCoin Mining");
-		this.backup = backup;
+		this.servidor = backup;
 		this.crearVista(true);
 	}
 	
 	public void crearVista(boolean secundario) {
-		this.secundario = secundario;
 		this.setVisible(true);
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -126,22 +125,7 @@ public class ServidorVista extends JFrame implements Observer{
 		} else {
 			textFieldPuerto.setText("5555");
 		}
-		/*
-		Properties propiedades = new Properties();
-	    InputStream entrada = null;
-	    try {
-			entrada = new FileInputStream("configuracion.properties");
-			propiedades.load(entrada);
-			String puertoA = propiedades.getProperty("PUERTOA");
-			textFieldPuerto.setText(puertoA);
-	    } catch (FileNotFoundException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		*/
+		
 		//CUANDO PRESIONES EL BOTON, VOY A CHEQUEAR QUE EL PUERTO QUE INGRESE ESTE LIBRE
 		btnConectarServidor = new JButton("Conectar Servidor");
 		btnConectarServidor.addActionListener(new ActionListener() {
@@ -151,15 +135,8 @@ public class ServidorVista extends JFrame implements Observer{
 					if(puerto<1024){
 						throw new NumberFormatException();
 					}
-					if (secundario == false) {
-						if(servidor.pedirPuerto(puerto)){
-							iniciarServidor();
-						}
-					} else {
-						if (backup.pedirPuerto(puerto)) {
-							iniciarServidor();
-							
-						}
+					if(servidor.pedirPuerto(puerto)){
+						iniciarServidor();
 					}
 				}catch(NumberFormatException e1){
 					//si el numero es muy grande tirar error al parsearlo a Integer
@@ -221,15 +198,9 @@ public class ServidorVista extends JFrame implements Observer{
 		btnDesconectar.setBackground(new Color(211, 211, 211));
 		btnDesconectar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (secundario == false) {
-					//LAMARA A UN METODO DESCONECTAR EN LA CLASE PRIMARIO
-					servidor.desconectarse();
-					System.exit(0);
-				}else{
-					//LLAMA A UN METODO DESCONECTAR EN LA CLASE BACKUP
-					backup.desconectarse();
-					System.exit(0);
-				}
+				servidor.desconectarse();
+				morir();
+				System.exit(0);
 			}
 		});
 		btnDesconectar.setBackground(new java.awt.Color(23, 26, 33));
@@ -265,6 +236,10 @@ public class ServidorVista extends JFrame implements Observer{
 		btnGenerarBloques.setBounds(40, 36, this.ancho-(800-210), this.alto-(500-23));
 		jpanel_trabajo.add(btnGenerarBloques);
 		
+		this.servidorLabel = new JLabel("Tipo de Servidor");
+		servidorLabel.setBounds(283, 37, 302, 23);
+		jpanel_trabajo.add(servidorLabel);
+		
 		JSpinner spinner = new JSpinner();
 		spinner.setBounds(462, 36, 60, 20);
 		//jpanel_trabajo.add(spinner); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
@@ -279,15 +254,8 @@ public class ServidorVista extends JFrame implements Observer{
 	}
 	
 	public boolean iniciarServidor(){
-		if (secundario == false) {
-			//ES LLAMADO POR EL BOTON CONECTAR SERVIDOR 
-			Thread ser =new Thread(this.servidor);
-			ser.start();
-			//UNA VEZ QUE DOY EL START, EL METODO RUN VA A LLAMAR AL ESPERARCLIENTES() DEL PRIMARIO
-		} else {
-			System.out.println("Es backup");
-			this.backup.esperarActualizaciones();
-		}
+		Thread ser =new Thread(this.servidor);
+		ser.start();
 		return true;
 	}
 	
@@ -321,14 +289,8 @@ public class ServidorVista extends JFrame implements Observer{
 		label_logo.setBounds((this.ancho-148), 100, 128, 128);
 		jpanel_trabajo.setVisible(true);
 		
-		//MUESTRO LA IP Y EL PUERTO
-		if (secundario == false) {
-			lblIPServidor.setText("Mi IP: " + this.servidor.getIP());
-			lblPuertoServidor.setText("Puerto: " + String.valueOf(this.servidor.getPuerto()));
-		} else {
-			lblIPServidor.setText("Mi IP: " + this.backup.getIP());
-			lblPuertoServidor.setText("Puerto: " + String.valueOf(this.backup.getPuerto()));	
-		}
+		lblIPServidor.setText("Mi IP: " + this.servidor.getIP());
+		lblPuertoServidor.setText("Puerto: " + String.valueOf(this.servidor.getPuerto()));
 		
 	}
 	
@@ -355,7 +317,6 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		}else{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
-				// System.out.println("observe un cambio en HiloConexionPrimario:");
 				//si el que me indica que cambio de estado es el hilo primario
 				//pregunto si cambio el estado del usuario u otra cosa
 				if(objeto.getClass().equals(Usuario.class)){
@@ -382,7 +343,7 @@ public class ServidorVista extends JFrame implements Observer{
                 if(claseLLamadora.getClass().equals(HiloBackup.class)){
                 	System.out.println("Observe un cambio en hilo backup");
                 	if(objeto.getClass().equals(MensajeGeneracionTarea.class)){
-                		this.actualizarAreadeBloques(this.backup.obtenerBloquesNoCompletados());
+                		this.actualizarAreadeBloques(this.servidor.obtenerBloquesNoCompletados());
                 	}else{
                 		String resultado = (String) objeto; 
         				textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
@@ -473,5 +434,18 @@ public class ServidorVista extends JFrame implements Observer{
 			default:
 				return (Color.RED);
 		}
+	}
+	
+	public void setServidorText(String texto){
+		this.servidorLabel.setText(texto);
+	}
+	
+	private void morir() {
+		this.dispose();
+		this.setVisible(false);
+		this.jpanel_servidor=null;
+		this.jpanel_trabajo=null;
+		this.servidor=null;
+		this.tareas=null;
 	}
 }
