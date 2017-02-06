@@ -40,7 +40,18 @@ public class HiloConexion implements Runnable {
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
 			this.flujoSaliente.writeObject(msj);
-			MensajeLogeo respuesta = (MensajeLogeo) this.flujoEntrante.readObject();
+			MensajeLogeo respuesta=null;
+			Object o= this.flujoEntrante.readObject();
+			//si el mensaje que leo es informandome de un servidor de backup todavia tengo q leer el mensaje de logeo
+			if(o.getClass().equals(MensajeNotificacion.class)){
+				//leo el msj de logeo
+				respuesta = (MensajeLogeo) this.flujoEntrante.readObject();
+				MensajeNotificacion msjNotif= (MensajeNotificacion)o;
+				this.cliente.actualizarInformacionBackup(msjNotif.getIpBackup(), msjNotif.getPuertoBackup());
+			}else{
+				respuesta = (MensajeLogeo) o;
+			}
+			
 			if(respuesta.getID_Sesion() == null){
 				//error de logeo
 				//TODO informar a la vista
@@ -74,8 +85,7 @@ public class HiloConexion implements Runnable {
 			//mientras no este desconectado
 			//leo y recibo mensajes
 			cliente.crearGUITrabajo();
-			//MANDO CON TRUE POR AHORA, PERO EN REALIDAD HABRIA QUE PREGUNTAR SI ES PRIMARIO O BACKUP
-			cliente.actualizarIPConexion(true);
+			
 			try {
 				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
 				
@@ -90,7 +100,7 @@ public class HiloConexion implements Runnable {
 					break;
 				case notificacion:
 					MensajeNotificacion mensaje1 = (MensajeNotificacion) mensajeRecibido;
-					this.actualizarDatosBackup(mensaje1);
+					this.cliente.actualizarInformacionBackup(mensaje1.getIpBackup(), mensaje1.getPuertoBackup());
 					break;
 				case desconexion:
 					this.cliente.primarioDesconecto();
@@ -101,20 +111,19 @@ public class HiloConexion implements Runnable {
 				
 				}
 			} catch (java.io.EOFException | java.net.SocketException e) {
-				this.cliente.notificarDesconexion();
+				//this.cliente.setEstado(EstadoCliente.desconectado);
+				this.cliente.primarioDesconecto();
 			} catch (java.net.SocketTimeoutException e) {
 				//no hago nada
 			} catch (ClassNotFoundException | IOException e) {
-				this.cliente.setEstado(EstadoCliente.desconectado);
-				e.printStackTrace();
-				System.out.println("error en la comunicacion con el servidor. Desconectado");
+				//this.cliente.setEstado(EstadoCliente.desconectado);
+				this.cliente.primarioDesconecto();
+				//e.printStackTrace();
+				//System.out.println("error en la comunicacion con el servidor. Desconectado");
 			}
 		}
+		//this.cliente.notificarDesconexion();
 		this.cerrarConexiones();
-	}
-
-	private void actualizarDatosBackup(MensajeNotificacion mensaje){
-		this.cliente.actualizarIPConexionBackup(false, mensaje.getIpBackup(), mensaje.getPuertoBackup());
 	}
 	
 	private boolean tarea(Tarea tarea){
@@ -180,7 +189,4 @@ public class HiloConexion implements Runnable {
 		this.socket=null;
 	}
 
-	public void desconectarse() {
-		//al final creo q es al pedo el metodo
-	}
 }

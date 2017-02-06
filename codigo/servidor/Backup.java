@@ -1,5 +1,6 @@
 package servidor;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
@@ -59,7 +60,7 @@ private static Integer tiempoEsperaBackup=500;
 		hilo.start();
 		//lo hago esperar un poquito a que conexionBackup se conecte con el primario y cambie su estado a conectado
 		try {
-			Thread.sleep(250);
+			Thread.sleep(350);
 		} catch (InterruptedException e1) {
 		}
 		while(conexionBackup.isConectado()){
@@ -69,9 +70,13 @@ private static Integer tiempoEsperaBackup=500;
 				logger.guardar(e);
 			}
 		}
-		this.pasarAPrimario();
-		this.vista.setServidorText("Servidor Primario");
-		this.esperarClientes();
+		if( this.pasarAPrimario() ){
+			this.vista.setServidorText("Servidor Primario");
+			this.esperarClientes();
+		}else{
+			this.vista.MostrarPopUp("error al cambiar a servidor primario. cerrame");
+		}
+		
 	}
 	
 	public boolean pasarAPrimario(){
@@ -86,6 +91,7 @@ private static Integer tiempoEsperaBackup=500;
 			this.sha256 = MessageDigest.getInstance ("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
 			this.logger.guardar(e);
+			return false;
 		}
 		
 		//parte que va dentro del run() de primario
@@ -95,8 +101,18 @@ private static Integer tiempoEsperaBackup=500;
 		this.CrearReplicador();
 		
 		//desecho objetos de backup
+		this.conexionBackup=null;
 		
-		return false;
+		try {
+			System.out.println("probando el puerto :"+this.puerto);
+			//this.serverSO= new ServerSocket(this.puerto);
+			this.serverSO.setSoTimeout(Primario.tiempoEspera);
+		} catch (IOException e) {
+			this.logger.guardar(e);
+			return false;
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -104,7 +120,10 @@ private static Integer tiempoEsperaBackup=500;
 		System.out.println("Desconectando el backup");
 		this.estado = EstadoServidor.desconectado;
 		//CIERRO LA CONEXION DE HILO BACKUP
-		this.conexionBackup.desconectar();
+		if(this.conexionBackup!=null){
+			this.conexionBackup.desconectar();
+		}
+		
 	}
 
 }

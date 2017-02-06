@@ -17,6 +17,12 @@ public class Cliente {
 	private Usuario usuario;
 	private ModoTrabajo modoTrabajo;
 	
+	private String ipPrimario;
+	private Integer puertoPrimario;
+	
+	private String ipBackup;
+	private Integer puertoBackup;
+	
 	public static void main(String[] args) {
 		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
 		Cliente cliente = new Cliente();
@@ -25,7 +31,6 @@ public class Cliente {
 
 	public Cliente(){
 		this.puntos = 0;
-		this.modoTrabajo= ModoTrabajo.multiThread;
 	}
 	
 	public boolean crearGUILogueo(){
@@ -37,19 +42,23 @@ public class Cliente {
 		this.vista.crearPanelTrabajo();
 		return false;
 	}
-	
-	public boolean crearMenuConsola(){
-		//menu para manejarlo por consola
-		return false;
-	}
-	
+
 	public boolean conectarseServidorPrimario(String ip, Integer puerto, String usuario, String password){
 		// a este metodo lo llamaria la vista
 		this.hiloConexion = new HiloConexion(this);
 		if (this.hiloConexion.conectarse(ip, puerto, usuario, password) ){
+			//ya que la conexion fue exitosa guardo los datos
+			this.ipPrimario=ip;
+			this.puertoPrimario=puerto;
+			this.usuario= new Usuario();
+			this.usuario.setNombre(usuario);
+			this.usuario.setPassword(password);
+			//inicio el hilo de comunicacion
 			hilo = new Thread(hiloConexion);
 			hilo.start();
 			vista.mostrarMsjPorConsola("Conexion exitosa");
+			
+			this.vista.actualizarInfoServidor(this.ipPrimario, this.puertoPrimario, null, null);
 			return true;
 		}else{
 			vista.mostrarMsjPorConsola("Error en el logueo, datos incorrectos");
@@ -58,12 +67,18 @@ public class Cliente {
 	}
 	
 	public boolean conectarseServidorBackup(){
-		//este metodo se llamaria automaticamente si no responde el servidor primario
-		return false;
-	}
-	
-	public boolean logearse(){
-		// lo llama la vista, y este llama al hilo recien creado para que se loguee
+		this.ipPrimario=this.ipBackup;
+		this.puertoPrimario=this.puertoBackup;
+		this.ipBackup=null;
+		this.puertoBackup=null;
+		this.hiloConexion = new HiloConexion(this);
+		if( this.hiloConexion.conectarse (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword()) ){
+			this.vista.actualizarInfoServidor(this.ipPrimario, this.puertoPrimario, null, null);
+			hilo = new Thread(hiloConexion);
+			hilo.start();
+			vista.mostrarMsjPorConsola("Conexion exitosa con el servidor de Backup");
+			return true;
+		}
 		return false;
 	}
 	
@@ -75,7 +90,7 @@ public class Cliente {
 			this.hiloMinero.detener();
 		}
 		this.liberarRecursos();
-		return false;
+		return true;
 	}
 
 	public void notificarDesconexion () {
@@ -109,7 +124,6 @@ public class Cliente {
 							this.hiloMinero = new HiloMineroGestorMultiCore(this, tarea);
 							break;
 						case video:
-							//TODO	 faltaaaa
 							break;
 						}
 					}else{
@@ -132,11 +146,6 @@ public class Cliente {
 	}
 
 	public void setEstado(EstadoCliente estado) {
-		/*	ME TIRO ERROR AL USARLO PROBARLO CON SOCKETS
-		synchronized (this.estado) {
-			this.estado = estado;
-		}
-		*/
 		this.estado=estado;
 	}
 
@@ -165,14 +174,6 @@ public class Cliente {
 		return puntos;
 	}
 	
-	//SI RECIBE UN TRUE ES QUE LA INFO ES DEL PRIMARIO Y SINO DEL BACKUP
-	public void actualizarIPConexion(boolean primario) {
-		vista.actualizarInfoServidor(primario, hiloConexion.getIPConexion(), hiloConexion.getPuertoConexion());
-	}
-	public void actualizarIPConexionBackup(boolean primario, String ip, Integer puerto) {
-		vista.actualizarInfoServidor(primario, ip, puerto);
-	}
-	
 	public void notificarPuntos(MensajePuntos msj) {
 		Integer puntos = msj.getPuntos();
 		this.setPuntos(puntos);
@@ -183,20 +184,24 @@ public class Cliente {
 	public void primarioDesconecto() {
 		// este metodo lo llama el hilo conexion en caso de que se desconecte del hilo primario(de buena o mala manera)
 		this.notificarDesconexion();
+		if (hiloMinero != null) {
+			this.hiloMinero.detener();
+		}
 		if(this.tengoServidorBackup() == true){
 			vista.mostrarMsjPorConsola("intentando conectar al servidor de backup, mientras sigo procesando la tarea");
-			//TODO cuando este lo de backup 
+			this.conectarseServidorBackup();
 		}else{
 			vista.mostrarMsjPorConsola("no tengo informacion del backup, asi que dejo de procesar y quedo en estado muerto");
-			if (hiloMinero != null) {
-				this.hiloMinero.detener();
-			}
+			
 		}
+		
 	}
 
 	private boolean tengoServidorBackup() {
-		// TODO metodo que chequea si tengo info del servidor backup para conectarme
-		return false;
+		if(this.puertoBackup==null || this.ipBackup==null){
+			return false;
+		}
+		return true;
 	}
 	
 	public void setUsuarioACliente(Usuario usuario) {
@@ -211,6 +216,12 @@ public class Cliente {
 	public void setModoTrabajo(ModoTrabajo modoTrabajo) {
 		this.modoTrabajo = modoTrabajo;
 	}
+
+	public void actualizarInformacionBackup(String ipBackup2, Integer puertoBackup2) {
+		this.ipBackup=ipBackup2;
+		this.puertoBackup=puertoBackup2;
+		System.out.println("datos backup -> ip:"+this.ipBackup+" puerto: "+this.puertoBackup);
+		this.vista.actualizarInfoServidor(this.ipPrimario,this.puertoPrimario , this.ipBackup, this.puertoBackup);
+	}
 	
 }
-

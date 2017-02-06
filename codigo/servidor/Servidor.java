@@ -59,13 +59,10 @@ public class Servidor {
 			this.ventana.agregarLine("Conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
 			this.logger.guardar("inicio","Conectadose al servidor primario encontrado en la red local: ip-"+ipPrimario+" puerto-"+puerto);
 			this.crearServidorBackup(ipPrimario, puerto.toString());
-			try {
-				Thread.sleep(2000);
-				this.ventana.cerrarVentana();
-				this.ventana=null;
-			} catch (InterruptedException e) {
-				this.logger.guardar(e);
-			}
+			
+			this.ventana.cerrarVentana();
+			this.ventana=null;
+
 			return true;
 		}
 		
@@ -104,6 +101,7 @@ public class Servidor {
 				       	this.crearServidorBackup(ip, puerto);
 				       	this.ventana.cerrarVentana();
 				       	this.ventana=null;
+				       	prueba.close();
 				    }catch (Exception e){
 				    	this.logger.guardar("inicio","No tuve respuesta desde: "+ip + ":"+puerto);
 				    }

@@ -3,7 +3,6 @@ package servidor;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.time.Duration;
 import java.time.Instant;
@@ -386,13 +385,12 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		return (this.tareaEnTrabajo != null);
 	}
 	
-	public void enviarIPBackup(InetAddress ip, Integer puerto) {
-		MensajeNotificacion mensaje = new MensajeNotificacion(CodigoMensaje.notificacion,this.idSesion,ip.toString(), puerto);
+	public void enviarIPBackup(String ip, Integer puerto) {
+		MensajeNotificacion mensaje = new MensajeNotificacion(CodigoMensaje.notificacion,this.idSesion,ip, puerto);
 		try {
 			this.flujoSaliente.writeObject(mensaje);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.servidor.logger.guardar(e);
 		}
 	}
 }//fin de la clase

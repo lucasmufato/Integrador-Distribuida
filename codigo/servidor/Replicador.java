@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -140,9 +139,13 @@ public class Replicador extends Thread {
 	private boolean acceptConnection () {
 		try {
 			this.socket = this.serverSocket.accept();
-			this.primario.mandarNotificacion(socket);
+			
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
 			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
+			Integer puerto=(Integer) this.flujoEntrante.readObject();
+			this.primario.setIpBackup(socket.getInetAddress().getHostAddress());
+			this.primario.setPuertoBackup(puerto);
+			this.primario.mandarNotificacion();
 		} catch (Exception e) {
 			this.logger.guardar(e);
 		}

@@ -1,7 +1,6 @@
 package mensajes.replicacion;
 
 import java.io.Serializable;
-import bloquesYTareas.Tarea;
 import baseDeDatos.Usuario;
 
 public class MensajeAsignacionPuntos extends MensajeReplicacion implements Serializable {

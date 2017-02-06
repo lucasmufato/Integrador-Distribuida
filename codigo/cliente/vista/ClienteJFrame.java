@@ -61,6 +61,7 @@ public class ClienteJFrame extends JFrame {
 		this.setResizable(false);
 		this.setBounds(250, 250, 580, 330);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//TODO cuando cierre la ventana q llame al metodo cerrar de esta clase
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -178,7 +179,7 @@ public class ClienteJFrame extends JFrame {
 		btnSalir.setBackground(new java.awt.Color(23, 26, 33));
 		btnSalir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				System.exit(0);
+				cerrar();
 			}
 		});
 		
@@ -264,17 +265,14 @@ public class ClienteJFrame extends JFrame {
 			int modoTrabajo = this.modoTrabajoComboBox.getSelectedIndex();
 			switch(modoTrabajo){
 				case 0:
-					System.out.println("seteo modo MONO");
 					this.cliente.setModoTrabajo(ModoTrabajo.monoThread);
 					lblModo.setText("Modo: MonoProcesador");
 					break;
 				case 1:
-					System.out.println("seteo modo MULTI");
 					this.cliente.setModoTrabajo(ModoTrabajo.multiThread);
 					lblModo.setText("Modo: MultiProcesador");
 					break;
 				default:
-					System.out.println("seteo modo DEFAULT");
 					this.cliente.setModoTrabajo(ModoTrabajo.video);
 					lblModo.setText("Modo: PlacaVideo");
 					break;					
@@ -331,21 +329,38 @@ public class ClienteJFrame extends JFrame {
 		lblPuntos.setText("Puntos: " + puntos);
 	}
 	
-	public void actualizarInfoServidor(boolean primario, String ip, Integer puerto) {
-		if (primario) {
+	public void actualizarInfoServidor(String ipPrimario, Integer puertoPrimario,String ipSecundario, Integer puertoSecundario) {
+		
+		//label primario
+		if(ipPrimario==null || puertoPrimario==null){
+			lblServidorPrimario.setText("Servidor Primario: -");
+			lblDireccionIp.setText("Direccion IP: - ");
+			lblPuerto.setText("Puerto: - ");
+		}else{
 			lblServidorPrimario.setText("Servidor Primario: Conectado");
+			lblDireccionIp.setText("Direccion IP: " + ipPrimario);
+			lblPuerto.setText("Puerto: " + puertoPrimario);
+		}
+		
+		//labels secundario
+		if(ipSecundario==null || puertoSecundario==null){
 			lblServidorBackup.setText("Servidor Backup: - ");
-			lblDireccionIp.setText("Direccion IP: " + ip);
-			lblPuerto.setText("Puerto: " + puerto);
 			lblDireccionIp_1.setText("Direccion IP: - ");
 			lblPuerto_1.setText("Puerto: - ");
-		} else {
-			lblServidorPrimario.setText("Servidor Primario: - ");
-			lblServidorBackup.setText("Servidor Backup: Conectado");
-			lblDireccionIp_1.setText("Direccion IP: " + ip);
-			lblPuerto_1.setText("Puerto: " + puerto);
-			lblPuerto.setText("Puerto: - ");
-			lblDireccionIp.setText("Direccion IP: - ");
+		}else{
+			lblServidorBackup.setText("Servidor Backup: Disponible ");
+			lblDireccionIp_1.setText("Direccion IP: "+ipSecundario);
+			lblPuerto_1.setText("Puerto: - "+puertoSecundario);
 		}
+		
+		
+	}
+
+	private void cerrar() {
+		// TODO Auto-generated method stub
+		this.cliente.desconectarse();
+		this.cliente=null;
+		this.dispose();
+		System.exit(0);
 	}
 }

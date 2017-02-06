@@ -114,8 +114,8 @@ public class ServidorVista extends JFrame implements Observer{
 		textFieldPuerto = new JTextField();
 		textFieldPuerto.setBackground(Color.DARK_GRAY);
 		textFieldPuerto.setForeground(Color.BLACK);
-		textFieldPuerto.setEnabled(false);
-		textFieldPuerto.setEditable(false);
+		textFieldPuerto.setEnabled(true);
+		textFieldPuerto.setEditable(true);
 		textFieldPuerto.setBounds((this.ancho-180)/2, ((this.alto-20)*2/3), 180, 24);
 		jpanel_servidor.add(textFieldPuerto);
 		textFieldPuerto.setColumns(10);
@@ -378,8 +378,6 @@ public class ServidorVista extends JFrame implements Observer{
 			y += 16;
 			
 			cantidadTareas = bs.get(numbloques).getTareas().size();
-			System.out.println("Bloque " + numbloques + ": ");
-			System.out.println(cantidadTareas);
 			for (int numtareas = 1; numtareas <= cantidadTareas; numtareas++) {
 				//SI LLEGUE A 16 TAREAS TENGO QUE BAJAR DE RENGLON
 				if ((numtareas % 16) == 0){

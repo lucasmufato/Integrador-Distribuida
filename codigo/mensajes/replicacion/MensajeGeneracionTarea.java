@@ -1,7 +1,6 @@
 package mensajes.replicacion;
 
 import java.io.Serializable;
-import bloquesYTareas.Tarea;
 
 
 public class MensajeGeneracionTarea extends MensajeReplicacion implements Serializable {

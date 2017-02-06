@@ -43,10 +43,12 @@ public class HiloBackup extends Observable implements Runnable {
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
 			System.out.println("[DEBUG] Conectado a Replicador");
 			this.logger.guardar("HiloBackup", "conectado con el servidor primario en: "+ip+":"+7567);
-			
-			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			this.conectado=true;
-			String resultado;
+			this.flujoSaliente.writeObject(backup.getPuerto());
+		} catch (IOException e) {
+			this.logger.guardar(e);
+		}
+			//ACA VA A EMPEZAR A RECIBIR MSJ DE ACTUALIZACION A LA BD
 			Integer cont = 0;
 			Integer id_ultimo_bloque = 0;
 			this.enviarVersionDB ();
@@ -80,7 +82,7 @@ public class HiloBackup extends Observable implements Runnable {
 						MensajeGeneracionTarea msjTarea = (MensajeGeneracionTarea) msj;
 						this.procesarGeneracionTarea (msjTarea);
 
-						if(cont == this.backup.numTareasPorBloque || (cont > 1 && id_ultimo_bloque != msjTarea.getIdBloque())){
+						if(cont == Backup.numTareasPorBloque || (cont > 1 && id_ultimo_bloque != msjTarea.getIdBloque())){
 							cont=0;
 							
 							setChanged();
@@ -88,19 +90,23 @@ public class HiloBackup extends Observable implements Runnable {
 						}
 						id_ultimo_bloque = msjTarea.getIdBloque();
 						break;
+					default:
+						break;
 					}
 				this.bd.guardarMensajeReplicado (msj);
 				} catch (ClassNotFoundException e) {
 					this.logger.guardar(e);
+				} catch (IOException e) {
+					this.logger.guardar("Backup", "perdi la conexion con el primario, guardando error");
+					this.logger.guardar(e);
+					this.conectado=false;
 				}
 			}
 			//SI ESTOY ACA ES PORQUE CONECTADO YA ES FALSE
 			//EJECUTO METODOS PARA CERRAR LA CONEXION
 			this.morir();
 			
-		} catch (IOException e) {
-			this.logger.guardar(e);
-		}
+		
 	}
 
 	private void enviarVersionDB () {
@@ -205,6 +211,7 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	private void morir() {
+		this.desconectar();
 		//RELACION CON BACKUP EN NULL
 		this.backup = null;
 		
@@ -217,7 +224,6 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	public void desconectar() {
-		// TODO Auto-generated method stub
 		this.conectado = false;
 	}
 

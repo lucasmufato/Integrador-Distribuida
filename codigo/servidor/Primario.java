@@ -43,6 +43,9 @@ public class Primario implements Runnable {
 		protected Replicador replicador;
 		protected BusquedaUDP servicioUDP;
 		public Loggeador logger;
+		protected String ipBackup;
+		protected Integer puertoBackup;
+		
 		
 		public Primario(String ip, String puerto,Loggeador logger){
 			this.setPuerto(Integer.valueOf(puerto));
@@ -124,11 +127,10 @@ public class Primario implements Runnable {
 			this.estado=EstadoServidor.esperandoClientes;
 			this.logger.guardar("Servidor", "Esperando conexiones");
 			this.vista.mostrarMsjConsola("Esperando conexiones");
-			//CREO LA GUI2
-			this.crearGUI2();
 			
 			while (this.estado.equals( EstadoServidor.esperandoClientes) ){
 				try {
+					
 					Socket s = this.serverSO.accept();
 					this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
 					this.logger.guardar("Conexiones", "Se conecto: "+s.getRemoteSocketAddress() );
@@ -138,7 +140,12 @@ public class Primario implements Runnable {
 					this.hilosConexiones.add(nuevaConexion);
 					Thread hilo = new Thread(nuevaConexion);
 					this.hilos.add(hilo);
-					hilo.start();	
+					hilo.start();
+					//si ya tengo info del backup se la envio
+					if(this.ipBackup!=null && this.puertoBackup!=null){
+						Thread.sleep(100);	//TODO por lucas, lo tengo q borrar y acomodar mejor lo de enviar el mensaje de notificacion.
+						nuevaConexion.enviarIPBackup(this.ipBackup, this.puertoBackup);
+					}
 				} catch (SocketTimeoutException e) {
 					//si sale por timeout no hay problema
 				} catch (IOException e) {
@@ -147,6 +154,9 @@ public class Primario implements Runnable {
 					this.estado=EstadoServidor.desconectado;
 					this.vista.mostrarError(e.getMessage());
 					this.logger.guardar(e);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 			this.logger.guardar("Servidor", "Dejo de esperar conexiones.");
@@ -155,13 +165,11 @@ public class Primario implements Runnable {
 		
 		public boolean pedirPuerto(Integer puerto){
 			try {
-				//this.puerto=puerto;
-				if (puerto == 5555) {
-					this.serverSO = new ServerSocket(this.puerto);
-					this.serverSO.setSoTimeout(tiempoEspera);
-					this.vista.MostrarPopUp("Servidor conectado con exito");
-					this.logger.guardar("Servidor", "Solicite el puerto: "+this.puerto +" con exito.");
-				}
+				this.puerto=puerto;
+				this.serverSO = new ServerSocket(this.puerto);
+				this.serverSO.setSoTimeout(tiempoEspera);
+				this.vista.MostrarPopUp("Servidor conectado con exito");
+				this.logger.guardar("Servidor", "Solicite el puerto: "+this.puerto +" con exito.");
 				return true;
 			} catch (IOException e) {
 				this.logger.guardar(e);
@@ -221,7 +229,7 @@ public class Primario implements Runnable {
 			hiloServicioUDP.start();
 			
 			this.CrearReplicador();
-			
+			this.crearGUI2();
 			this.esperarClientes();
 		}
 
@@ -394,9 +402,9 @@ public class Primario implements Runnable {
 			BusquedaUDP.trabajando=false;
 		}
 		
-		public void mandarNotificacion(Socket socket) {
+		public void mandarNotificacion() {
 			for (HiloConexionPrimario hilo : this.hilosConexiones) {
-				hilo.enviarIPBackup(socket.getInetAddress(), socket.getPort());
+				hilo.enviarIPBackup(this.ipBackup, this.puertoBackup);
 			}
 		}
 		
@@ -435,6 +443,22 @@ public class Primario implements Runnable {
 		public void setIP(String ip) {
 			this.IP = ip;
 			
+		}
+
+		public String getIpBackup() {
+			return ipBackup;
+		}
+
+		public void setIpBackup(String ipBackup) {
+			this.ipBackup = ipBackup;
+		}
+
+		public Integer getPuertoBackup() {
+			return puertoBackup;
+		}
+
+		public void setPuertoBackup(Integer puertoBackup) {
+			this.puertoBackup = puertoBackup;
 		}
 
 	}

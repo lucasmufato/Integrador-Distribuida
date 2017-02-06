@@ -1,8 +1,6 @@
 package mensajes.replicacion;
 
 import java.io.Serializable;
-import bloquesYTareas.Bloque;
-import baseDeDatos.Usuario;
 
 public class MensajeGeneracionBloque extends MensajeReplicacion implements Serializable {
 	protected static final long serialVersionUID = 1L;

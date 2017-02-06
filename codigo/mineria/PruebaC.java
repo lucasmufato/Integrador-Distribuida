@@ -9,6 +9,7 @@ public class PruebaC {
 	private Process p;
 	private InputStream in;
 	private OutputStream out;
+	@SuppressWarnings("unused")
 	private InputStream err;
 	
 	public static void main(String[] args){
@@ -45,6 +46,7 @@ public class PruebaC {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean pasarleTarea(){
 		byte[] tareaResolver = {0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F, 0x0B, 0x0A, 0x03, 0x0F};	//11bytes
 		byte[] parcial = {0x00};
@@ -84,7 +86,7 @@ public class PruebaC {
 	}
 	
 	
-	private boolean comunicarseC(){
+	protected boolean comunicarseC(){
 		//send a command to 
 
         printOut.println("hola mundo");
