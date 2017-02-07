@@ -171,8 +171,6 @@ public class HiloConexion implements Runnable {
 		try {
 			if(this.socket!=null){
 				this.escribirObjetoSocket(mensaje);
-				//cambio un poco la tarea para que si se reenvia por ahi se lee de otra manera
-				this.ultimaTarea.setBloque(null);
 				
 			}
 		} catch (IOException e) {
