@@ -68,6 +68,20 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		this.repeticiones=0;
 	}
 
+	protected Object leerObjetoSocket () throws IOException, ClassNotFoundException {
+		Object object;
+		synchronized (this.flujoEntrante) {
+			object = this.flujoEntrante.readObject ();
+		}
+		return object;
+	}
+
+	protected void escribirObjetoSocket (Object objeto) throws IOException {
+		synchronized (this.flujoSaliente) {
+			this.flujoSaliente.writeObject (objeto);
+		}
+	}
+
 	@Override
 	public void run() {
 		//hago el logeo
@@ -112,7 +126,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			while(!logeado){
 				try {
 					//leo lo que me manda (el usuario es el primero en mandar algo)
-					msj=(MensajeLogeo)this.flujoEntrante.readObject();
+					msj=(MensajeLogeo)this.leerObjetoSocket();
 				} catch (ClassNotFoundException | IOException e) {
 					this.servidor.logger.guardar(e);
 					return false;
@@ -134,7 +148,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					mensaje  = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
 				}
 				try {
-					this.flujoSaliente.writeObject(mensaje);
+					this.escribirObjetoSocket(mensaje);
 				} catch (IOException e) {
 					this.servidor.logger.guardar(e);
 					return false;
@@ -159,8 +173,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		this.conectado=true;
 		while(this.conectado){
 			try {
-				Object o = this.flujoEntrante.readObject();
-				//Object o = this.flujoEntrante.readUnshared(); TAMPOCO AYUDA
+				Object o = this.leerObjetoSocket();
 				Mensaje msj=null;
 				if(o instanceof Mensaje ){
 					msj= (Mensaje) o;
@@ -171,16 +184,11 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					}
 					System.err.println("mensaje desconocido del tipo , pidiendo retransmision");
 					msj =new Mensaje(CodigoMensaje.retransmision,null);
-					this.flujoSaliente.writeObject(msj);
+					this.escribirObjetoSocket(msj);
 					this.repeticiones++;
-					/***
-					 * NO FUNCAAAA -.-
-					//pruebo limpiar el socket leyendo todo lo q tiene
-					int i=this.flujoEntrante.available();
-					this.flujoEntrante.read(new byte[i]);
-					***/
 					//renuevo el input stream
 					this.flujoEntrante = new ObjectInputStream(this.socket.getInputStream());
+ 			
 					
 				}
 				
@@ -314,7 +322,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			int idProcesamiento = this.bd.getIdProcesamiento (tarea.getId(), this.usuario.getId());
 			this.replicador.replicarAsignacionTareaUsuario(tarea, this.usuario, idProcesamiento);
 			try {
-				this.flujoSaliente.writeObject(mensaje);
+				this.escribirObjetoSocket(mensaje);
 				this.tiempoInicio= Instant.now();
 				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
 				this.servidor.logger.guardar("Tarea","al usuario: "+this.usuario.getNombre()+" le asigne la tarea: "+tarea.getId() +" del bloque: "+tarea.getBloque().getId());
@@ -380,7 +388,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	public void enviarNotificacionPuntos(MensajePuntos msj) {
 		try {
 			this.replicador.replicarAsignacionPuntos (msj.getPuntos(), this.usuario);
-			this.flujoSaliente.writeObject(msj);
+			this.escribirObjetoSocket(msj);
 			this.servidor.logger.guardar("Conexion","Se le informo al cliente con id " + this.usuario.getId() + " que se sus puntos son: "+ msj.getPuntos());
 		} catch (IOException e) {
 			this.servidor.logger.guardar(e);
@@ -393,7 +401,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		Mensaje msj = new Mensaje(CodigoMensaje.desconexion,this.idSesion);
 		this.servidor.logger.guardar("Conexion","Desconecto al cliente " + this.usuario.getNombre() );
 		try {
-			this.flujoSaliente.writeObject(msj);
+			this.escribirObjetoSocket(msj);
 		} catch (IOException e) {
 			//  no me importa si explota aca
 		}
@@ -406,7 +414,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	public void enviarIPBackup(String ip, Integer puerto) {
 		MensajeNotificacion mensaje = new MensajeNotificacion(CodigoMensaje.notificacion,this.idSesion,ip, puerto);
 		try {
-			this.flujoSaliente.writeObject(mensaje);
+			this.escribirObjetoSocket(mensaje);
 		} catch (IOException e) {
 			this.servidor.logger.guardar(e);
 		}

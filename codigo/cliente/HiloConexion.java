@@ -28,6 +28,20 @@ public class HiloConexion implements Runnable {
 	public HiloConexion(Cliente cliente){
 		this.cliente=cliente;
 	}
+
+	protected Object leerObjetoSocket () throws IOException, ClassNotFoundException {
+		Object object;
+		synchronized (this.flujoEntrante) {
+			object = this.flujoEntrante.readObject ();
+		}
+		return object;
+	}
+
+	protected void escribirObjetoSocket (Object objeto) throws IOException {
+		synchronized (this.flujoSaliente) {
+			this.flujoSaliente.writeObject (objeto);
+		}
+	}
 	
 	public boolean conectarse(String ip, Integer puerto, String usuario, String password){
 		//hecho rapido para probar que algo ande
@@ -40,13 +54,13 @@ public class HiloConexion implements Runnable {
 			this.socket.setSoTimeout(socketTimeout);
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
-			this.flujoSaliente.writeObject(msj);
+			this.escribirObjetoSocket(msj);
 			MensajeLogeo respuesta=null;
-			Object o= this.flujoEntrante.readObject();
+			Object o= this.leerObjetoSocket();
 			//si el mensaje que leo es informandome de un servidor de backup todavia tengo q leer el mensaje de logeo
 			if(o.getClass().equals(MensajeNotificacion.class)){
 				//leo el msj de logeo
-				respuesta = (MensajeLogeo) this.flujoEntrante.readObject();
+				respuesta = (MensajeLogeo) this.leerObjetoSocket();
 				MensajeNotificacion msjNotif= (MensajeNotificacion)o;
 				this.cliente.actualizarInformacionBackup(msjNotif.getIpBackup(), msjNotif.getPuertoBackup());
 			}else{
@@ -87,7 +101,7 @@ public class HiloConexion implements Runnable {
 			//leo y recibo mensajes
 			
 			try {
-				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
+				Mensaje mensajeRecibido = (Mensaje) this.leerObjetoSocket();
 				
 				switch(mensajeRecibido.getCodigo()){
 				case tarea:
@@ -156,7 +170,7 @@ public class HiloConexion implements Runnable {
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,ultimaTarea);
 		try {
 			if(this.socket!=null){
-				this.flujoSaliente.writeObject(mensaje);
+				this.escribirObjetoSocket(mensaje);
 				//cambio un poco la tarea para que si se reenvia por ahi se lee de otra manera
 				this.ultimaTarea.setBloque(null);
 				
