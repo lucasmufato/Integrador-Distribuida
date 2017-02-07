@@ -14,7 +14,7 @@ public class Tarea implements Serializable{
 	protected byte[] resultado;
 	protected byte[] limiteSuperior;
 	protected EstadoTarea estado;
-	
+
 	public Tarea(Bloque bloque, byte[] tarea, byte[] parcial){
 		this.bloque= bloque;
 		this.tarea=tarea;
@@ -23,6 +23,7 @@ public class Tarea implements Serializable{
 		this.limiteSuperior = new byte[32];
 		Arrays.fill (this.limiteSuperior, (byte) 0x00);
 		this.limiteSuperior[3] = (byte) 0x80;
+		this.estado = EstadoTarea.pendiente;
 	}
 
 	public Tarea (Bloque bloque, byte[] tarea, byte[] parcial,byte[] resultado){
@@ -33,6 +34,7 @@ public class Tarea implements Serializable{
 		this.limiteSuperior = new byte[32];
 		Arrays.fill (this.limiteSuperior, (byte) 0x00);
 		this.limiteSuperior[3] = (byte) 0x80;
+		this.estado = EstadoTarea.pendiente;
 	}
 	
 	public byte[] getTareaRespuesta(){
@@ -87,9 +89,7 @@ public class Tarea implements Serializable{
 		this.limiteSuperior[posicionByte] = byteLimite;
 	}
 	public EstadoTarea getEstado() {
-		synchronized (this.estado) {
-			return estado;
-		}
+		return estado;
 	}
 
 	public void setEstado(EstadoTarea estado) {
