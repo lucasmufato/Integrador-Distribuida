@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Mensaje implements Serializable {
 	
 	//Esta clase maestra de los mensaje solo tiene el codigo de mensaje y el id de sesion que va en todos los mensajes
-	protected static final long serialVersionUID = 1L;
+	protected static final long serialVersionUID = 3L;
 	protected CodigoMensaje codigo;
 	protected Integer ID_Sesion;
 	

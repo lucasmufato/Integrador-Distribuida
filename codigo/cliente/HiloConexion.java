@@ -9,7 +9,6 @@ import java.net.UnknownHostException;
 
 import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
-import mensajes.CodigoMensaje;
 import mensajes.*;
 
 public class HiloConexion implements Runnable {
@@ -23,6 +22,8 @@ public class HiloConexion implements Runnable {
 	protected Integer idSesion;
 	protected Usuario usuario;
 	protected static final int socketTimeout = 100;	//tiempo de espera de lectura del socket
+	
+	protected Tarea ultimaTarea;
 	
 	public HiloConexion(Cliente cliente){
 		this.cliente=cliente;
@@ -54,7 +55,6 @@ public class HiloConexion implements Runnable {
 			
 			if(respuesta.getID_Sesion() == null){
 				//error de logeo
-				//TODO informar a la vista
 				return false;
 			}
 			this.usuario = respuesta.getUsuarioObject();
@@ -81,10 +81,10 @@ public class HiloConexion implements Runnable {
 	
 	@Override
 	public void run() {
+		cliente.crearGUITrabajo();
 		while(cliente.getEstado()!=EstadoCliente.desconectado){
 			//mientras no este desconectado
 			//leo y recibo mensajes
-			cliente.crearGUITrabajo();
 			
 			try {
 				Mensaje mensajeRecibido = (Mensaje) this.flujoEntrante.readObject();
@@ -104,25 +104,21 @@ public class HiloConexion implements Runnable {
 					break;
 				case desconexion:
 					this.cliente.primarioDesconecto();
+				case retransmision:
+					//le reenvio la ultima tarea, haciendole una copia y todo
+					System.err.println("le estoy reenviando una tarea");
+					this.enviarResultado(ultimaTarea);
+					break;
 				default:
-					//aca entran los casos de un mensaje con codigo=logeo y codigo respuestaTarea
-					//ambos no deberian suceder
 					break;
 				
 				}
-			} catch (java.io.EOFException | java.net.SocketException e) {
-				//this.cliente.setEstado(EstadoCliente.desconectado);
-				this.cliente.primarioDesconecto();
 			} catch (java.net.SocketTimeoutException e) {
-				//no hago nada
-			} catch (ClassNotFoundException | IOException e) {
-				//this.cliente.setEstado(EstadoCliente.desconectado);
+			//no hago nada
+			}catch (IOException | ClassNotFoundException e) {
 				this.cliente.primarioDesconecto();
-				//e.printStackTrace();
-				//System.out.println("error en la comunicacion con el servidor. Desconectado");
 			}
 		}
-		//this.cliente.notificarDesconexion();
 		this.cerrarConexiones();
 	}
 	
@@ -150,21 +146,23 @@ public class HiloConexion implements Runnable {
 			System.arraycopy(tarea.getResultado(), 0, copia_resultado, 0, copia_resultado.length);
 		}
 
-		Tarea copia = new Tarea(
+		this.ultimaTarea = new Tarea(
 			tarea.getBloque(),
 			tarea.getTarea(),
 			copia_parcial,
 			copia_resultado);
-		copia.setId(tarea.getId());
-		copia.setLimiteSuperior(tarea.getLimiteSuperior());
-		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,copia);
+		ultimaTarea.setId(tarea.getId());
+		ultimaTarea.setLimiteSuperior(tarea.getLimiteSuperior());
+		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.respuestaTarea,this.idSesion,ultimaTarea);
 		try {
 			if(this.socket!=null){
 				this.flujoSaliente.writeObject(mensaje);
+				//cambio un poco la tarea para que si se reenvia por ahi se lee de otra manera
+				this.ultimaTarea.setBloque(null);
+				
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.cliente.primarioDesconecto();
 		}
 	}
 	

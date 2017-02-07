@@ -40,6 +40,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	protected Integer idSesion;
 	protected Usuario usuario;
 	protected ModoTrabajo modo;
+	protected Integer repeticiones;
 	
 	//variables relacionadas con el watchdog timer (desconecta al cliente si tarda mucho en responder)
 	protected Watchdog wdt = null;
@@ -64,7 +65,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			this.servidor.logger.guardar(e);
 		}
 		this.bd = bd;
-		
+		this.repeticiones=0;
 	}
 
 	@Override
@@ -159,16 +160,33 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		while(this.conectado){
 			try {
 				Object o = this.flujoEntrante.readObject();
-				if(o.getClass()!= Mensaje.class || o.getClass()!= MensajeTarea.class ){
-					//System.out.println("tipo: "+o.getClass());
+				//Object o = this.flujoEntrante.readUnshared(); TAMPOCO AYUDA
+				Mensaje msj=null;
+				if(o instanceof Mensaje ){
+					msj= (Mensaje) o;
+				}else{
+					if(this.repeticiones>10){
+						System.err.println("desconecto al cliente por que siempre me responde mal");
+						this.desconectar();
+					}
+					System.err.println("mensaje desconocido del tipo , pidiendo retransmision");
+					msj =new Mensaje(CodigoMensaje.retransmision,null);
+					this.flujoSaliente.writeObject(msj);
+					this.repeticiones++;
+					/***
+					 * NO FUNCAAAA -.-
+					//pruebo limpiar el socket leyendo todo lo q tiene
+					int i=this.flujoEntrante.available();
+					this.flujoEntrante.read(new byte[i]);
+					***/
+					//renuevo el input stream
+					this.flujoEntrante = new ObjectInputStream(this.socket.getInputStream());
+					
 				}
-				Mensaje msj= (Mensaje) o;
+				
 				//Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
 				this.kickDog();
 				switch(msj.getCodigo()){
-				case logeo:
-					//
-					break;
 				case respuestaTarea:
 					//tranformo el mensaje leido al tipo de mensaje que necesito
 					MensajeTarea mensaje= (MensajeTarea)msj;
@@ -187,8 +205,8 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					this.morir();
 					return true;
 				default:
-					throw new IOException("tipo de mensaje indebido");
-				
+					//throw new IOException("tipo de mensaje indebido");
+					
 				}
 			}catch(java.net.SocketTimeoutException e){
 				//entra aca por time out no pasa nada

@@ -80,14 +80,14 @@ public class Primario implements Runnable {
 			//creo la GUI
 			this.vista = new ServidorVista(this);
 			//despues empiezo a esperar por los clientes
-			return false;
+			return true;
 		}
 		
 		private boolean crearGUI2(){
 			//creo la GUI 2
 			this.vista.crearPanelTrabajo();
 			vista.crearAreadeBloques(obtenerBloquesNoCompletados());
-			return false;
+			return true;
 		}
 		
 		public ArrayList<Bloque> obtenerBloquesNoCompletados() {
@@ -115,7 +115,6 @@ public class Primario implements Runnable {
 			for (int i = 0; i< this.hilosConexiones.size(); i++) {
 				hilo = this.hilosConexiones.get(i);
 				if (!hilo.estaTrabajando()) {
-					System.out.println ("Hilo "+i+" no esta trabajando");
 					hilo.enviarNuevaTarea();
 				}
 			}
@@ -155,8 +154,7 @@ public class Primario implements Runnable {
 					this.vista.mostrarError(e.getMessage());
 					this.logger.guardar(e);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//tampoco importa si es interrumpido
 				}
 			}
 			this.logger.guardar("Servidor", "Dejo de esperar conexiones.");
@@ -196,8 +194,6 @@ public class Primario implements Runnable {
 			byte[] hash = this.sha256.digest (concatenacion);
 
 			if (hash.length != tarea.getLimiteSuperior().length) {
-				//throw new Exception ("No se puede comparar hash con limite superior, longitudes incompatibles.");
-				/** le saco la excepcion ya que es mas facil tratarlo como que da distinto y listo **/
 				return false;
 			}
 
@@ -239,21 +235,17 @@ public class Primario implements Runnable {
 		}
 		
 		public void calculoPuntos(ArrayList<ProcesamientoTarea> lista_proc) { //RECIBE LISTA POR TAREA
-			//System.out.println("Parciales sumados a sus combinaciones menores");
 			this.logger.guardar("Servidor", "Calculando puntos");
 			for(int i=0;i<lista_proc.size();i++){
 				BigInteger parcial = new BigInteger(1,lista_proc.get(i).getParcial());
 				BigInteger combinaciones = this.sumarParcial(lista_proc.get(i).getParcial().length-1);
 				lista_proc.get(i).setParcialCombinaciones(parcial.add(combinaciones));
-				System.out.println("Parciales " + lista_proc.get(i).getParcialCombinaciones());
 			}
 			//HAGO LO MISMO PARA EL RESULTADO
-			System.out.println(lista_proc.get(lista_proc.size()-1).getResultado() + " Resultdo final");
 			BigInteger resultado = new BigInteger(1,lista_proc.get(lista_proc.size()-1).getResultado());//DEL ULTIMO ELEMENTO TOMO EL RESULTADO
 			BigInteger combinaciones = this.sumarParcial(lista_proc.get(lista_proc.size()-1).getResultado().length-1);
 			lista_proc.get(lista_proc.size()-1).setResultadoCombinaciones(resultado.add(combinaciones));
-			System.out.println("Resultado " + lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones());
-			
+		
 			BigDecimal puntosARepartir = new BigDecimal("100");
 			//Integer puntosRepartir = 100; //REPARTIMOS 100 PTOS POR TAREA
 			BigInteger parcial, anterior, resta;
@@ -268,9 +260,7 @@ public class Primario implements Runnable {
 				anterior = new BigInteger("0");
 				resta = parcial.subtract(anterior);
 				lista_proc.get(0).setResta(resta);
-				System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " anterior " + anterior + " pc " + parcial);
-				System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " resta " + lista_proc.get(0).getResta());
-			
+				
 				//A CADA USUARIO LE RESTO EL PARCIAL DEL ANTERIOR, MIENTRAS NO SEA EL ULTIMO ELEMENTO
 				for(int i=1;i<lista_proc.size();i++) {
 					if(lista_proc.size()-1 != i){
@@ -278,24 +268,18 @@ public class Primario implements Runnable {
 						anterior = lista_proc.get(i-1).getParcialCombinaciones();
 						resta = parcial.subtract(anterior);
 						lista_proc.get(i).setResta(resta);
-						System.out.println("Usuario " + lista_proc.get(i).getUsuario() + " anterior " + anterior + " pc " + parcial);
-						System.out.println("Usuario " + lista_proc.get(i).getUsuario() + " resta " + lista_proc.get(i).getResta());
-					}
+						}
 				}	  
 				//AL RESULTADO FINAL LE RESTO EL ULTIMO PARCIAL
 				parcial = lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones(); //PARCIAL QUEDO CON EL RESULTADO
 				anterior = lista_proc.get(lista_proc.size()-2).getParcialCombinaciones();
 				resta = parcial.subtract(anterior);
 				lista_proc.get(lista_proc.size()-1).setResta(resta);
-				System.out.println("Usuario " + lista_proc.get(lista_proc.size()-1).getUsuario() + " anterior " + anterior + " pc " + parcial);
-				System.out.println("Usuario " + lista_proc.get(lista_proc.size()-1).getUsuario() + " resta " + lista_proc.get(lista_proc.size()-1).getResta());
 			}else{
 				parcial = lista_proc.get(0).getResultadoCombinaciones();
 				anterior = new BigInteger("0");
 				resta = parcial.subtract(anterior);
 				lista_proc.get(0).setResta(resta);
-				System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " anterior " + anterior + " pc " + parcial);
-				System.out.println("Usuario " + lista_proc.get(0).getUsuario() + " resta " + lista_proc.get(0).getResta());
 			}
 				
 			//PRIMERO HAGO UNA LISTA DE USUARIOS NO REPETIDOS,PARA LUEGO SUMAR
@@ -315,46 +299,29 @@ public class Primario implements Runnable {
 					nuevo.setTrabajo_Realizado(inicial);
 					nuevo.setTarea(pt.getTarea());
 					usuarios.add(nuevo);
-					System.out.println("Agrego a la lista a: " + pt.getUsuario() + " por la tarea " + pt.getTarea());
 				}
 				cont = 0;
 			}// CUANDO TERMINA EL FOR DEBERIA TENER UNA LISTA CON LOS ID DE LOS USUARIOS SIN REPETICION
 			
-			//MUESTRO LOS USUARIOS QUE SE VEAN UNA SOLA VEZ
-			for(int i = 0; i < usuarios.size(); i++){
-				System.out.println(usuarios.get(i).getUsuario());
-			}
-			
 			//COMPARO LA LISTA DE USUARIOS NO REPETIDOS CON LA LISTA ORIGINAL
 			for(int i = 0; i < usuarios.size(); i++){
 				for(int j = 0; j < lista_proc.size(); j++){
-					//System.out.println("usuarios = " + usuarios.get(i).getUsuario() + " lista_proc usuario " + lista_proc.get(j).getUsuario());
 					if(usuarios.get(i).getUsuario() == lista_proc.get(j).getUsuario()){
-						//System.out.println("Son iguales los usuarios entonces sumo el trabajo");
-						//System.out.println("Trabajo anterior : " + usuarios.get(i).getTrabajo_Realizado());
-						usuarios.get(i).addTrabajo_Realizado(lista_proc.get(j).getResta());
-						//System.out.println("Trabajo despues de la suma " + usuarios.get(i).getTrabajo_Realizado());
-					}
+					usuarios.get(i).addTrabajo_Realizado(lista_proc.get(j).getResta());
+						}
 				}
-				System.out.println(" Tarea " + usuarios.get(i).getTarea() + " usuario " + usuarios.get(i).getUsuario() + " trabajo realizado " + usuarios.get(i).getTrabajo_Realizado());
 			}
 			
 			Integer p = null;
 			BigDecimal resultadoDecimal, trabajoDecimal;
 			//AHORA TENGO QUE DIVIDIR EL RESULTADO FINAL / LO HECHO POR CADA USUARIO Y TENGO LA PROPORCION
 			for (int i = 0; i < usuarios.size(); i++) {
-				System.out.println("Resultado " + lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones());
 				//PROPORCION = TRABAJO REALIZADO / RESULTADO
 				resultadoDecimal = new BigDecimal(lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones());
 				trabajoDecimal = new BigDecimal(usuarios.get(i).getTrabajo_Realizado());
-				//proporcion = (usuarios.get(i).getTrabajo_Realizado().divide(lista_proc.get(lista_proc.size()-1).getResultadoCombinaciones())).doubleValue();		
-				System.out.println("Trabajo realizado del usuario " + usuarios.get(i).getUsuario() + " es " + usuarios.get(i).getTrabajo_Realizado());
 				//ACTUALIZO LOS PUNTOS EN LA BD
-				System.out.println("La proporcion del usuario " + usuarios.get(i).getUsuario() + " es " + trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP));
 				p = trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP).multiply(puntosARepartir).intValue();
 				usuarios.get(i).setPuntos(p);//LE SETTEO LOS PTOS A ESE USUARIO
-				//System.out.println("Los puntos a repartir  al usuario " + usuarios.get(i).getUsuario() + " son: " + trabajoDecimal.divide(resultadoDecimal, 2, RoundingMode.HALF_UP).multiply(puntosARepartir));
-				System.out.println("Los puntos a repartir  al usuario " + usuarios.get(i).getUsuario() + " son: " + p);
 				this.baseDatos.actualizarPuntos(usuarios.get(i).getUsuario(), p);
 			}
 			
@@ -395,7 +362,7 @@ public class Primario implements Runnable {
 				h.desconectar();
 			}
 			//libero recursos
-			try {	this.serverSO.close();	} catch (IOException e) {	}
+			try {	this.serverSO.close();	} catch (Exception e) {	}
 			this.serverSO = null;
 			this.baseDatos.desconectarse();
 			this.baseDatos=null;
@@ -440,9 +407,9 @@ public class Primario implements Runnable {
 		public String getIP() {
 			return IP;
 		}
+		
 		public void setIP(String ip) {
 			this.IP = ip;
-			
 		}
 
 		public String getIpBackup() {

@@ -10,7 +10,6 @@ import java.util.concurrent.Semaphore;
 import baseDeDatos.BaseDatos;
 
 import baseDeDatos.Usuario;
-import bloquesYTareas.Bloque;
 import bloquesYTareas.Tarea;
 import cliente.ModoTrabajo;
 import jxl.Workbook;
@@ -53,22 +52,6 @@ public class Loggeador {
 	private FileWriter errorWriter;
 	
 	private BaseDatos baseDatos;
-
-	public static void main(String[] args){
-		//para pŕobar el logeador
-		Loggeador l=Loggeador.getLoggeador();
-		Tarea t= new Tarea(new Bloque(1),new byte[1],new byte[2]);
-		t.setId(1);
-		Usuario u=new Usuario();
-		u.setNombre("usuario");
-		Instant t1= Instant.now();
-		Instant t2= Instant.now();
-		Duration d = Duration.between(t1, t2);
-		l.guardarTiempo(t, u,d,ModoTrabajo.monoThread, true);
-		u.setNombre("lucas");
-		l.guardarTiempo(t, u,d,ModoTrabajo.multiThread, false);
-		l.cerrar();
-	}
 	
 	public static Loggeador getLoggeador(){
 		if(logger==null){
@@ -234,7 +217,7 @@ public class Loggeador {
 			this.excelEscritura = Workbook.createWorkbook(this.archivoExcel, this.excel);
 			this.hojaDatos = this.excelEscritura.getSheet(0); 
 			this.ultimaFila=this.hojaDatos.getRows();
-			System.out.println("la fila en la q voy a escribir es la nro: "+this.ultimaFila);
+			
 			Label l2 = new Label(0,this.ultimaFila,LocalDate.now().toString());
 			Label l3 = new Label(1,this.ultimaFila,LocalTime.now().toString());
 			Number l4 = new Number(2,this.ultimaFila,nroBloque);

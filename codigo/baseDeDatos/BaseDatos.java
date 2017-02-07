@@ -688,7 +688,6 @@ public class BaseDatos {
 			ResultSet result = stm.getResultSet();
 			result.next();
 			int restantes = result.getInt("restantes");
-			System.out.println ("DEBUG: Restantes: " + restantes);
 			return (restantes == 0);
 		} catch (Exception e) {
 			System.err.println ("Error al intentar determinar si bloque esta finalizado "+e.getMessage());
@@ -787,7 +786,7 @@ public class BaseDatos {
 			res_tarea = stm_tarea.getResultSet ();
 
 			if (res_tarea.next()) {
-				System.out.println ("DEBUG: Se ha encontrado una tarea no iniciada dentro de un bloque no iniciado");
+				//System.out.println ("DEBUG: Se ha encontrado una tarea no iniciada dentro de un bloque no iniciado");
 			} else {
 				res_tarea = null;
 			}
@@ -863,7 +862,7 @@ public class BaseDatos {
 			stm_update_tarea.setInt(1, id_tarea);
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
-				System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
+				//System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
 
 			} else {
 				System.err.println ("Error al asignar una tarea al usuario");

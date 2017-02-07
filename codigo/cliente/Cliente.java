@@ -177,7 +177,6 @@ public class Cliente {
 	public void notificarPuntos(MensajePuntos msj) {
 		Integer puntos = msj.getPuntos();
 		this.setPuntos(puntos);
-		System.out.println("los puntos que tengo que notificar a la vista son: " + this.puntos);
 		this.vista.actualizarPuntos(this.getPuntos());
 	}
 
