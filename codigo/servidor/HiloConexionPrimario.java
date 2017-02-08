@@ -186,10 +186,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					msj =new Mensaje(CodigoMensaje.retransmision,null);
 					this.escribirObjetoSocket(msj);
 					this.repeticiones++;
-					//renuevo el input stream
-					this.flujoEntrante = new ObjectInputStream(this.socket.getInputStream());
- 			
-					
 				}
 				
 				//Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
@@ -220,7 +216,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				//entra aca por time out no pasa nada
 			} catch (ClassNotFoundException | IOException e) {
 				
-				this.servidor.logger.guardar(e);
+				Loggeador.getLoggeador().guardar(e);
 				System.out.println("hubo un error en la conexion con un usuario. Desconectandolo.");
 				this.detenerTarea();
 				this.cerrarConexion();
