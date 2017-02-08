@@ -214,6 +214,13 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				}
 			}catch(java.net.SocketTimeoutException e){
 				//entra aca por time out no pasa nada
+			} catch (java.io.EOFException e) {
+				// Entra por aca cuando el cliente se desconecta correctamente
+				System.out.println("El usuario "+this.usuario.getNombre()+" se ha desconectado.");
+				this.detenerTarea();
+				this.cerrarConexion();
+				this.morir();
+				return true;
 			} catch (ClassNotFoundException | IOException e) {
 				
 				Loggeador.getLoggeador().guardar(e);
