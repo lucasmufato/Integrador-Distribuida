@@ -1080,50 +1080,6 @@ public class BaseDatos {
 		return true;
 	}
 
-	public synchronized Replicacion getReplicacion () {
-		Replicacion replicacion = new Replicacion ();
-		if (replicacion.cargar (this.c)) {
-			return replicacion;
-		} else {
-			return null;
-		}
-	}
-
-	public synchronized boolean replicar (Replicacion replicacion) {
-		if (this.borrarTodo ()) {
-			return replicacion.insertarTodo (this.c);
-		} else {
-			return false;
-		}
-	}
-
-	@SuppressWarnings("unused")
-	public synchronized boolean borrarTodo () {
-		this.limpiarCache ();
-		try {
-			this.c.setAutoCommit (false);
-			PreparedStatement dropProcesamientos = this.c.prepareStatement ("DELETE FROM PROCESAMIENTO_TAREA");
-			PreparedStatement dropBloques = this.c.prepareStatement ("DELETE FROM BLOQUES");
-			PreparedStatement dropTareas = this.c.prepareStatement ("DELETE FROM TAREAS");
-			PreparedStatement dropUsuarios = this.c.prepareStatement ("DELETE FROM USUARIOS");
-			dropProcesamientos.execute ();
-			dropProcesamientos.execute ();
-			dropProcesamientos.execute ();
-			dropProcesamientos.execute ();
-			this.c.commit ();
-		} catch (Exception e) {
-			try {
-				this.c.rollback ();
-				this.c.setAutoCommit (true);
-			} catch (Exception e2) {}
-			return false;
-		}
-		try {
-			this.c.setAutoCommit (true);
-		} catch (Exception e) {}
-		return true;
-	}
-
 	public synchronized List <MensajeReplicacion> getRegistrosCambios (long desdeVersion) {
 		List lista = new ArrayList();
 		try {
