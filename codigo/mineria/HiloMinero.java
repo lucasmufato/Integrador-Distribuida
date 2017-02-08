@@ -22,7 +22,6 @@ public abstract class HiloMinero implements Runnable {
 	}
 	
 	public HiloMinero() {
-		// me lo pedia por la herencia por crear el constructor de arriba
 	}
 
 	public Cliente getCliente () {
@@ -124,7 +123,7 @@ public abstract class HiloMinero implements Runnable {
 	}
 
 	public void detener() {
-		//aca tendria que detener la ejecucion del hilo o lo que fuera.
+		HiloMinero.trabajando=false;
 	}
 
 }

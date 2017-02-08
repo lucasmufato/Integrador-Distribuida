@@ -24,7 +24,6 @@ public class Cliente {
 	private Integer puertoBackup;
 	
 	public static void main(String[] args) {
-		//si se llama con argumentos no deberia mostrar interfaz grafica sino por consola
 		Cliente cliente = new Cliente();
 		cliente.crearGUILogueo();
 	}
@@ -73,7 +72,7 @@ public class Cliente {
 		this.puertoBackup=null;
 		this.hiloConexion = new HiloConexion(this);
 		if( this.hiloConexion.conectarse (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword()) ){
-			this.vista.actualizarInfoServidor(this.ipPrimario, this.puertoPrimario, null, null);
+			this.vista.actualizarInfoServidor (this.ipPrimario, this.puertoPrimario, null, null);
 			hilo = new Thread(hiloConexion);
 			hilo.start();
 			vista.mostrarMsjPorConsola("Conexion exitosa con el servidor de Backup");
@@ -95,7 +94,7 @@ public class Cliente {
 
 	public void notificarDesconexion () {
 		this.desconectarse();
-		this.vista.desconectar ("El servidor ha cerrado la conexion");
+		this.vista.mostrarPanelLogeo();
 	}
 	
 	private void liberarRecursos(){
@@ -107,36 +106,26 @@ public class Cliente {
 	public boolean trabajar(Tarea tarea){
 		// es llamado por el hilo y le pide resolver la tarea
 		synchronized (this.estado) {
-			switch (this.estado) {
-				case trabajando:
-					return false;
-				case desconectado:
-					return false;
-				case logueado:
-					return false;
-				case esperandoTrabajo:
-					if (this.hiloMinero == null) {
-						switch(this.modoTrabajo){
-						case monoThread:
-							this.hiloMinero = new HiloMineroCPU(this, tarea);
-							break;
-						case multiThread:
-							this.hiloMinero = new HiloMineroGestorMultiCore(this, tarea);
-							break;
-						case video:
-							break;
-						}
-					}else{
-						this.hiloMinero.setTarea(tarea);
-					}
-					this.estado = EstadoCliente.trabajando;
-					this.mostrarEstadoCliente("Trabajando en tarea...");
-					Thread hilo = new Thread(this.hiloMinero);
-					hilo.start();
-					return true;
+			this.vista.escribirTarea(tarea.getId());
+			if (this.hiloMinero == null) {
+				switch(this.modoTrabajo){
+				case monoThread:
+					this.hiloMinero = new HiloMineroCPU(this, tarea);
+					break;
+				case multiThread:
+					this.hiloMinero = new HiloMineroGestorMultiCore(this, tarea);
+					break;
+				case video:
+					break;
+				}
+			}else{
+				this.hiloMinero.setTarea(tarea);
 			}
+			this.estado = EstadoCliente.trabajando;
+			Thread hilo = new Thread(this.hiloMinero);
+			hilo.start();
+			return true;
 		}
-		return false;
 	}
 
 	public EstadoCliente getEstado() {
@@ -148,19 +137,13 @@ public class Cliente {
 	public void setEstado(EstadoCliente estado) {
 		this.estado=estado;
 	}
-
-	public void mostrarEstadoCliente(String texto){
-		this.vista.escribirResultado(texto);
-	}
 	
 	public void notificar (Tarea tarea){
-		String texto = "";
 		if (tarea.getResultado() == null) {
-			texto = "Envio el resultado: PARCIAL " + HiloMinero.hashToString(tarea.getParcial());
+			vista.escribirParcial( HiloMinero.hashToString(tarea.getParcial()) );
 		} else {
-			texto = "FINAL: " + HiloMinero.hashToString(tarea.getResultado());
+			vista.escribirResultado("Tarea:"+tarea.getId()+" Resultado:"+HiloMinero.hashToString(tarea.getResultado()) );
 		}
-		vista.escribirResultado(texto);
 		if (this.hiloConexion != null) {
 			this.hiloConexion.enviarResultado(tarea);
 		}
@@ -191,9 +174,7 @@ public class Cliente {
 			this.conectarseServidorBackup();
 		}else{
 			vista.mostrarMsjPorConsola("no tengo informacion del backup, asi que dejo de procesar y quedo en estado muerto");
-			
 		}
-		
 	}
 
 	private boolean tengoServidorBackup() {
@@ -219,7 +200,6 @@ public class Cliente {
 	public void actualizarInformacionBackup(String ipBackup2, Integer puertoBackup2) {
 		this.ipBackup=ipBackup2;
 		this.puertoBackup=puertoBackup2;
-		System.out.println("datos backup -> ip:"+this.ipBackup+" puerto: "+this.puertoBackup);
 		this.vista.actualizarInfoServidor(this.ipPrimario,this.puertoPrimario , this.ipBackup, this.puertoBackup);
 	}
 	

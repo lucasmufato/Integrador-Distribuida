@@ -50,9 +50,10 @@ public class ClienteJFrame extends JFrame {
 	private JLabel lblPuerto_1;
 	private JLabel lblModoDeTrabajo;
 	private JComboBox<String> modoTrabajoComboBox;
-	
+	private JLabel lblParcial;
 	private JTextPane textPane;
 	private JLabel lblModo;
+	private JLabel lblTarea;
 
 	public ClienteJFrame(Cliente c) {
 		this.cliente=c;
@@ -61,7 +62,7 @@ public class ClienteJFrame extends JFrame {
 		this.setResizable(false);
 		this.setBounds(250, 250, 580, 330);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//TODO cuando cierre la ventana q llame al metodo cerrar de esta clase
+		
 		getContentPane().setLayout(new BorderLayout(0, 0));
 		
 		JPanel panel = new JPanel();
@@ -233,12 +234,22 @@ public class ClienteJFrame extends JFrame {
 		desktopPane.add(lblPuerto_1);
 		
 		textPane = new JTextPane();
-		textPane.setBounds(211, 49, 353, 221);
-		//jpanel_trabajo.add(textPane);
+		textPane.setBounds(201, 119, 353, 161);
 		
 		JScrollPane scrollBar = new JScrollPane(textPane);
-		scrollBar.setBounds(211, 49, 353, 221);
+		scrollBar.setBounds(213, 91, 353, 179);
 		jpanel_trabajo.add(scrollBar);
+		
+		lblParcial = new JLabel("Parcial: ");
+		lblParcial.setBounds(209, 49, 228, 30);
+		jpanel_trabajo.add(lblParcial);
+		lblParcial.setForeground(new java.awt.Color(189, 187, 185));
+		
+		lblTarea = new JLabel("Tarea: ");
+		lblTarea.setBounds(449, 53, 115, 26);
+		jpanel_trabajo.add(lblTarea);
+		lblTarea.setForeground(new java.awt.Color(189, 187, 185));
+		
 		textPaneConsola = new JTextPane();
 		getContentPane().add(textPaneConsola, BorderLayout.SOUTH);
 		textPaneConsola.setBackground(new java.awt.Color(209, 218, 225));
@@ -283,14 +294,12 @@ public class ClienteJFrame extends JFrame {
 			this.mostrarMsjPorConsola("alguno de los campos contiene un error");
 		}
 		
-		
 	}
 
-	public void desconectar (String msj) {
+	public void mostrarPopUp(String msj,String titulo) {
 		if (msj != null) {
-			JOptionPane.showMessageDialog(null, msj, "Desconexion", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, msj, titulo, JOptionPane.ERROR_MESSAGE);
 		}
-		this.mostrarPanelLogueo();
 	}
 	
 	public void mostrarPanelLogeo(){
@@ -350,17 +359,24 @@ public class ClienteJFrame extends JFrame {
 		}else{
 			lblServidorBackup.setText("Servidor Backup: Disponible ");
 			lblDireccionIp_1.setText("Direccion IP: "+ipSecundario);
-			lblPuerto_1.setText("Puerto: - "+puertoSecundario);
+			lblPuerto_1.setText("Puerto: "+puertoSecundario);
 		}
 		
 		
 	}
 
 	private void cerrar() {
-		// TODO Auto-generated method stub
 		this.cliente.desconectarse();
 		this.cliente=null;
 		this.dispose();
 		System.exit(0);
+	}
+
+	public void escribirParcial(String hashToString) {
+		this.lblParcial.setText("Parcial: "+hashToString);
+	}
+	
+	public void escribirTarea(Integer nroTarea){
+		this.lblTarea.setText("Tarea:"+nroTarea);
 	}
 }

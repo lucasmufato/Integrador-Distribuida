@@ -1,14 +1,5 @@
-DROP DATABASE IF EXISTS finaldistribuido;
-DROP ROLE IF EXISTS distribuido;
-
-/* creo el usuario con permiso para crear BD */
-CREATE ROLE distribuido LOGIN ENCRYPTED PASSWORD 'sistemas' CREATEDB VALID UNTIL 'infinity';
-
-CREATE DATABASE finaldistribuido;
-
+﻿
 GRANT ALL PRIVILEGES ON DATABASE finaldistribuido TO distribuido;
-
-\connect finaldistribuido;
 
 /* creo la tabla usuario para la version 0.1	*/
 CREATE TABLE usuario(

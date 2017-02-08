@@ -51,7 +51,7 @@ public class HiloConexion implements Runnable {
 		msj.setModoTrabajo(cliente.getModoTrabajo());
 		try {
 			this.socket = new Socket(ip,puerto);
-			this.socket.setSoTimeout(socketTimeout);
+			//this.socket.setSoTimeout(socketTimeout);
 			this.flujoSaliente = new ObjectOutputStream(socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream(socket.getInputStream());
 			this.escribirObjetoSocket(msj);
@@ -75,7 +75,6 @@ public class HiloConexion implements Runnable {
 			this.idSesion=respuesta.getID_Sesion();
 			cliente.setUsuarioACliente(this.usuario);
 			cliente.setEstado(EstadoCliente.esperandoTrabajo);
-			cliente.mostrarEstadoCliente("Esperando trabajo");
 			return true;
 		} catch (UnknownHostException e) {
 			//no me pude conectar al servidor

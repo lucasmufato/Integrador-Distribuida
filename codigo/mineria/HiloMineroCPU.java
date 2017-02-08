@@ -33,6 +33,7 @@ public class HiloMineroCPU extends HiloMinero {
 
 	@Override
 	public void run() {
+		HiloMinero.trabajando=true;
 		byte[] limite = this.getLimiteSuperior();
 		byte[] tarea = this.getTarea();
 		byte[] inicio = this.getInicio();
@@ -41,7 +42,6 @@ public class HiloMineroCPU extends HiloMinero {
 
 		byte[] n_seq = new byte[inicio.length]; // Numero de secuencia actual
 		System.arraycopy (inicio, 0, n_seq, 0, n_seq.length);
-		boolean encontrado = false;
 
 		byte[] concatenacion = new byte[tarea.length + n_seq.length];	
 		System.arraycopy(tarea, 0, concatenacion, 0, tarea.length);
@@ -54,22 +54,16 @@ public class HiloMineroCPU extends HiloMinero {
 
 		byte[] hash;
 
-		while (!encontrado) {
+		while (HiloMinero.trabajando) {
 			hash = this.sha256.digest(concatenacion);
 
 			if (esMenor (hash, limite)) {
 				System.arraycopy(concatenacion, tarea.length, n_seq, 0, n_seq.length);
-				encontrado = true;
+				HiloMinero.trabajando = true;
 				this.notificarResultado (n_seq);
 
-				// DEBUG:
-				//System.out.println ("[DEBUG] FINAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
 
-				/* TODO: setear estado a cliente */
 			} else {
-				// DEBUG:
-				// System.out.println ("[DEBUG] PARCIAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
-
 				/* sumamos uno a la parte correspondiente al numero de secuencia en la concatencacion */
 				int pos = concatenacion.length -1; //Ponemos el puntero en el bit menos significativo
 				boolean seguir = true;
