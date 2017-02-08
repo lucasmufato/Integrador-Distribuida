@@ -323,7 +323,8 @@ public class BaseDatos {
 
 	public synchronized boolean setParcial(Tarea tarea, Integer idUsuario){
 		tarea.setEstado (EstadoTarea.enProceso);
-		
+		this.cacheTareas.put (tarea.getId(), tarea);
+
 		try {
 			PreparedStatement stm = c.prepareStatement (
 			"UPDATE " +
@@ -918,7 +919,7 @@ public class BaseDatos {
 			stm_update_tarea.setInt(1, id_tarea);
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
-				System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
+				//System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
 
 			} else {
 				System.err.println ("Error al asignar una tarea al usuario");

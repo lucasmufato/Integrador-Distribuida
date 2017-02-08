@@ -313,7 +313,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	@SuppressWarnings("deprecation")
 	protected boolean enviarNuevaTarea(){
 		//metodo que pide una tarea a la clase BaseDatos y se la envia al cliente
-		System.out.println("el usuario es: " + this.usuario.getNombre());
 		Tarea tarea = this.bd.getTarea(this.usuario.getId());
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		if (tarea == null) {

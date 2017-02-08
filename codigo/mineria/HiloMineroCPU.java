@@ -63,7 +63,7 @@ public class HiloMineroCPU extends HiloMinero {
 				this.notificarResultado (n_seq);
 
 				// DEBUG:
-				System.out.println ("[DEBUG] FINAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
+				//System.out.println ("[DEBUG] FINAL: "+ hashToString (concatenacion) + " -> " + hashToString (hash));
 
 				/* TODO: setear estado a cliente */
 			} else {
