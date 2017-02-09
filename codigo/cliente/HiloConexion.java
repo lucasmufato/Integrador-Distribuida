@@ -92,6 +92,15 @@ public class HiloConexion implements Runnable {
 		return false;
 	}
 	
+	public boolean conectarseConEspera (String ip, Integer puerto, String usuario, String password, long milisegundos) {
+		try {
+			Thread.sleep (milisegundos);
+			return this.conectarse (ip, puerto, usuario, password);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	@Override
 	public void run() {
 		cliente.crearGUITrabajo();
