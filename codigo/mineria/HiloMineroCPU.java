@@ -33,7 +33,7 @@ public class HiloMineroCPU extends HiloMinero {
 
 	@Override
 	public void run() {
-		HiloMinero.trabajando=true;
+		boolean encontrado = false;
 		byte[] limite = this.getLimiteSuperior();
 		byte[] tarea = this.getTarea();
 		byte[] inicio = this.getInicio();
@@ -54,12 +54,12 @@ public class HiloMineroCPU extends HiloMinero {
 
 		byte[] hash;
 
-		while (HiloMinero.trabajando) {
+		while (!encontrado) {
 			hash = this.sha256.digest(concatenacion);
 
 			if (esMenor (hash, limite)) {
 				System.arraycopy(concatenacion, tarea.length, n_seq, 0, n_seq.length);
-				HiloMinero.trabajando = true;
+				encontrado = true;
 				this.notificarResultado (n_seq);
 
 
