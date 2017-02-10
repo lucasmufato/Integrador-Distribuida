@@ -179,16 +179,17 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					msj= (Mensaje) o;
 				}else{
 					if(this.repeticiones>10){
-						System.err.println("desconecto al cliente por que siempre me responde mal");
+						System.err.println("Desconecto al cliente por que siempre me responde mal");
+						this.servidor.logger.guardar("Error", "Desconectado al cliente por que responde mal");
+						
 						this.desconectar();
 					}
-					System.err.println("mensaje desconocido del tipo , pidiendo retransmision");
+					System.err.println("Mensaje desconocido del tipo , pidiendo retransmision");
 					msj =new Mensaje(CodigoMensaje.retransmision,null);
 					this.escribirObjetoSocket(msj);
 					this.repeticiones++;
 				}
 				
-				//Mensaje msj= (Mensaje)this.flujoEntrante.readObject();
 				this.kickDog();
 				switch(msj.getCodigo()){
 				case respuestaTarea:
@@ -221,7 +222,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				this.cerrarConexion();
 				this.morir();
 				return true;
-			} catch (ClassNotFoundException | IOException e) {
+			} catch (Exception e) {
 				
 				Loggeador.getLoggeador().guardar(e);
 				System.out.println("hubo un error en la conexion con un usuario. Desconectandolo.");
@@ -237,17 +238,12 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	protected boolean resultadoFinalTarea(Tarea tarea){
 		//System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
 		String resultado;
-		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " FINAL: " + hashToString (tarea.getResultado());
+		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " Parcial: " + hashToString (tarea.getResultado());
 		
-		//MARCO QUE CAMBIO EL OBJETO
-        setChanged();
-        //NOTIFICO EL CAMBIO
-        notifyObservers(resultado);
 		if (this.servidor.verificarResultado(tarea) == true){
 			this.tiempoFin= Instant.now();
 			Duration duracion =Duration.between(this.tiempoInicio, this.tiempoFin);
 			this.servidor.logger.guardarTiempo(tareaEnTrabajo, usuario, duracion,this.modo,true);
-			//TODO tiempo
 			if (this.bd.setResultado(tarea, this.usuario.getId()) == true){
 				setChanged();
 				notifyObservers(tarea);
@@ -288,8 +284,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	
 	protected boolean resultadoParcialTarea(Tarea tarea){
 		//creo q no haria mas que eso
-		String resultado;
-		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial());
+		String resultado = +this.idSesion+";USUARIO: " + this.usuario.getNombre() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial());
 		//MARCO QUE CAMBIO EL OBJETO
         setChanged();
         //NOTIFICO EL CAMBIO
@@ -328,10 +323,14 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				this.tiempoInicio= Instant.now();
 				this.tareaEnTrabajo = tarea;	//una vez que envie la nueva tarea y no hubo error, digo que esta en trabajo. 
 				this.servidor.logger.guardar("Tarea","al usuario: "+this.usuario.getNombre()+" le asigne la tarea: "+tarea.getId() +" del bloque: "+tarea.getBloque().getId());
+				this.setChanged();
+				String resultado = +this.idSesion+";USUARIO: " + this.usuario.getNombre() + " TAREA: " + tarea.getId() + " PARCIAL: " + hashToString (tarea.getParcial());
+				this.notifyObservers(resultado);
 				return true;
 			} catch (IOException e) {
-				//TODO si sale mal q hago?
 				this.servidor.logger.guardar(e);
+				this.cerrarConexion();
+				this.morir();
 				return false;
 			}
 		}
@@ -345,11 +344,13 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			this.tiempoFin= Instant.now();
 			Duration duracion =Duration.between(this.tiempoInicio, this.tiempoFin);
 			this.servidor.logger.guardarTiempo(tareaEnTrabajo, usuario, duracion,this.modo,false);
-			//TODO tiempo
 			if (tareaSeDetuvo) {
 				this.replicador.replicarDetencionTarea (this.tareaEnTrabajo, this.usuario);
 				setChanged();
 				this.notifyObservers(this.tareaEnTrabajo);
+				setChanged();
+				int id=this.idSesion;
+				this.notifyObservers(id);
 				this.servidor.logger.guardar("Tarea","se detuvo la tarea: "+this.tareaEnTrabajo.getId() + " del usuario: "+this.usuario.getNombre() );
 			}
 		}

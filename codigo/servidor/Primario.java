@@ -369,7 +369,9 @@ public class Primario implements Runnable {
 			BusquedaUDP.trabajando=false;
 		}
 		
-		public void mandarNotificacion() {
+		public void mandarNotificacionBackup() {
+			System.out.println("notifico datos backup: "+this.ipBackup+":"+this.puertoBackup);
+			this.vista.actualizarDatosBackup(this.ipBackup, this.puertoBackup);
 			for (HiloConexionPrimario hilo : this.hilosConexiones) {
 				hilo.enviarIPBackup(this.ipBackup, this.puertoBackup);
 			}

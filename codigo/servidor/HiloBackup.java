@@ -217,9 +217,9 @@ public class HiloBackup extends Observable implements Runnable {
 		
 		//LIBERO RESURSOS Y CIERRO SOCKET
 		this.bd=null;
-		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
-		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
-		try {	this.socket.close();			} catch (IOException e) {}
+		try {	this.flujoEntrante.close(); 	} catch (Exception e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (Exception e) {}
+		try {	this.socket.close();			} catch (Exception e) {}
 				
 	}
 

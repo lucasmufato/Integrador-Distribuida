@@ -35,6 +35,7 @@ private static Integer tiempoEsperaBackup=500;
 	private void crearGUIBackup() {
 		this.vista = new ServidorVista(this);
 		this.vista.setServidorText("Servidor de Backup");
+		this.vista.setNombrePanelInformacio("Primario");
 	}
 	
 	private void crearGUIBackup2() {
@@ -58,6 +59,7 @@ private static Integer tiempoEsperaBackup=500;
 		
 		Thread hilo = new Thread(conexionBackup);
 		hilo.start();
+		this.vista.actualizarDatosBackup(this.IP, null);
 		//lo hago esperar un poquito a que conexionBackup se conecte con el primario y cambie su estado a conectado
 		try {
 			Thread.sleep(350);
@@ -102,10 +104,9 @@ private static Integer tiempoEsperaBackup=500;
 		
 		//desecho objetos de backup
 		this.conexionBackup=null;
-		
+		this.vista.setNombrePanelInformacio("Backup");
+		this.vista.actualizarDatosBackup(null, null);
 		try {
-			System.out.println("probando el puerto :"+this.puerto);
-			//this.serverSO= new ServerSocket(this.puerto);
 			this.serverSO.setSoTimeout(Primario.tiempoEspera);
 		} catch (IOException e) {
 			this.logger.guardar(e);

@@ -55,6 +55,12 @@ public class HiloMineroCPU extends HiloMinero {
 		byte[] hash;
 
 		while (HiloMinero.trabajando) {
+			if(concatenacion==null){
+				System.out.println("concatenacion null");
+			}
+			if(concatenacion.length==0){
+				System.out.println("tamaño cero");
+			}
 			hash = this.sha256.digest(concatenacion);
 
 			if (esMenor (hash, limite)) {

@@ -244,6 +244,7 @@ public class Loggeador {
 			this.excel.close();
 		} catch (IOException | WriteException | BiffException e) {
 			this.guardar(e);
+			this.archivoExcel=null;
 		}
 		
 		return false;

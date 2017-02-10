@@ -134,6 +134,7 @@ public class Replicador extends Thread {
 			this.backupEstaConectado = false;
 			this.logger.guardar(e);
 		}
+		this.morir();
 	}
 
 	private boolean acceptConnection () {
@@ -145,7 +146,7 @@ public class Replicador extends Thread {
 			Integer puerto=(Integer) this.flujoEntrante.readObject();
 			this.primario.setIpBackup(socket.getInetAddress().getHostAddress());
 			this.primario.setPuertoBackup(puerto);
-			this.primario.mandarNotificacion();
+			this.primario.mandarNotificacionBackup();
 		} catch (Exception e) {
 			this.logger.guardar(e);
 		}
@@ -181,14 +182,30 @@ public class Replicador extends Thread {
 				//Mover mensajes de cola temporal a cola principal
 				MensajeReplicacion mensajeTmp = this.colaTmp.poll();
 				while (mensajeTmp != null) {
-				
 					this.cola.add(mensajeTmp);
 					mensajeTmp = this.colaTmp.poll();
 				}
 			}
 		}
 	}
-
+	
+	private void morir(){
+		System.out.println("Replicador: muriendo");
+		this.primario.setIpBackup(null);
+		this.primario.setPuertoBackup(null);
+		this.primario.mandarNotificacionBackup();
+		this.primario=null;
+		this.baseDatos=null;
+		try {this.serverSocket.close();	} catch (Exception e) {	}
+		try {this.serverSocket=null; 	} catch (Exception e) {	}
+		try {this.flujoEntrante.close(); 	} catch (Exception e) {	}
+		try {this.flujoEntrante=null; 	} catch (Exception e) {	}
+		try {this.flujoSaliente.close(); 	} catch (Exception e) {	}
+		try {this.flujoSaliente=null; 	} catch (Exception e) {	}
+		try {this.socket.close(); 	} catch (Exception e) {	}
+		try {this.socket=null; 	} catch (Exception e) {	}
+	}
+	
 	private boolean enviarMensaje (MensajeReplicacion mensaje) {
 		try {
 			this.flujoSaliente.writeObject (mensaje);

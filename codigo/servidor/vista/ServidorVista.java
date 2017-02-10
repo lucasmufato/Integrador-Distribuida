@@ -21,13 +21,14 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JTextPane;
 
-import baseDeDatos.Usuario;
 import bloquesYTareas.Bloque;
 import bloquesYTareas.EstadoTarea;
 import bloquesYTareas.Tarea;
@@ -38,11 +39,11 @@ import java.awt.Font;
 
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.JSpinner;
 
 import mensajes.replicacion.MensajeGeneracionTarea;
 
 import java.awt.SystemColor;
+import javax.swing.JSeparator;
 
 public class ServidorVista extends JFrame implements Observer{
 	
@@ -50,6 +51,7 @@ public class ServidorVista extends JFrame implements Observer{
 	protected static final long serialVersionUID = 1L;
 	protected Primario servidor;
 	protected HashMap<Integer, JLabel> tareas =  new HashMap<Integer, JLabel>();
+	protected HashMap<Integer, JLabel> clientes = new HashMap<Integer,JLabel>();
 	
 	//variables de la vista
 	protected JPanel jpanel_servidor;
@@ -61,12 +63,21 @@ public class ServidorVista extends JFrame implements Observer{
 	protected JTextPane textPaneConsolaTrabajo;
 	protected JLabel lblIPServidor;
 	protected JLabel lblPuertoServidor;
-
-	protected JTextPane textPaneMsj;
 	protected JPanel panel_bloques;
 	protected JLabel label_logo;
 	protected JScrollPane scrollBarBloques;
 	protected JLabel servidorLabel;
+	protected JLabel lblBloquesTotales;
+	protected JLabel lblBloquesCompletados;
+	protected JLabel lblBloquesTerminados;
+	protected JLabel lblBloquesRealizandose;
+	private JLabel lblServidorBackup;
+	private JLabel lblIpBackup;
+	private JLabel lblPuertoBackup;
+	private JLabel lblInformacion;
+	private JScrollPane scrollBarMsj;
+	private JPanel panelClientes;
+	
 	//TAMA�O
 	protected Integer alto = 500;
 	protected Integer ancho = 800;
@@ -155,6 +166,7 @@ public class ServidorVista extends JFrame implements Observer{
 		textPaneConsola.setBounds(0, 452, this.ancho-(800-794), this.alto-(500-20));
 		jpanel_servidor.add(textPaneConsola);
 		
+		
 		label_logo = new JLabel("");
 		try {
 			label_logo.setIcon(new ImageIcon(ServidorVista.class.getResource("/servidor/vista/icono.jpg")));
@@ -166,8 +178,9 @@ public class ServidorVista extends JFrame implements Observer{
 		label_logo.setBounds((this.ancho-128)/2, ((this.alto-128)/2)-64, 128, 128);
 		jpanel_servidor.add(label_logo);
 		
+		
 		//------------------------------------------------------------VISTA 2-----------------------------------------------------------		
-		jpanel_trabajo = new JPanel();
+		jpanel_trabajo =  new JPanel();
 		jpanel_trabajo.setBackground(new java.awt.Color(23, 26, 33));
 		panel.add(jpanel_trabajo, "");
 		jpanel_trabajo.setLayout(null);
@@ -178,12 +191,12 @@ public class ServidorVista extends JFrame implements Observer{
 		textPaneConsolaTrabajo.setBounds(0, 452, this.ancho-(800-794), this.alto-(500-20));
 		jpanel_trabajo.add(textPaneConsolaTrabajo);
 		
-		lblIPServidor = new JLabel("");
+		lblIPServidor = new JLabel("IP: ");
 		lblIPServidor.setForeground(new java.awt.Color(189, 187, 185));
 		lblIPServidor.setBounds(54, 11, this.ancho-(800-148), this.alto-(500-14));
 		jpanel_trabajo.add(lblIPServidor);
 		
-		lblPuertoServidor = new JLabel("");
+		lblPuertoServidor = new JLabel("Puerto: ");
 		lblPuertoServidor.setForeground(new java.awt.Color(189, 187, 185));
 		lblPuertoServidor.setBounds(343, 11, this.ancho-(800-139), this.alto-(500-14));
 		jpanel_trabajo.add(lblPuertoServidor);
@@ -211,13 +224,17 @@ public class ServidorVista extends JFrame implements Observer{
 		lblBloquesYTareas.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblBloquesYTareas.setForeground(new java.awt.Color(189, 187, 185));
 		lblBloquesYTareas.setBounds(203, 78, this.ancho-(800-184), this.alto-(500-14));
-		jpanel_trabajo.add(lblBloquesYTareas); 
+		jpanel_trabajo.add(lblBloquesYTareas);
 		
+		//TODO panel clientes
+		panelClientes = new JPanel();
+		panelClientes.setBackground(Color.LIGHT_GRAY);
+		panelClientes.setLayout(null);
+		panelClientes.setPreferredSize(new Dimension(this.ancho-(800-512), this.alto-(500-183)));
 		
-		textPaneMsj = new JTextPane();
-		textPaneMsj.setBounds(10, 132, this.ancho-(800-512), this.alto-(500-130));
+		scrollBarMsj = new JScrollPane(panelClientes);
 		
-		JScrollPane scrollBarMsj = new JScrollPane(textPaneMsj);
+
 		scrollBarMsj.setBounds(10, 248, this.ancho-(800-512), this.alto-(500-183));
 		jpanel_trabajo.add(scrollBarMsj);
 		
@@ -238,16 +255,52 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		this.servidorLabel = new JLabel("Tipo de Servidor");
 		servidorLabel.setBounds(283, 37, 302, 23);
+		servidorLabel.setForeground(new java.awt.Color(189, 187, 185));
 		jpanel_trabajo.add(servidorLabel);
 		
-		JSpinner spinner = new JSpinner();
-		spinner.setBounds(462, 36, 60, 20);
-		//jpanel_trabajo.add(spinner); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
+		lblServidorBackup = new JLabel("Informacion del Servidor Backup:");
+		lblServidorBackup.setBounds(536, 77, 250, 15);
+		lblServidorBackup.setForeground(new java.awt.Color(189, 187, 185));
+		jpanel_trabajo.add(lblServidorBackup);
 		
-		JLabel lblDificultad = new JLabel("Dificultad : ");
-		lblDificultad.setForeground(new java.awt.Color(189, 187, 185));
-		lblDificultad.setBounds(353, 40, this.ancho-(800-92), this.alto-(500-14));
-		//jpanel_trabajo.add(lblDificultad); // Esto lo escondo por ahora porque todavia no esta implementada la funcionalidad
+		lblIpBackup = new JLabel("IP:");
+		lblIpBackup.setBounds(565, 104, 191, 15);
+		lblIpBackup.setForeground(new java.awt.Color(189, 187, 185));
+		jpanel_trabajo.add(lblIpBackup);
+		
+		lblPuertoBackup = new JLabel("Puerto:");
+		lblPuertoBackup.setBounds(565, 131, 191, 15);
+		lblPuertoBackup.setForeground(new java.awt.Color(189, 187, 185));
+		jpanel_trabajo.add(lblPuertoBackup);
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(536, 158, 250, 2);
+		jpanel_trabajo.add(separator);
+		
+		lblInformacion = new JLabel("Informacion Estadistica:");
+		lblInformacion.setBounds(536, 172, 191, 15);
+		jpanel_trabajo.add(lblInformacion);
+		lblInformacion.setForeground(new java.awt.Color(189, 187, 185));
+		
+		lblBloquesTotales = new JLabel("Bloques Totales:");
+		lblBloquesTotales.setBounds(565, 199, 191, 15);
+		jpanel_trabajo.add(lblBloquesTotales);
+		lblBloquesTotales.setForeground(new java.awt.Color(189, 187, 185));
+		
+		lblBloquesCompletados = new JLabel("Bloques Completados:");
+		lblBloquesCompletados.setBounds(565, 226, 191, 15);
+		jpanel_trabajo.add(lblBloquesCompletados);
+		lblBloquesCompletados.setForeground(new java.awt.Color(189, 187, 185));
+		
+		lblBloquesTerminados = new JLabel("Bloques Incompletos:");
+		lblBloquesTerminados.setBounds(565, 253, 191, 15);
+		jpanel_trabajo.add(lblBloquesTerminados);
+		lblBloquesTerminados.setForeground(new java.awt.Color(189, 187, 185));
+		
+		lblBloquesRealizandose = new JLabel("Bloques en proceso: ");
+		lblBloquesRealizandose.setBounds(565, 280, 191, 15);
+		jpanel_trabajo.add(lblBloquesRealizandose);
+		lblBloquesRealizandose.setForeground(new java.awt.Color(189, 187, 185));
 		
 		this.revalidate();
 		this.repaint();
@@ -285,8 +338,8 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_servidor.setVisible(false);
 		panel.remove(jpanel_servidor);
 		jpanel_servidor.remove(label_logo);
-		jpanel_trabajo.add(label_logo);
-		label_logo.setBounds((this.ancho-148), 100, 128, 128);
+		//jpanel_trabajo.add(label_logo);
+		//label_logo.setBounds((this.ancho-148), 100, 128, 128);
 		jpanel_trabajo.setVisible(true);
 		
 		lblIPServidor.setText("Mi IP: " + this.servidor.getIP());
@@ -295,17 +348,14 @@ public class ServidorVista extends JFrame implements Observer{
 	}
 	
 	@Override
-	public void update(Observable claseLLamadora, Object objeto) {
+	public synchronized void update(Observable claseLLamadora, Object objeto) {
 		//ya que voy a recibir distintos tipos de objetos, tengo q ver quien la clase llamadora (la que cambio de estado)
 		//y que objeto me pasa
 		if(objeto.getClass().equals(Tarea.class)){
 			//si una tarea cambio de datos cambio de estado
-			// System.out.println("observe en una tarea:");
 			Tarea tarea = (Tarea) objeto;
 			//VOY A SACAR EL ESTADO DE LA TAREA PARA VER QUE COLOR PONGO, Y VOY A SACAR EL ID BLOQUE Y EL ID TAREA
 			int id_tarea = tarea.getId();
-			//Bloque bloque = tarea.getBloque();
-			//int idBloque = bloque.getId();
 			EstadoTarea estado = tarea.getEstado();
 			// La clave del Hashmap es la id de la tarea
 			Integer clave = id_tarea;
@@ -319,34 +369,61 @@ public class ServidorVista extends JFrame implements Observer{
 			if(claseLLamadora.getClass().equals(HiloConexionPrimario.class)){
 				//si el que me indica que cambio de estado es el hilo primario
 				//pregunto si cambio el estado del usuario u otra cosa
-				if(objeto.getClass().equals(Usuario.class)){
-					//si el q cambio de estado es el usuario
-					Usuario usuario= (Usuario) objeto;
-					switch(usuario.getEstado()){
-					case conectado:
-							System.out.println("se ha autenticado el usuario: "+usuario.getNombre());
-							//habria que actualizar algun label o en lo que se muestre el usuario
-						break;
-					case noLogeado:
-							System.out.println("se a conectado un usuario no autenticado todavia");
-						break;
-					default:
-						break;
-					
+				if(objeto instanceof String){
+					String o=(String) objeto;
+					//saco lo q hay hasta el ; que es el nro de sesion con el q identifico el JLabel
+					if(!o.contains(";")){
+						this.mostrarMsjConsolaTrabajo(o);
+					}else{
+						Integer nro= Integer.parseInt( o.substring(0,o.indexOf(";")) );
+						int i=nro;
+						i++;
+						String text = o.substring(i, o.length());
+						
+						if(this.clientes.containsKey(nro)){
+							this.clientes.get(nro).setText(text);
+							//System.out.println("contiene a "+nro);
+						}else{
+							System.out.println("creando label nro:"+nro);
+							System.out.println(text);
+							JLabel clienteX = new JLabel(text);
+							clienteX.setBounds(5,(this.clientes.size()*20)+10 , 500, 20);
+							this.panelClientes.add(clienteX);
+							//clienteX.setForeground(Color.LIGHT_GRAY);
+							//clienteX.setBackground(new java.awt.Color(27, 40, 56));
+							this.clientes.put(nro, clienteX);	
+						}
 					}
-				}else{ //SI NO CAMBIO EL ESTADO USUARIO MUESTRO PARCIALES Y FINALES
-					
-					String resultado = (String) objeto; 
-					textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
+				}else if(objeto instanceof Integer){
+					//saco el JLabel
+					int o=(int) objeto;
+					if(this.clientes.containsKey(o)){
+						this.mostrarMsjConsolaTrabajo("Se desconecto un cliente");
+						this.clientes.get(o).setVisible(false);
+						this.clientes.remove(o);
+						this.panelClientes.remove(this.clientes.get(o));
+						this.panelClientes.validate();
+						this.panelClientes.repaint();
+						System.out.println("Borre el cliente");
+						//reacomodo el resto de los JLabels con un for horrible
+						System.out.println("acomode los demas labels");
+						int y=0;
+						for(int i=0;i<30;i++){
+							JLabel label=this.clientes.get(i);
+							if(label!=null){
+								label.setBounds(5, (y*20)+10, 500, 20);
+								y++;
+							}
+						}
+					}
 				}
 			}else{
                 if(claseLLamadora.getClass().equals(HiloBackup.class)){
-                	System.out.println("Observe un cambio en hilo backup");
                 	if(objeto.getClass().equals(MensajeGeneracionTarea.class)){
                 		this.actualizarAreadeBloques(this.servidor.obtenerBloquesNoCompletados());
                 	}else{
-                		String resultado = (String) objeto; 
-        				textPaneMsj.setText(textPaneMsj.getText() + "\n" + resultado);
+                		String resultado = (String) objeto;
+                		//TODO q decia esta clase?
                 	}
                 }else{
                 	System.out.println("Fallo observador :O");
@@ -445,5 +522,22 @@ public class ServidorVista extends JFrame implements Observer{
 		this.jpanel_trabajo=null;
 		this.servidor=null;
 		this.tareas=null;
+	}
+	
+	public void actualizarDatosBackup(String ip, Integer puerto){
+		if(ip==null){
+			this.lblIpBackup.setText("IP: -");
+		}else{
+			this.lblIpBackup.setText("IP: "+ip);
+		}
+		if(puerto==null){
+			this.lblPuertoBackup.setText("Puerto: -");
+		}else{
+			this.lblPuertoBackup.setText("Puerto: "+puerto);
+		}
+	}
+	
+	public void setNombrePanelInformacio(String PrimarioOBackup){
+		this.lblServidorBackup.setText("Informacion del Servidor "+PrimarioOBackup);
 	}
 }
