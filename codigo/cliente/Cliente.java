@@ -22,6 +22,7 @@ public class Cliente {
 	
 	private String ipBackup;
 	private Integer puertoBackup;
+	private final static long ESPERA_RECONEXION = 3000;
 	
 	public static void main(String[] args) {
 		Cliente cliente = new Cliente();
@@ -71,7 +72,8 @@ public class Cliente {
 		this.ipBackup=null;
 		this.puertoBackup=null;
 		this.hiloConexion = new HiloConexion(this);
-		if( this.hiloConexion.conectarse (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword()) ){
+		vista.mostrarMsjPorConsola("Se intentara conectar al servidor backup");
+		if( this.hiloConexion.conectarseConEspera (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword(), ESPERA_RECONEXION)) {
 			this.vista.actualizarInfoServidor (this.ipPrimario, this.puertoPrimario, null, null);
 			hilo = new Thread(hiloConexion);
 			hilo.start();

@@ -21,8 +21,6 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.awt.event.ActionEvent;
@@ -226,11 +224,10 @@ public class ServidorVista extends JFrame implements Observer{
 		lblBloquesYTareas.setBounds(203, 78, this.ancho-(800-184), this.alto-(500-14));
 		jpanel_trabajo.add(lblBloquesYTareas);
 		
-		//TODO panel clientes
 		panelClientes = new JPanel();
 		panelClientes.setBackground(Color.LIGHT_GRAY);
 		panelClientes.setLayout(null);
-		panelClientes.setPreferredSize(new Dimension(this.ancho-(800-512), this.alto-(500-183)));
+		panelClientes.setPreferredSize(new Dimension(this.ancho-(900-512), this.alto-(550-183)));
 		
 		scrollBarMsj = new JScrollPane(panelClientes);
 		
@@ -376,16 +373,13 @@ public class ServidorVista extends JFrame implements Observer{
 						this.mostrarMsjConsolaTrabajo(o);
 					}else{
 						Integer nro= Integer.parseInt( o.substring(0,o.indexOf(";")) );
-						int i=nro;
+						int i=o.indexOf(";");
 						i++;
 						String text = o.substring(i, o.length());
 						
 						if(this.clientes.containsKey(nro)){
 							this.clientes.get(nro).setText(text);
-							//System.out.println("contiene a "+nro);
 						}else{
-							System.out.println("creando label nro:"+nro);
-							System.out.println(text);
 							JLabel clienteX = new JLabel(text);
 							clienteX.setBounds(5,(this.clientes.size()*20)+10 , 500, 20);
 							this.panelClientes.add(clienteX);
@@ -400,13 +394,11 @@ public class ServidorVista extends JFrame implements Observer{
 					if(this.clientes.containsKey(o)){
 						this.mostrarMsjConsolaTrabajo("Se desconecto un cliente");
 						this.clientes.get(o).setVisible(false);
-						this.clientes.remove(o);
 						this.panelClientes.remove(this.clientes.get(o));
+						this.clientes.remove(o);
 						this.panelClientes.validate();
 						this.panelClientes.repaint();
-						System.out.println("Borre el cliente");
 						//reacomodo el resto de los JLabels con un for horrible
-						System.out.println("acomode los demas labels");
 						int y=0;
 						for(int i=0;i<30;i++){
 							JLabel label=this.clientes.get(i);
@@ -421,9 +413,6 @@ public class ServidorVista extends JFrame implements Observer{
                 if(claseLLamadora.getClass().equals(HiloBackup.class)){
                 	if(objeto.getClass().equals(MensajeGeneracionTarea.class)){
                 		this.actualizarAreadeBloques(this.servidor.obtenerBloquesNoCompletados());
-                	}else{
-                		String resultado = (String) objeto;
-                		//TODO q decia esta clase?
                 	}
                 }else{
                 	System.out.println("Fallo observador :O");

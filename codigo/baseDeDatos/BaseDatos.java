@@ -582,10 +582,44 @@ public class BaseDatos {
 
 	/* Cuando el servidor arranca todas las tareas deben estar pendientes, completadas o detenidas (nunca en proceso) */
 	public synchronized boolean detenerTareasEnProceso() {
+		this.detenerProcesamientosTarea();
 		try {
 			PreparedStatement stm = c.prepareStatement (
 			"UPDATE " +
 				"tarea " +
+			"SET " +
+				"estado=subq_detenida.id " +
+			"FROM ( " +
+				"SELECT " +
+					"id_estado_tarea AS id " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'en proceso' " +
+			") AS subq_proc, " +
+			"(" +
+					"SELECT " +
+					"id_estado_tarea  AS id " +
+				"FROM " +
+					"estado_tarea " +
+				"WHERE " +
+					"estado = 'detenida' " +
+			") AS subq_detenida " +
+			"WHERE " +
+				"estado = subq_proc.id" 
+			);
+			return stm.execute ();
+		} catch (Exception e) {
+			this.logger.guardar(e);
+			return false;
+		}
+	}
+	
+	public synchronized boolean detenerProcesamientosTarea() {
+		try {
+			PreparedStatement stm = c.prepareStatement (
+			"UPDATE " +
+				"procesamiento_tarea " +
 			"SET " +
 				"estado=subq_detenida.id " +
 			"FROM ( " +
@@ -920,7 +954,7 @@ public class BaseDatos {
 
 			if ( (stm_procesamiento.executeUpdate() > 0) && (stm_update_tarea.executeUpdate() > 0)) {
 				//System.out.println ("DEBUG: Se ha asignado una tarea al usuario");
-
+				this.setSeqProcesamientoTarea(id_procesamiento_tarea);
 			} else {
 				System.err.println ("Error al asignar una tarea al usuario");
 				return false;
@@ -933,6 +967,17 @@ public class BaseDatos {
 
 		return true;
 		}
+
+	public synchronized void setSeqProcesamientoTarea (int val) {
+		try{
+			PreparedStatement stm = this.c.prepareStatement("SELECT setval ('procesamiento_tarea_id_procesamiento_tarea_seq', ?)");
+			stm.setInt (1, val);
+			stm.execute();
+		} catch (Exception e) {
+			this.logger.guardar(e);
+		}
+		
+	}
 
 	public synchronized Usuario getUsuario(String nombreUsuario) {
 		Usuario u = null;
