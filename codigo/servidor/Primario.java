@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import baseDeDatos.BaseDatos;
 import bloquesYTareas.*;
@@ -26,9 +29,9 @@ public class Primario implements Runnable {
 		protected MessageDigest sha256;
 		protected ArrayList<HiloConexionPrimario> hilosConexiones;
 		protected Integer puerto;
-		protected String IP="127.0.0.1"; //PROVISORIA HASTA QUE ESTE EL ARCHIVO DE CONFIGURACION
+		protected String IP;
 		protected static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
-		protected static final int numTareasPorBloque = 16;
+		protected static final int numTareasPorBloque = 48;
 		protected static final int numBytesPorTarea = 40;
 		
 		//variables para la vista
@@ -48,7 +51,7 @@ public class Primario implements Runnable {
 		
 		
 		public Primario(String ip, String puerto,Loggeador logger){
-			this.setPuerto(Integer.valueOf(puerto));
+			this.IP=this.conseguirIP();
 			this.estado=EstadoServidor.desconectado;
 			this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 			this.hilos = new ArrayList<Thread>();
@@ -65,8 +68,7 @@ public class Primario implements Runnable {
 			}
 		}
 		
-		public Primario() {
-			
+		public Primario() {	
 		}
 		
 		protected void conectarseBD() {
@@ -142,7 +144,7 @@ public class Primario implements Runnable {
 					hilo.start();
 					//si ya tengo info del backup se la envio
 					if(this.ipBackup!=null && this.puertoBackup!=null){
-						Thread.sleep(100);	//TODO por lucas, lo tengo q borrar y acomodar mejor lo de enviar el mensaje de notificacion.
+						Thread.sleep(100);
 						nuevaConexion.enviarIPBackup(this.ipBackup, this.puertoBackup);
 					}
 				} catch (SocketTimeoutException e) {
@@ -374,6 +376,35 @@ public class Primario implements Runnable {
 			this.vista.actualizarDatosBackup(this.ipBackup, this.puertoBackup);
 			for (HiloConexionPrimario hilo : this.hilosConexiones) {
 				hilo.enviarIPBackup(this.ipBackup, this.puertoBackup);
+			}
+		}
+		
+		public String conseguirIP(){
+			try {
+				InetAddress candidateAddress = null;
+		        for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+		            NetworkInterface iface = (NetworkInterface) ifaces.nextElement();
+		            for (Enumeration<InetAddress> inetAddrs = iface.getInetAddresses(); inetAddrs.hasMoreElements();) {
+		                InetAddress inetAddr = (InetAddress) inetAddrs.nextElement();
+		                if (!inetAddr.isLoopbackAddress()) {
+
+		                    if (inetAddr.isSiteLocalAddress()) {
+		                        candidateAddress=inetAddr;
+		                    }
+		                    else if (candidateAddress == null) {
+		                        candidateAddress = inetAddr;
+		                    }
+		                }
+		            }
+		        }
+		        String ipCandidata=candidateAddress.toString();
+		        if(ipCandidata.contains("/")){
+		        	ipCandidata =ipCandidata.replace("/", "");
+		        }
+		        return ipCandidata.trim();
+			} catch (Exception e2) {
+				System.err.println("no pude conseguir mi direcion ip, pongo la de loopback");
+				try { return InetAddress.getLocalHost().getHostAddress();	} catch (Exception e) { return "127.0.0.1";	}
 			}
 		}
 		

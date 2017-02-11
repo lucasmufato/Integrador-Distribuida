@@ -258,6 +258,7 @@ public class ClienteJFrame extends JFrame {
 		
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void conectarse(){
 		try{
 			String ip = this.jtext_IP.getText().trim();
@@ -305,6 +306,7 @@ public class ClienteJFrame extends JFrame {
 	public void mostrarPanelLogeo(){
 		jpanel_trabajo.setVisible(false);
 		jpanel_logeo.setVisible(true);
+		this.repaint();
 	}
 	
 	public void mostrarMsjPorConsola(String msj){
@@ -322,11 +324,7 @@ public class ClienteJFrame extends JFrame {
 		//CADA VEZ QUE SE FINALIZA UN BLOQUE Y EL SERVIDOR ME ENVIE LOS PUNTOS QUE GANE
 		lblUsuario_1.setText("Usuario: " + usuario);
 		lblPuntos.setText("Puntos: " + cliente.getPuntos());
-	}
-
-	public void mostrarPanelLogueo() {
-		jpanel_trabajo.setVisible(false);
-		jpanel_logeo.setVisible(true);
+		this.repaint();
 	}
 	
 	//ESCRIBIR RESULTADO EN REALIDAD PUEDE ESCRIBIR CUALQUIER COSA AUNQUE NO SEA UN RESULTADO

@@ -138,6 +138,10 @@ public class BusquedaUDP implements Runnable {
 			}
 				
 		}
+		try {
+			socket.close();
+			socket=null;
+		} catch (Exception e) {	}
 	}
 	
 }

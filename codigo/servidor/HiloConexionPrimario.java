@@ -109,9 +109,9 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		this.bd=null;
 		this.usuario=null;
 		this.tareaEnTrabajo=null;
-		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
-		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
-		try {	this.socket.close();			} catch (IOException e) {}
+		try {	this.flujoEntrante.close(); 	} catch (Exception e) {}
+		try { 	this.flujoSaliente.close(); 	} catch (Exception e) {}
+		try {	this.socket.close();			} catch (Exception e) {}
 		if (this.wdt != null) {
 			this.wdt.interrupt();
 		}
@@ -166,7 +166,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		//entra en un bucle en el cual lee respuestas del cliente y las responde conforme sea necesario
 		if(this.enviarNuevaTarea() == false ){
 			//si se produjo algun error al enviar la tarea
-			this.servidor.logger.guardar("Hilo sesion: "+this.idSesion,"se produjo un error al enviar la tarea! ");
 			return false;
 		}
 		//DESPUES DEL ENVIARNUEVATAREA EN TAREAENTRABAJO VOY A TENER LA TAREA QUE ME ASIGNARON
@@ -189,8 +188,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					this.escribirObjetoSocket(msj);
 					this.repeticiones++;
 				}
-				
-				this.kickDog();
+				//this.kickDog();	//TODO descomentar
 				switch(msj.getCodigo()){
 				case respuestaTarea:
 					//tranformo el mensaje leido al tipo de mensaje que necesito
@@ -205,6 +203,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					}
 					break;
 				case desconexion:
+					// Entra por aca cuando el cliente se desconecta correctamente
 					this.detenerTarea();
 					this.cerrarConexion();
 					this.morir();
@@ -216,16 +215,19 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 			}catch(java.net.SocketTimeoutException e){
 				//entra aca por time out no pasa nada
 			} catch (java.io.EOFException e) {
-				// Entra por aca cuando el cliente se desconecta correctamente
-				System.out.println("El usuario "+this.usuario.getNombre()+" se ha desconectado.");
-				this.detenerTarea();
-				this.cerrarConexion();
-				this.morir();
-				return true;
-			} catch (Exception e) {
+				//si hay error en la lectura pregunto si la parte de lectura del socket sigue abierta
+				if(socket.isInputShutdown()){
+					System.out.println("socket cerrado");
+					this.detenerTarea();
+					this.cerrarConexion();
+					this.morir();
+					return true;
+				}else{
+					System.out.println("socket abierto todavia");
+				}
 				
+			} catch (Exception e) {
 				Loggeador.getLoggeador().guardar(e);
-				System.out.println("hubo un error en la conexion con un usuario. Desconectandolo.");
 				this.detenerTarea();
 				this.cerrarConexion();
 				this.morir();
@@ -236,7 +238,6 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	}
 	
 	protected boolean resultadoFinalTarea(Tarea tarea){
-		//System.out.println ("[DEBUG] FINAL: "+ hashToString (tarea.getTarea()) + " -> " + hashToString (tarea.getResultado()));
 		String resultado;
 		resultado = "USUARIO: " + this.usuario.getId() + " TAREA: " + tarea.getId() + " Parcial: " + hashToString (tarea.getResultado());
 		
@@ -312,7 +313,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		if (tarea == null) {
 			setChanged();
-			this.wdt.stop();
+			//this.wdt.stop();	//TODO descomentar
 			this.tareaEnTrabajo = null;
 			return false;
 		} else {

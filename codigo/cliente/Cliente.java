@@ -1,12 +1,15 @@
 package cliente;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import cliente.vista.ClienteJFrame;
 import mensajes.MensajePuntos;
 import mineria.*;
 
-public class Cliente {
+public class Cliente implements Observer {
 
 	private EstadoCliente estado;
 	private Integer puntos;
@@ -15,7 +18,7 @@ public class Cliente {
 	private Thread hilo;	//es el hiloConexion, es por si le queremos dar algun comando como hilo	
 	private HiloMinero hiloMinero;
 	private Usuario usuario;
-	private ModoTrabajo modoTrabajo;
+	private volatile ModoTrabajo modoTrabajo;
 	
 	private String ipPrimario;
 	private Integer puertoPrimario;
@@ -46,6 +49,7 @@ public class Cliente {
 	public boolean conectarseServidorPrimario(String ip, Integer puerto, String usuario, String password){
 		// a este metodo lo llamaria la vista
 		this.hiloConexion = new HiloConexion(this);
+		this.hiloConexion.addObserver(this);
 		if (this.hiloConexion.conectarse(ip, puerto, usuario, password) ){
 			//ya que la conexion fue exitosa guardo los datos
 			this.ipPrimario=ip;
@@ -72,6 +76,7 @@ public class Cliente {
 		this.ipBackup=null;
 		this.puertoBackup=null;
 		this.hiloConexion = new HiloConexion(this);
+		this.hiloConexion.addObserver(this);
 		vista.mostrarMsjPorConsola("Se intentara conectar al servidor backup");
 		if( this.hiloConexion.conectarseConEspera (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword(), ESPERA_RECONEXION)) {
 			this.vista.actualizarInfoServidor (this.ipPrimario, this.puertoPrimario, null, null);
@@ -85,6 +90,7 @@ public class Cliente {
 	
 	public boolean desconectarse(){
 		//lo llama la vista para cerrar la conexion "bien"
+		this.hiloConexion.enviarDesconexion();
 		this.estado=EstadoCliente.desconectado;
 		// this.hiloConexion.desconectarse(); al pedo, con cambiar el estado del cliente el hiloConecion va a terminar solo.
 		if (this.hiloMinero != null) {
@@ -203,6 +209,13 @@ public class Cliente {
 		this.ipBackup=ipBackup2;
 		this.puertoBackup=puertoBackup2;
 		this.vista.actualizarInfoServidor(this.ipPrimario,this.puertoPrimario , this.ipBackup, this.puertoBackup);
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if(arg.equals("Desconexion")){
+			this.primarioDesconecto();
+		}
 	}
 	
 }

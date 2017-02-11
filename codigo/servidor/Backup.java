@@ -1,8 +1,6 @@
 package servidor;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -21,7 +19,9 @@ private static Integer tiempoEsperaBackup=500;
 		this.logger=logger;
 		this.logger.guardar("Backup","Me creo como backup");
 		this.ipPrimario=ip;
+		this.IP=this.conseguirIP();
 		this.conectarseBD();
+		/*
 		try {
 			String ipB = (InetAddress.getLocalHost().getHostAddress());
 			this.setIP(ipB);
@@ -29,6 +29,7 @@ private static Integer tiempoEsperaBackup=500;
 		} catch (UnknownHostException e) {
 			this.logger.guardar(e);
 		}
+		*/
 		this.crearGUIBackup();
 	}
 	

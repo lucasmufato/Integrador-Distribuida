@@ -1,17 +1,19 @@
 package cliente;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Observable;
 
 import baseDeDatos.Usuario;
 import bloquesYTareas.Tarea;
 import mensajes.*;
 
-public class HiloConexion implements Runnable {
+public class HiloConexion extends Observable implements Runnable {
 	
 	protected Cliente cliente;
 	
@@ -22,7 +24,6 @@ public class HiloConexion implements Runnable {
 	protected Integer idSesion;
 	protected Usuario usuario;
 	protected static final int socketTimeout = 100;	//tiempo de espera de lectura del socket
-	
 	protected Tarea ultimaTarea;
 	
 	public HiloConexion(Cliente cliente){
@@ -46,7 +47,6 @@ public class HiloConexion implements Runnable {
 	public boolean conectarse(String ip, Integer puerto, String usuario, String password){
 		//hecho rapido para probar que algo ande
 		//La idea es que no sea asi
-		
 		MensajeLogeo msj = new MensajeLogeo(CodigoMensaje.logeo,null,usuario,password);
 		msj.setModoTrabajo(cliente.getModoTrabajo());
 		try {
@@ -78,15 +78,12 @@ public class HiloConexion implements Runnable {
 			return true;
 		} catch (UnknownHostException e) {
 			//no me pude conectar al servidor
-			//e.printStackTrace();
 			System.out.println("No se pudo encontrar el servidor :(");
 		} catch (IOException e) {
 			//otro tipo de error, ya sea de comunicacion o al crear los flujos
-			//e.printStackTrace();
 			System.out.println("Error de entrada/salida");
 		} catch (ClassNotFoundException e) {
 			//me mandaron algo que no era un objeto de la clase mensaje
-			//e.printStackTrace();
 			System.out.println("no se pudo intepretar la respuesta del servidor");
 		}
 		return false;
@@ -107,10 +104,8 @@ public class HiloConexion implements Runnable {
 		while(cliente.getEstado()!=EstadoCliente.desconectado){
 			//mientras no este desconectado
 			//leo y recibo mensajes
-			
 			try {
 				Mensaje mensajeRecibido = (Mensaje) this.leerObjetoSocket();
-				
 				switch(mensajeRecibido.getCodigo()){
 				case tarea:
 					MensajeTarea mensaje = (MensajeTarea) mensajeRecibido;
@@ -125,7 +120,9 @@ public class HiloConexion implements Runnable {
 					this.cliente.actualizarInformacionBackup(mensaje1.getIpBackup(), mensaje1.getPuertoBackup());
 					break;
 				case desconexion:
-					this.cliente.primarioDesconecto();
+					setChanged();
+					notifyObservers("Desconexion");
+					break;
 				case retransmision:
 					//le reenvio la ultima tarea, haciendole una copia y todo
 					System.err.println("le estoy reenviando una tarea");
@@ -137,8 +134,18 @@ public class HiloConexion implements Runnable {
 				}
 			} catch (java.net.SocketTimeoutException e) {
 			//no hago nada
-			}catch (IOException | ClassNotFoundException e) {
-				this.cliente.primarioDesconecto();
+			}catch (EOFException e ) {
+				if(socket.isInputShutdown()){
+					System.out.println("socket cerrado");
+					setChanged();
+					notifyObservers("Desconexion");
+				}else{
+					//System.out.println("socket abierto todavia");
+				}
+			}catch(IOException | ClassNotFoundException e){
+				e.printStackTrace(); //TODO hay q borrar
+				setChanged();
+				notifyObservers("Desconexion");
 			}
 		}
 		this.cerrarConexiones();
@@ -195,16 +202,16 @@ public class HiloConexion implements Runnable {
 		return socket.getPort();
 	}
 	
-	public Usuario getUsuarioDeCliente() {
-		Usuario usuario = null;
-		return usuario;
-	}
-	
 	private void cerrarConexiones(){
 		try {	this.flujoEntrante.close(); 	} catch (IOException e) {}
 		try { 	this.flujoSaliente.close(); 	} catch (IOException e) {}
 		try {	this.socket.close();			} catch (IOException e) {}
 		this.socket=null;
+	}
+
+	public void enviarDesconexion() {
+		Mensaje m = new Mensaje(CodigoMensaje.desconexion,null);
+		try {	this.escribirObjetoSocket(m);	} catch (IOException e) {	}
 	}
 
 }
