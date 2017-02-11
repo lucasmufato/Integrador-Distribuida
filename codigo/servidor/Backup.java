@@ -11,6 +11,7 @@ import servidor.vista.ServidorVista;
 public class Backup extends Primario {
 	
 private String ipPrimario;
+private String puertoPrimario;
 private HiloBackup conexionBackup;
 private static Integer tiempoEsperaBackup=500;
 
@@ -18,18 +19,10 @@ private static Integer tiempoEsperaBackup=500;
 		super();
 		this.logger=logger;
 		this.logger.guardar("Backup","Me creo como backup");
-		this.ipPrimario=ip;
 		this.IP=this.conseguirIP();
+		this.ipPrimario=ip;
+		this.puertoPrimario = puerto;
 		this.conectarseBD();
-		/*
-		try {
-			String ipB = (InetAddress.getLocalHost().getHostAddress());
-			this.setIP(ipB);
-			this.setPuerto(6666);
-		} catch (UnknownHostException e) {
-			this.logger.guardar(e);
-		}
-		*/
 		this.crearGUIBackup();
 	}
 	
@@ -60,7 +53,7 @@ private static Integer tiempoEsperaBackup=500;
 		
 		Thread hilo = new Thread(conexionBackup);
 		hilo.start();
-		this.vista.actualizarDatosBackup(this.IP, null);
+		this.vista.actualizarDatosBackup(this.ipPrimario, Integer.parseInt(this.puertoPrimario));
 		//lo hago esperar un poquito a que conexionBackup se conecte con el primario y cambie su estado a conectado
 		try {
 			Thread.sleep(350);
