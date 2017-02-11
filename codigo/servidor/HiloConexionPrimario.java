@@ -188,7 +188,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					this.escribirObjetoSocket(msj);
 					this.repeticiones++;
 				}
-				//this.kickDog();	//TODO descomentar
+				this.kickDog();
 				switch(msj.getCodigo()){
 				case respuestaTarea:
 					//tranformo el mensaje leido al tipo de mensaje que necesito
@@ -313,7 +313,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 		MensajeTarea mensaje = new MensajeTarea(CodigoMensaje.tarea,this.idSesion,tarea);
 		if (tarea == null) {
 			setChanged();
-			//this.wdt.stop();	//TODO descomentar
+			this.wdt.stop();
 			this.tareaEnTrabajo = null;
 			return false;
 		} else {
