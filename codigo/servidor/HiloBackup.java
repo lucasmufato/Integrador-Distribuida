@@ -122,7 +122,7 @@ public class HiloBackup extends Observable implements Runnable {
 /* procesar mensajes recibidos */
 
 	private void procesarAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msjAsignacionTarea) {
-		String resultado = "Recibi actualizaci�n: Asignaci�n de tarea a usuario.";
+		String resultado = "Recibi actualizacion: Asignaci�n de tarea a usuario.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);
@@ -134,7 +134,7 @@ public class HiloBackup extends Observable implements Runnable {
 	   }
 
 	private void procesarParcialTarea (MensajeParcialTarea msjParcial) {
-		String resultado = "Recibi actualizaci�n: Resultado parcial de tarea.";
+		String resultado = "Recibi actualizacion: Resultado parcial de tarea.";
 		this.logger.guardar("HiloBackup", resultado);
 
 		if(this.bd.setParcial(msjParcial.getTarea(), msjParcial.getUsuario().getId()) == true){
@@ -144,7 +144,7 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	private void procesarResultadoTarea (MensajeResultadoTarea msjResultadoTarea) {
-		String resultado = "Recibi actualizaci�n: Resultado final de tarea.";
+		String resultado = "Recibi actualizacion: Resultado final de tarea.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);
@@ -157,7 +157,7 @@ public class HiloBackup extends Observable implements Runnable {
 		}
 
 	private void procesarDetencionTarea (MensajeDetencionTarea msjDetencionTarea) {
-		String resultado = "Recibi actualizaci�n: Detencion de tarea.";
+		String resultado = "Recibi actualizacion: Detencion de tarea.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);
@@ -173,7 +173,7 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	private void procesarCompletitudBloque (MensajeCompletitudBloque msjBloque) {
-		String resultado = "Recibi actualizaci�n: Bloque completado.";
+		String resultado = "Recibi actualizacion: Bloque completado.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);
@@ -184,7 +184,7 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	private void procesarAsignacionPuntos (MensajeAsignacionPuntos msjPts) {
-		String resultado = "Recibi actualizaci�n: Asignaci�n de puntos a usuario.";
+		String resultado = "Recibi actualizacion: actualizacion de puntos a usuario.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);
@@ -193,7 +193,7 @@ public class HiloBackup extends Observable implements Runnable {
 	   }
 
 	private void procesarGeneracionBloque (MensajeGeneracionBloque msjGenBloque) {
-		String resultado = "Recibi actualizaci�n: Generacion de bloque.";
+		String resultado = "Recibi actualizacion: Generacion de bloque.";
 		this.logger.guardar("HiloBackup", resultado);
 
 		this.bd.generarBloqueReplicado (msjGenBloque.getIdBloque());
@@ -202,7 +202,7 @@ public class HiloBackup extends Observable implements Runnable {
 	}
 
 	private void procesarGeneracionTarea (MensajeGeneracionTarea msjTarea) {
-		String resultado = "Recibi actualizaci�n: Generacion de tarea.";
+		String resultado = "Recibi actualizacion: Generacion de tarea.";
 		this.logger.guardar("HiloBackup", resultado);
 
 		this.bd.generarTareaReplicada (msjTarea.getIdTarea(), msjTarea.getIdBloque(), msjTarea.getTarea());

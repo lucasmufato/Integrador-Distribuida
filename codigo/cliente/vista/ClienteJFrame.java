@@ -83,7 +83,7 @@ public class ClienteJFrame extends JFrame {
 		jpanel_logeo.add(lblIpServidor);
 		
 		jtext_IP = new JTextField();
-		jtext_IP.setBounds(129, 42, 150, 19);
+		jtext_IP.setBounds(139, 42, 140, 19);
 		jpanel_logeo.add(jtext_IP);
 		jtext_IP.setColumns(10);
 		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
@@ -92,7 +92,7 @@ public class ClienteJFrame extends JFrame {
 		JLabel lblPuertoServidor = new JLabel("Puerto Servidor: ");
 		lblPuertoServidor.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblPuertoServidor.setForeground(new java.awt.Color(189, 187, 185));
-		lblPuertoServidor.setBounds(305, 45, 142, 15);
+		lblPuertoServidor.setBounds(320, 45, 142, 15);
 		jpanel_logeo.add(lblPuertoServidor);
 		
 		jtext_puerto = new JTextField();
@@ -115,14 +115,14 @@ public class ClienteJFrame extends JFrame {
 		jpanel_logeo.add(lblPassword);
 		
 		jtext_usuario = new JTextField();
-		jtext_usuario.setBounds(129, 130, 150, 20);
+		jtext_usuario.setBounds(139, 130, 140, 20);
 		jpanel_logeo.add(jtext_usuario);
 		jtext_usuario.setColumns(20);
 		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
 		jtext_usuario.setText("usuario");
 		
 		jpassword = new JPasswordField();
-		jpassword.setBounds(129, 173, 150, 20);
+		jpassword.setBounds(139, 173, 140, 20);
 		jpanel_logeo.add(jpassword);
 		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
 		jpassword.setText("usuario123");
@@ -144,17 +144,17 @@ public class ClienteJFrame extends JFrame {
 			System.out.println("No se encontro la imagen ");
 		}
 		lblAcaVaEl.setHorizontalAlignment(SwingConstants.CENTER);
-		lblAcaVaEl.setBounds(305, 71, 228, 187);
+		lblAcaVaEl.setBounds(336, 71, 228, 187);
 		jpanel_logeo.add(lblAcaVaEl);
 		
 		lblModoDeTrabajo = new JLabel("Modo de Trabajo");
-		lblModoDeTrabajo.setBounds(25, 82, 114, 15);
+		lblModoDeTrabajo.setBounds(25, 86, 114, 15);
 		lblModoDeTrabajo.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblModoDeTrabajo.setForeground(new java.awt.Color(189, 187, 185));
 		jpanel_logeo.add(lblModoDeTrabajo);
 		
 		modoTrabajoComboBox = new JComboBox<String>();
-		modoTrabajoComboBox.setBounds(139, 77, 140, 24);
+		modoTrabajoComboBox.setBounds(139, 81, 140, 24);
 		modoTrabajoComboBox.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		modoTrabajoComboBox.addItem(new String("MonoProcesador"));
 		modoTrabajoComboBox.addItem(new String("MultiProcesador"));
@@ -201,36 +201,36 @@ public class ClienteJFrame extends JFrame {
 		
 		lblModo = new JLabel("Modo: ");
 		lblModo.setFont(new Font("Tahoma", Font.BOLD, 13));
-		lblModo.setBounds(0, 0, 191, 15);
+		lblModo.setBounds(10, 11, 191, 15);
 		desktopPane.add(lblModo);
 		
 		JLabel lblConexionA = new JLabel("Conexi\u00F3n a: ");
 		lblConexionA.setFont(new Font("Tahoma", Font.BOLD, 13));
-		lblConexionA.setBounds(0, 18, 171, 14);
+		lblConexionA.setBounds(10, 34, 171, 14);
 		desktopPane.add(lblConexionA);
 		
 		lblServidorPrimario = new JLabel("");
-		lblServidorPrimario.setBounds(10, 44, 171, 14);
+		lblServidorPrimario.setBounds(10, 69, 171, 14);
 		desktopPane.add(lblServidorPrimario);
 		
 		lblDireccionIp = new JLabel("");
-		lblDireccionIp.setBounds(10, 69, 171, 14);
+		lblDireccionIp.setBounds(10, 93, 171, 14);
 		desktopPane.add(lblDireccionIp);
 		
 		lblPuerto = new JLabel("");
-		lblPuerto.setBounds(10, 94, 171, 14);
+		lblPuerto.setBounds(10, 118, 171, 14);
 		desktopPane.add(lblPuerto);
 		
 		lblServidorBackup = new JLabel("");
-		lblServidorBackup.setBounds(10, 136, 171, 14);
+		lblServidorBackup.setBounds(10, 151, 171, 14);
 		desktopPane.add(lblServidorBackup);
 		
 		lblDireccionIp_1 = new JLabel("");
-		lblDireccionIp_1.setBounds(10, 161, 171, 14);
+		lblDireccionIp_1.setBounds(10, 176, 171, 14);
 		desktopPane.add(lblDireccionIp_1);
 		
 		lblPuerto_1 = new JLabel("");
-		lblPuerto_1.setBounds(10, 186, 171, 14);
+		lblPuerto_1.setBounds(10, 196, 171, 14);
 		desktopPane.add(lblPuerto_1);
 		
 		textPane = new JTextPane();

@@ -30,6 +30,7 @@ public class Primario implements Runnable {
 		protected ArrayList<HiloConexionPrimario> hilosConexiones;
 		protected Integer puerto;
 		protected String IP;
+		private Integer cantidadBloques[] = new Integer[3];
 		protected static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
 		protected static final int numTareasPorBloque = 48;
 		protected static final int numBytesPorTarea = 40;
@@ -60,6 +61,8 @@ public class Primario implements Runnable {
 			this.baseDatos.detenerTareasEnProceso(); // Por si algun cliente no se desconecto bien y quedo la tarea colgada
 			this.crearGUI();
 			this.vista.setServidorText("Servidor Primario");
+			this.inicializarCantidadBloques();
+			this.vista.actualizarInfoBloques(this.actualizarBloquesVista());
 			this.logger.guardar("Servidor", "inicio el servicio");
 			try {
 				this.sha256 = MessageDigest.getInstance ("SHA-256");
@@ -92,6 +95,25 @@ public class Primario implements Runnable {
 			return true;
 		}
 		
+		public void inicializarCantidadBloques () {
+			for (int i = 0; i < cantidadBloques.length; i++) {
+				cantidadBloques[i] = 0;
+			}
+		}
+		
+		public Integer[] actualizarBloquesVista() {
+			/* en la bd
+			 * 1 pendientee
+			 * 2 en proceso
+			 * 3 completado
+			 * */
+			this.cantidadBloques[0] = this.baseDatos.getCantidadBloques(); //TOTAL BLOQUES
+			this.cantidadBloques[2] = this.baseDatos.getInfoBloques(3); //BLOQUES COMPLETADOS
+			this.cantidadBloques[1] = this.cantidadBloques[0] - this.cantidadBloques[2]; //BLOQUES INCOMPLETOS
+			
+			return this.cantidadBloques;
+		}
+		
 		public ArrayList<Bloque> obtenerBloquesNoCompletados() {
 			ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 			return bs;
@@ -102,6 +124,7 @@ public class Primario implements Runnable {
 			if (id_generado != -1) {
 				ArrayList<Bloque> bs = baseDatos.getBloquesNoCompletados();
 				this.vista.actualizarAreadeBloques(bs);
+				this.vista.actualizarInfoBloques(this.actualizarBloquesVista());
 				this.replicador.replicarGeneracionBloque (this.baseDatos.getBloque(id_generado));
 				this.asignarTareasDeNuevoBloque();
 				return true;
@@ -135,7 +158,7 @@ public class Primario implements Runnable {
 					Socket s = this.serverSO.accept();
 					this.vista.mostrarMsjConsolaTrabajo("Se me conecto "+s);
 					this.logger.guardar("Conexiones", "Se conecto: "+s.getRemoteSocketAddress() );
-					HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos,this.replicador);
+					HiloConexionPrimario nuevaConexion = new HiloConexionPrimario(this,s,this.baseDatos,this.replicador, this.vista);
 					//UNA VEZ Q CREO LA CONEXION HAGO QUE LA VISTA LA OBSERVE
 					nuevaConexion.addObserver(this.vista);
 					this.hilosConexiones.add(nuevaConexion);

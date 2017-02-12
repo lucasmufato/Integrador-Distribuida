@@ -52,10 +52,11 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 	private Instant tiempoFin = Instant.now();
 	private Instant tiempoInicio= Instant.now();
 	
-	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd,Replicador replicador) {
+	public HiloConexionPrimario(Primario servidor,Socket s,BaseDatos bd,Replicador replicador, ServidorVista vista) {
 		this.servidor=servidor;
 		this.socket=s;
 		this.replicador=replicador;
+		this.vista = vista;
 		this.usuario= new Usuario();
 		try {
 			this.socket.setSoTimeout(socketTimeout);
@@ -196,6 +197,7 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 					if(mensaje.getTarea().getResultado()!=null){
 						//si el mensaje tiene el resultado final
 						this.resultadoFinalTarea(mensaje.getTarea());
+						
 						this.servidor.logger.guardar("Tarea","resultado final: "+ hashToString( mensaje.getTarea().getResultado()  )+" para la tarea "+mensaje.getTarea().getId() + "user: "+this.usuario.getNombre());
 					}else{
 						//si no tiene resultado final entonces tiene un resultado parcial
@@ -254,6 +256,8 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 				if (tarea.getBloque().getEstado() == EstadoBloque.completado) {
 					this.servidor.logger.guardar("bloque","El bloque "+tarea.getBloque().getId()+ "se a completado");
 					this.replicador.replicarCompletitudBloque(tarea.getBloque());
+					//HAY QUE ACTUALIZAR LA VISTA CON LA INFO DE LOS BLOQUES
+					this.vista.actualizarInfoBloques(this.servidor.actualizarBloquesVista());
 					ArrayList<Tarea> tareas = this.bd.getTareasPorBloque(tarea.getBloque().getId());
 					ArrayList<ProcesamientoTarea> lista_proc;
 					//ACA SE LLAMA A GETPROCEDIMIENTOS Y SE LE MANDA UN ID DE TAREA

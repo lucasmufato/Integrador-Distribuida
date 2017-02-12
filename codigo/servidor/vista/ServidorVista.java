@@ -41,7 +41,10 @@ import javax.swing.SwingConstants;
 import mensajes.replicacion.MensajeGeneracionTarea;
 
 import java.awt.SystemColor;
+
 import javax.swing.JSeparator;
+
+import cliente.vista.ClienteJFrame;
 
 public class ServidorVista extends JFrame implements Observer{
 	
@@ -67,8 +70,7 @@ public class ServidorVista extends JFrame implements Observer{
 	protected JLabel servidorLabel;
 	protected JLabel lblBloquesTotales;
 	protected JLabel lblBloquesCompletados;
-	protected JLabel lblBloquesTerminados;
-	protected JLabel lblBloquesRealizandose;
+	protected JLabel lblBloquesIncompletos;
 	private JLabel lblServidorBackup;
 	private JLabel lblIpBackup;
 	private JLabel lblPuertoBackup;
@@ -251,12 +253,12 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.add(btnGenerarBloques);
 		
 		this.servidorLabel = new JLabel("Tipo de Servidor");
-		servidorLabel.setBounds(283, 37, 302, 23);
+		servidorLabel.setBounds(343, 36, 302, 23);
 		servidorLabel.setForeground(new java.awt.Color(189, 187, 185));
 		jpanel_trabajo.add(servidorLabel);
 		
 		lblServidorBackup = new JLabel("Informacion del Servidor Backup:");
-		lblServidorBackup.setBounds(536, 77, 250, 15);
+		lblServidorBackup.setBounds(546, 78, 250, 15);
 		lblServidorBackup.setForeground(new java.awt.Color(189, 187, 185));
 		jpanel_trabajo.add(lblServidorBackup);
 		
@@ -271,11 +273,11 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.add(lblPuertoBackup);
 		
 		JSeparator separator = new JSeparator();
-		separator.setBounds(536, 158, 250, 2);
+		separator.setBounds(532, 157, 250, 2);
 		jpanel_trabajo.add(separator);
 		
 		lblInformacion = new JLabel("Informacion Estadistica:");
-		lblInformacion.setBounds(536, 172, 191, 15);
+		lblInformacion.setBounds(546, 171, 191, 15);
 		jpanel_trabajo.add(lblInformacion);
 		lblInformacion.setForeground(new java.awt.Color(189, 187, 185));
 		
@@ -289,15 +291,25 @@ public class ServidorVista extends JFrame implements Observer{
 		jpanel_trabajo.add(lblBloquesCompletados);
 		lblBloquesCompletados.setForeground(new java.awt.Color(189, 187, 185));
 		
-		lblBloquesTerminados = new JLabel("Bloques Incompletos:");
-		lblBloquesTerminados.setBounds(565, 253, 191, 15);
-		jpanel_trabajo.add(lblBloquesTerminados);
-		lblBloquesTerminados.setForeground(new java.awt.Color(189, 187, 185));
+		lblBloquesIncompletos = new JLabel("Bloques Incompletos:");
+		lblBloquesIncompletos.setBounds(565, 253, 191, 15);
+		jpanel_trabajo.add(lblBloquesIncompletos);
+		lblBloquesIncompletos.setForeground(new java.awt.Color(189, 187, 185));
 		
-		lblBloquesRealizandose = new JLabel("Bloques en proceso: ");
-		lblBloquesRealizandose.setBounds(565, 280, 191, 15);
-		jpanel_trabajo.add(lblBloquesRealizandose);
-		lblBloquesRealizandose.setForeground(new java.awt.Color(189, 187, 185));
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(532, 279, 250, 2);
+		jpanel_trabajo.add(separator_1);
+		
+		JLabel labelIcono = new JLabel("");
+		try{
+			labelIcono.setIcon(new ImageIcon(ClienteJFrame.class.getResource("/cliente/vista/icono.jpg")));
+		}catch(Exception e){
+			labelIcono.setBackground(Color.WHITE);
+			System.out.println("No se encontro la imagen ");
+		}
+		labelIcono.setHorizontalAlignment(SwingConstants.CENTER);
+		labelIcono.setBounds(565, 291, 172, 145);
+		jpanel_trabajo.add(labelIcono);
 		
 		this.revalidate();
 		this.repaint();
@@ -485,6 +497,18 @@ public class ServidorVista extends JFrame implements Observer{
 		
 	}
 
+	public void actualizarInfoBloques (Integer[] estados) {
+		/*lblBloquesTotales
+		lblBloquesCompletados 
+		lblBloquesIncompletos*/
+		System.out.println("actualizarInfoBloques " + estados[0]);
+		this.lblBloquesTotales.setText("Bloques totales: " + estados[0]);
+		this.lblBloquesIncompletos.setText("Bloques incompletos: " + estados[1]);
+		this.lblBloquesCompletados.setText("Bloques completados: " + estados[2]);
+		
+	}
+	
+	
 	private static Color colorEstado (EstadoTarea estado) { 			switch(estado){
 			case enProceso:
 				//PASA A COLOR CELESTE

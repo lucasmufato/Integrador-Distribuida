@@ -1103,6 +1103,49 @@ public class BaseDatos {
 		
 	}
 	
+	public synchronized Integer getInfoBloques(Integer estado) {
+		Integer cantidad = 0;
+		try {
+			String query = "SELECT count(id_bloque) as cantidad FROM BLOQUE WHERE BLOQUE.ESTADO = ? ";
+
+			PreparedStatement stm = c.prepareStatement(query);
+			
+			stm.setInt(1, estado);
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				cantidad = rs.getInt("cantidad");
+			}
+			
+		} catch (SQLException e) {
+			
+		}
+		System.out.println("cantidad de bloques con estado: " + estado + " " +  cantidad);
+		
+		return cantidad;
+	}
+	
+	public synchronized int getCantidadBloques() {
+		int cantidad = 0;
+		try {
+			String query = "SELECT count(id_bloque) as cantidad FROM BLOQUE";
+
+			PreparedStatement stm = c.prepareStatement(query);
+			
+			stm.execute();
+			ResultSet rs = stm.getResultSet();
+			if (rs.next()) {
+				cantidad = rs.getInt("cantidad");
+			}
+			
+		} catch (SQLException e) {
+			
+		}
+		System.out.println("cantida de bloques: " + cantidad);
+		
+		return cantidad;
+	}
+	
 	public synchronized boolean actualizarPuntos(Integer id_usuario, Integer puntos) {
 		try {
 			PreparedStatement stm = c.prepareStatement(
