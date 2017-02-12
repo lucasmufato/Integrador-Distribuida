@@ -112,7 +112,7 @@ public class Loggeador {
 		return true;
 	}
 
-	public boolean guardar (MensajeReplicacion mensajeReplicacion, boolean replicado) {
+	public synchronized boolean guardar (MensajeReplicacion mensajeReplicacion, boolean replicado) {
 		switch (mensajeReplicacion.getCodigo()) {
 			case parcialTarea :
 				this.baseDatos.logMensajeParcialTarea ((MensajeParcialTarea) mensajeReplicacion, replicado);

@@ -42,7 +42,6 @@ public class HiloBackup extends Observable implements Runnable {
 			this.socket = new Socket(this.ip,7567);
 			this.flujoSaliente = new ObjectOutputStream (this.socket.getOutputStream());
 			this.flujoEntrante = new ObjectInputStream (this.socket.getInputStream());
-			System.out.println("[DEBUG] Conectado a Replicador");
 			this.logger.guardar("HiloBackup", "conectado con el servidor primario en: "+ip+":"+7567);
 			this.conectado=true;
 			this.flujoSaliente.writeObject(backup.getPuerto());
@@ -125,7 +124,7 @@ public class HiloBackup extends Observable implements Runnable {
 /* procesar mensajes recibidos */
 
 	private void procesarAsignacionTareaUsuario (MensajeAsignacionTareaUsuario msjAsignacionTarea) {
-		String resultado = "Recibi actualizacion: Asignaci�n de tarea a usuario.";
+		String resultado = "Recibi actualizacion: Asignacion de tarea a usuario.";
 		this.logger.guardar("HiloBackup", resultado);
 		setChanged();
 		notifyObservers(resultado);

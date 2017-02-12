@@ -1259,6 +1259,7 @@ public class BaseDatos {
 			Date fecha = result.getTimestamp (3);
 			mensaje = new MensajeParcialTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
+			mensaje.setNroVersion (version);
 		}
 		return mensaje;
 	}
