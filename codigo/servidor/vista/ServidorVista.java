@@ -61,6 +61,7 @@ public class ServidorVista extends JFrame implements Observer{
 	protected JTextPane textPaneConsola;
 	protected JPanel panel;
 	protected JPanel jpanel_trabajo;
+	protected JButton btnGenerarBloques;
 	protected JTextPane textPaneConsolaTrabajo;
 	protected JLabel lblIPServidor;
 	protected JLabel lblPuertoServidor;
@@ -94,7 +95,7 @@ public class ServidorVista extends JFrame implements Observer{
 	
 	public ServidorVista(Backup backup){
 		this.setMinimumSize(new Dimension(this.ancho,this.alto)); 
-		setTitle("Servidor Backup BitCoin Mining");
+		setTitle("Servidor BitCoin Mining - Backup");
 		this.servidor = backup;
 		this.crearVista(true);
 	}
@@ -237,15 +238,13 @@ public class ServidorVista extends JFrame implements Observer{
 		scrollBarMsj.setBounds(10, 248, this.ancho-(800-512), this.alto-(500-183));
 		jpanel_trabajo.add(scrollBarMsj);
 		
-		JButton btnGenerarBloques = new JButton("Generar bloques de trabajo");
+		btnGenerarBloques = new JButton("Generar bloques de trabajo");
 		if(secundario == true){
 			btnGenerarBloques.setVisible(false);
 		}
 		btnGenerarBloques.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (secundario == false) {
-					servidor.generarBloque();
-				}
+				servidor.generarBloque();
 			}
 		});
 		btnGenerarBloques.setBackground(SystemColor.inactiveCaption);
@@ -526,6 +525,10 @@ public class ServidorVista extends JFrame implements Observer{
 	public void setServidorText(String texto){
 		this.servidorLabel.setText(texto);
 	}
+
+	public void setTituloVentana (String titulo) {
+		this.setTitle (titulo);
+	}
 	
 	private void morir() {
 		this.dispose();
@@ -551,5 +554,9 @@ public class ServidorVista extends JFrame implements Observer{
 	
 	public void setNombrePanelInformacio(String PrimarioOBackup){
 		this.lblServidorBackup.setText("Informacion del Servidor "+PrimarioOBackup);
+	}
+
+	public void mostrarBotonGenerarBloques () {
+		this.btnGenerarBloques.setVisible (true);
 	}
 }

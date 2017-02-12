@@ -37,12 +37,6 @@ private static Integer tiempoEsperaBackup=500;
 		this.vista.crearAreadeBloques(super.obtenerBloquesNoCompletados());
 	}
 	
-	/*
-	public void esperarActualizaciones() {
-		//pase todo al metodo run
-	}
-	*/
-	
 	@Override
 	public void run(){
 		this.crearGUIBackup2();
@@ -79,6 +73,8 @@ private static Integer tiempoEsperaBackup=500;
 	public boolean pasarAPrimario(){
 		//parte que va en el constructor de primario
 		this.vista.setServidorText("Pasando a servidor primario");
+		this.vista.setTitle("Servidor BitCoin Mining");
+		this.vista.mostrarBotonGenerarBloques();
 		this.estado=EstadoServidor.desconectado;
 		this.hilosConexiones = new ArrayList<HiloConexionPrimario>();
 		this.hilos = new ArrayList<Thread>();

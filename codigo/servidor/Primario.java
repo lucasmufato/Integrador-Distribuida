@@ -191,7 +191,6 @@ public class Primario implements Runnable {
 				this.puerto=puerto;
 				this.serverSO = new ServerSocket(this.puerto);
 				this.serverSO.setSoTimeout(tiempoEspera);
-				this.vista.MostrarPopUp("Servidor conectado con exito");
 				this.logger.guardar("Servidor", "Solicite el puerto: "+this.puerto +" con exito.");
 				return true;
 			} catch (IOException e) {
