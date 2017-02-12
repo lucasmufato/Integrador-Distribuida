@@ -689,6 +689,7 @@ public class BaseDatos {
 
 	public synchronized boolean generarBloqueReplicado (int id_bloque) {
 		try {
+			this.setNumeroSecuencia ("bloque_id_bloque_seq", id_bloque);
 			PreparedStatement stm = c.prepareStatement ("INSERT INTO bloque (id_bloque, estado) SELECT ?, id_estado_bloque FROM estado_bloque WHERE estado = 'pendiente'");
 			stm.setInt (1, id_bloque);
 			return stm.execute();
@@ -701,6 +702,7 @@ public class BaseDatos {
 
 	public synchronized boolean generarTareaReplicada (int id_tarea, int id_bloque, byte[] bytes_tarea) {
 		try {
+			this.setNumeroSecuencia ("tarea_id_tarea_seq", id_tarea);
 			PreparedStatement stm = c.prepareStatement ("INSERT INTO tarea (id_tarea, bloque, header_bytes, estado) SELECT ?, ?, ?, id_estado_tarea FROM estado_tarea WHERE estado = 'pendiente'");
 			stm.setInt (1, id_tarea);
 			stm.setInt (2, id_bloque);
@@ -1666,6 +1668,19 @@ public class BaseDatos {
 		}
 			
 	}
+
+	private synchronized void setNumeroSecuencia (String nombre_secuencia, int numero) {
+		try{
+			PreparedStatement stm = this.c.prepareStatement("SELECT setval (?, ?)");
+			stm.setString (1, nombre_secuencia);
+			stm.setInt (2, numero);
+			stm.execute();
+		} catch (Exception e) {
+			this.logger.guardar(e);
+		}
+			
+	}
+
 
 	private synchronized void insertarMensajeReplicable (MensajeReplicacion msj, String query, Object[] parametros) {
 		try {
