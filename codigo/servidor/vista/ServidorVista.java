@@ -78,7 +78,7 @@ public class ServidorVista extends JFrame implements Observer{
 	private JScrollPane scrollBarMsj;
 	private JPanel panelClientes;
 	
-	//TAMA�O
+	//TAMANiO
 	protected Integer alto = 500;
 	protected Integer ancho = 800;
 	
@@ -123,7 +123,7 @@ public class ServidorVista extends JFrame implements Observer{
 		
 		//TEXFIELD DEL PUERTO
 		textFieldPuerto = new JTextField();
-		textFieldPuerto.setBackground(Color.DARK_GRAY);
+		textFieldPuerto.setBackground(Color.WHITE);
 		textFieldPuerto.setForeground(Color.BLACK);
 		textFieldPuerto.setEnabled(true);
 		textFieldPuerto.setEditable(true);

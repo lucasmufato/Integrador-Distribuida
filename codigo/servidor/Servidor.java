@@ -46,7 +46,7 @@ public class Servidor {
 		String ipPrimario=null;
 		try {
 			
-			this.ventana.agregarLine("Buscando un servidor primario en la red local(2 segundos)...");
+			this.ventana.agregarLine("Buscando un servidor primario en la red local (2 segundos)...");
 			this.logger.guardar("inicio","Buscando un servidor primario en la red local");
 			ipPrimario=BusquedaUDP.buscarPrimario(logger);
 		} catch (SocketException | UnknownHostException e1) {
