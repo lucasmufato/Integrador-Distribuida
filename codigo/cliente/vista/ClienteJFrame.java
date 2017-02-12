@@ -307,7 +307,7 @@ public class ClienteJFrame extends JFrame {
 		}
 	}
 	
-	public synchronized void mostrarPanelLogeo(){
+	public void mostrarPanelLogeo(){
 		jpanel_trabajo.setVisible(false);
 		jpanel_logeo.setVisible(true);
 		this.repaint();
@@ -318,7 +318,7 @@ public class ClienteJFrame extends JFrame {
 		//this.textPaneConsola.setText(msj + textPaneConsola.getText());
 	}
 	
-	public synchronized void crearPanelTrabajo() {
+	public void crearPanelTrabajo() {
 		//LUEGO DEL LOGUEO AUTOMATICAMENTE SE ABRE LA SEGUNDA PANTALLA
 		String usuario = this.jtext_usuario.getText();
 		jpanel_logeo.setVisible(false);
