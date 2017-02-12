@@ -380,6 +380,14 @@ public class BaseDatos {
 			if(stm.executeUpdate() < 1) {
 				return false;
 			}
+			/* Por ultimo, establecemos el estado del bloque a "en proceso" */
+				Bloque bloque = tarea.getBloque();
+				if (bloque != null) {
+					Integer id_bloque = bloque.getId();
+					if (id_bloque != null) {
+						this.setEstadoBloque (id_bloque, "en proceso");
+					}
+				}
 		} catch (Exception e) {
 			this.logger.guardar(e);
 			return false;
