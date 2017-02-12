@@ -1256,7 +1256,7 @@ public class BaseDatos {
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
 			Usuario usuario = this.getUsuario (result.getInt(2));
-			Date fecha = result.getDate (3);
+			Date fecha = result.getTimestamp (3);
 			mensaje = new MensajeParcialTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
 		}
@@ -1279,7 +1279,7 @@ public class BaseDatos {
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt(1));
 			Usuario usuario = this.getUsuario (result.getInt(2));
-			Date fecha = result.getDate (3);
+			Date fecha = result.getTimestamp (3);
 			mensaje = new MensajeResultadoTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1302,7 +1302,7 @@ public class BaseDatos {
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			Bloque bloque = this.getBloque (result.getInt(1));
-			Date fecha = result.getDate (2);
+			Date fecha = result.getTimestamp (2);
 			mensaje = new MensajeCompletitudBloque (bloque);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1328,7 +1328,7 @@ public class BaseDatos {
 			Tarea tarea = this.getTareaById (result.getInt (1));
 			Usuario usuario = this.getUsuario (result.getInt (2));
 			int idProcesamiento = result.getInt(3);
-			Date fecha = result.getDate (4);
+			Date fecha = result.getTimestamp (4);
 			mensaje = new MensajeAsignacionTareaUsuario (tarea, usuario, idProcesamiento);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1352,7 +1352,7 @@ public class BaseDatos {
 		if (result.next()) {
 			int puntos = result.getInt (1);
 			Usuario usuario = this.getUsuario (result.getInt(2));
-			Date fecha = result.getDate (3);
+			Date fecha = result.getTimestamp (3);
 			mensaje = new MensajeAsignacionPuntos (puntos, usuario);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1377,7 +1377,7 @@ public class BaseDatos {
 		if (result.next()) {
 			Tarea tarea = this.getTareaById (result.getInt (1));
 			Usuario usuario = this.getUsuario (result.getInt (2));
-			Date fecha = result.getDate ("fecha");
+			Date fecha = result.getTimestamp ("fecha");
 			mensaje = new MensajeDetencionTarea (tarea, usuario);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1399,7 +1399,7 @@ public class BaseDatos {
 		ResultSet result = stm.executeQuery ();
 		if (result.next()) {
 			int idBloque = result.getInt (1);
-			Date fecha = result.getDate (2);
+			Date fecha = result.getTimestamp (2);
 			mensaje = new MensajeGeneracionBloque (idBloque);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1425,7 +1425,7 @@ public class BaseDatos {
 			byte[] bytesTarea = result.getBytes (1);
 			int idTarea = result.getInt (2);
 			int idBloque = result.getInt(3);
-			Date fecha = result.getDate (4);
+			Date fecha = result.getTimestamp (4);
 			mensaje = new MensajeGeneracionTarea (idTarea, idBloque, bytesTarea);
 			mensaje.setFecha (fecha);
 			mensaje.setNroVersion (version);
@@ -1647,11 +1647,23 @@ public class BaseDatos {
 			param2[i] = new Long (msj.getNroVersion ());
 			param2[i+1] = msj.getFecha ();
 			this.insertParametrizado (query, param2);
+			this.setSeqLogReplicacion (msj.getNroVersion ());
 		} else {
 			query += "RETURNING nro_version, fecha";
 			this.insertarMensajeReplicable (msj, query, parametros);
 		}
 
+	}
+
+	private synchronized void setSeqLogReplicacion (long nro_version) {
+		try{
+			PreparedStatement stm = this.c.prepareStatement("SELECT setval ('log_replicacion_nro_version_seq', ?)");
+			stm.setLong (1, nro_version);
+			stm.execute();
+		} catch (Exception e) {
+			this.logger.guardar(e);
+		}
+			
 	}
 
 	private void insertarMensajeReplicable (MensajeReplicacion msj, String query, Object[] parametros) {
