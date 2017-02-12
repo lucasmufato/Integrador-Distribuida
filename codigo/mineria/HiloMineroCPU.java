@@ -54,7 +54,8 @@ public class HiloMineroCPU extends HiloMinero {
 
 		byte[] hash;
 
-		while (!encontrado) {
+		HiloMinero.trabajando = true;
+		while ((!encontrado) && HiloMinero.trabajando) {
 			hash = this.sha256.digest(concatenacion);
 
 			if (esMenor (hash, limite)) {

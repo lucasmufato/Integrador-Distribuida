@@ -69,25 +69,7 @@ public class Cliente implements Observer {
 			return false;
 		}
 	}
-	
-	public boolean conectarseServidorBackup(){
-		this.ipPrimario=this.ipBackup;
-		this.puertoPrimario=this.puertoBackup;
-		this.ipBackup=null;
-		this.puertoBackup=null;
-		this.hiloConexion = new HiloConexion(this);
-		this.hiloConexion.addObserver(this);
-		vista.mostrarMsjPorConsola("Se intentara conectar al servidor backup");
-		if( this.hiloConexion.conectarseConEspera (this.ipPrimario, this.puertoPrimario, usuario.getNombre(), usuario.getPassword(), ESPERA_RECONEXION)) {
-			this.vista.actualizarInfoServidor (this.ipPrimario, this.puertoPrimario, null, null);
-			hilo = new Thread(hiloConexion);
-			hilo.start();
-			vista.mostrarMsjPorConsola("Conexion exitosa con el servidor de Backup");
-			return true;
-		}
-		return false;
-	}
-	
+
 	public boolean desconectarse(){
 		//lo llama la vista para cerrar la conexion "bien"
 		this.hiloConexion.enviarDesconexion();
@@ -178,9 +160,11 @@ public class Cliente implements Observer {
 			this.hiloMinero.detener();
 		}
 		if(this.tengoServidorBackup() == true){
-			vista.mostrarMsjPorConsola("intentando conectar al servidor de backup, mientras sigo procesando la tarea");
-			this.conectarseServidorBackup();
+			vista.mostrarMsjPorConsola("Se ha perdido la conexion con el Servidor Primario. Hay informacion de Servidor Backup.");
+			vista.completarFormulario (this.ipBackup, this.puertoBackup, this.usuario.getNombre(), this.usuario.getPassword());
+			vista.clickBotonConectarse();
 		}else{
+		
 			vista.mostrarMsjPorConsola("no tengo informacion del backup, asi que dejo de procesar y quedo en estado muerto");
 		}
 	}

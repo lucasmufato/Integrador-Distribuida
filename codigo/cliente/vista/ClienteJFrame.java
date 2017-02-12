@@ -27,6 +27,9 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import javax.swing.JComboBox;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class ClienteJFrame extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
@@ -54,6 +57,7 @@ public class ClienteJFrame extends JFrame {
 	private JTextPane textPane;
 	private JLabel lblModo;
 	private JLabel lblTarea;
+	private JButton btnConectarse;
 
 	public ClienteJFrame(Cliente c) {
 		this.cliente=c;
@@ -127,7 +131,7 @@ public class ClienteJFrame extends JFrame {
 		//PONGO EL CAMPO PARA AHORRAR TIEMPO DE PRUEBA
 		jpassword.setText("usuario123");
 		
-		JButton btnConectarse = new JButton("Conectarse");
+		btnConectarse = new JButton("Conectarse");
 		btnConectarse.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				conectarse();
@@ -376,5 +380,21 @@ public class ClienteJFrame extends JFrame {
 	
 	public void escribirTarea(Integer nroTarea){
 		this.lblTarea.setText("Tarea:"+nroTarea);
+	}
+
+	public void completarFormulario (String host, Integer port, String usuario, String password) {
+		jtext_IP.setText (host);
+		jtext_puerto.setText (port.toString());
+		jtext_usuario.setText (usuario);
+		jpassword.setText (password);
+	}
+
+	public void clickBotonConectarse (){
+		Timer timer = new Timer (true);
+		timer.schedule (new TimerTask() {
+			public void run() {
+				btnConectarse.doClick();
+			}
+		}, 2000);
 	}
 }
