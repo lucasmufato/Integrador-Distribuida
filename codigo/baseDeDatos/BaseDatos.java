@@ -60,7 +60,7 @@ public class BaseDatos {
 		}
 	}
 
-	public void cargarConfiguracion (Properties config) {
+	public synchronized void cargarConfiguracion (Properties config) {
 		this.hostBD = config.getProperty ("host", "localhost");
 		this.nombreBD = config.getProperty ("nombreBD", "finaldistribuido");
 		this.puertoBD = Integer.parseInt (config.getProperty ("puertoBD", "5432"));
@@ -68,7 +68,7 @@ public class BaseDatos {
 		this.passwordBD = config.getProperty ("password", "sistemas");
 	}
 
-	public boolean conectarse(){
+	public synchronized boolean conectarse(){
 		try {
 	         Class.forName("org.postgresql.Driver");
 	         c = DriverManager.getConnection("jdbc:postgresql://"+this.hostBD+":"+this.puertoBD+"/"+this.nombreBD, this.userBD, this.passwordBD);
@@ -79,7 +79,7 @@ public class BaseDatos {
 	      }
 	}
 
-	public Integer autenticar(String usuario, String password){
+	public synchronized Integer autenticar(String usuario, String password){
 		//este metodo recibe el nombre de usuario y la password para hacer el logeo
 		//si el logeo no funciona (error de user y password) devuelve nulo, sino crea y devuelve un ID_SESION
 		if(usuario == null || password == null){
@@ -109,7 +109,7 @@ public class BaseDatos {
 		}
 	}
 
-	public boolean desconectarse(){
+	public synchronized boolean desconectarse(){
 		try {
 			c.close();
 			return true;
@@ -1190,7 +1190,7 @@ public class BaseDatos {
 		return lista;
 	}
 
-	private ResultSet selectRegistrosCambios (long desdeVersion) throws Exception{
+	private synchronized ResultSet selectRegistrosCambios (long desdeVersion) throws Exception{
 		String query =
 		"SELECT "+
 			"LOG_REPLICACION.nro_version AS nro_version, "+
@@ -1208,7 +1208,7 @@ public class BaseDatos {
 		
 	}
 
-	private MensajeReplicacion getMensajeReplicacion(int version, String tipo) throws Exception {
+	private synchronized MensajeReplicacion getMensajeReplicacion(int version, String tipo) throws Exception {
 		MensajeReplicacion mensaje = null;
 			switch (tipo) {
 				case "parcialTarea":
@@ -1239,7 +1239,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 	
-	private MensajeReplicacion getMensajeParcialTarea (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeParcialTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1262,7 +1262,7 @@ public class BaseDatos {
 		}
 		return mensaje;
 	}
-	private MensajeReplicacion getMensajeResultadoTarea (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeResultadoTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1287,7 +1287,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeCompletitudBloque (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeCompletitudBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1310,7 +1310,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionTareaUsuario (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeAsignacionTareaUsuario (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1336,7 +1336,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeAsignacionPuntos (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeAsignacionPuntos (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1361,7 +1361,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeDetencionTarea (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeDetencionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1385,7 +1385,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionBloque (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeGeneracionBloque (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1407,7 +1407,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	private MensajeReplicacion getMensajeGeneracionTarea (long version) throws Exception {
+	private synchronized MensajeReplicacion getMensajeGeneracionTarea (long version) throws Exception {
 		MensajeReplicacion mensaje = null;
 		PreparedStatement stm = this.c.prepareStatement (
 		"SELECT "+
@@ -1433,7 +1433,7 @@ public class BaseDatos {
 		return mensaje;
 	}
 
-	public long getVersion () {
+	public synchronized long getVersion () {
 		try {
 			Statement stm = this.c.createStatement ();
 			ResultSet result = stm.executeQuery(
@@ -1666,7 +1666,7 @@ public class BaseDatos {
 			
 	}
 
-	private void insertarMensajeReplicable (MensajeReplicacion msj, String query, Object[] parametros) {
+	private synchronized void insertarMensajeReplicable (MensajeReplicacion msj, String query, Object[] parametros) {
 		try {
 			PreparedStatement stm = this.c.prepareStatement (query);
 			this.setParametrosStatement (stm, parametros);
@@ -1694,7 +1694,7 @@ public class BaseDatos {
 		}
 	}
 
-	private void setParametrosStatement (PreparedStatement stm, Object[] params) throws Exception {
+	private synchronized void setParametrosStatement (PreparedStatement stm, Object[] params) throws Exception {
 		for (int i = 0; i < params.length; i++) {
 			if (params[i] instanceof Integer) {
 				stm.setInt(i+1, (Integer) params[i]);
@@ -1714,7 +1714,7 @@ public class BaseDatos {
 		}
 	}
 
-	public void setLogger(Loggeador logger) {
+	public synchronized void setLogger(Loggeador logger) {
 		this.logger = logger;
 	}
 
@@ -1723,7 +1723,7 @@ public class BaseDatos {
 		this.cacheTareas = new HashMap <Integer, Tarea> ();
 	}
 
-	public String cacheInfo () {
+	public synchronized String cacheInfo () {
 		return	
 		"Tareas en cache: " + this.cacheTareas.size() +
 		"\nBloques en cache: " + this.cacheBloques.size();
