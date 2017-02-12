@@ -48,12 +48,13 @@ private static Integer tiempoEsperaBackup=500;
 		this.crearGUIBackup2();
 		//DESPUES DE QUE YA TENGA LA VISTA, VOY A CREAR EL HILO Q SE COMUNICARA CON REPLICADOR
 		conexionBackup = new HiloBackup(this, this.ipPrimario, this.baseDatos,this.logger);
-		
+		this.vista.actualizarDatosBackup(this.ipPrimario, Integer.parseInt(this.puertoPrimario));
+		this.vista.actualizarInfoBloques(this.actualizarBloquesVista());
 		conexionBackup.addObserver(this.vista);
 		
 		Thread hilo = new Thread(conexionBackup);
 		hilo.start();
-		this.vista.actualizarDatosBackup(this.ipPrimario, Integer.parseInt(this.puertoPrimario));
+		
 		//lo hago esperar un poquito a que conexionBackup se conecte con el primario y cambie su estado a conectado
 		try {
 			Thread.sleep(350);

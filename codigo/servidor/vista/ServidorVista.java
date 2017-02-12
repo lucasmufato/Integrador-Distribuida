@@ -501,7 +501,6 @@ public class ServidorVista extends JFrame implements Observer{
 		/*lblBloquesTotales
 		lblBloquesCompletados 
 		lblBloquesIncompletos*/
-		System.out.println("actualizarInfoBloques " + estados[0]);
 		this.lblBloquesTotales.setText("Bloques totales: " + estados[0]);
 		this.lblBloquesIncompletos.setText("Bloques incompletos: " + estados[1]);
 		this.lblBloquesCompletados.setText("Bloques completados: " + estados[2]);

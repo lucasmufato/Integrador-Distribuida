@@ -1120,7 +1120,6 @@ public class BaseDatos {
 		} catch (SQLException e) {
 			
 		}
-		System.out.println("cantidad de bloques con estado: " + estado + " " +  cantidad);
 		
 		return cantidad;
 	}
@@ -1141,7 +1140,6 @@ public class BaseDatos {
 		} catch (SQLException e) {
 			
 		}
-		System.out.println("cantida de bloques: " + cantidad);
 		
 		return cantidad;
 	}

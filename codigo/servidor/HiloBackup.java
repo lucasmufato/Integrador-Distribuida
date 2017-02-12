@@ -28,6 +28,7 @@ public class HiloBackup extends Observable implements Runnable {
 		this.ip = ipPrimario;
 		this.bd = bd;
 		this.logger=logger;
+		
 	}
 
 	@Override
@@ -70,12 +71,14 @@ public class HiloBackup extends Observable implements Runnable {
 						break;
 					case completitudBloque:
 						this.procesarCompletitudBloque ((MensajeCompletitudBloque) msj);
+						this.backup.vista.actualizarInfoBloques(this.backup.actualizarBloquesVista());
 						break;
 					case asignacionPuntos:
 						this.procesarAsignacionPuntos ((MensajeAsignacionPuntos) msj);
 						break;
 					case generacionBloque:
 						this.procesarGeneracionBloque ((MensajeGeneracionBloque) msj);
+						this.backup.vista.actualizarInfoBloques(this.backup.actualizarBloquesVista());
 						break;
 					case generacionTarea:
 						cont++;
