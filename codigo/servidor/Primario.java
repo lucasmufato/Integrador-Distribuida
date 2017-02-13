@@ -32,7 +32,7 @@ public class Primario implements Runnable {
 		protected String IP;
 		private Integer cantidadBloques[] = new Integer[3];
 		protected static final Integer tiempoEspera = 1000;		//esta variables sirve para que no se queda trabado para siempre esperando conexiones
-		protected static final int numTareasPorBloque = 48;
+		protected static final int numTareasPorBloque = 16;
 		protected static final int numBytesPorTarea = 40;
 		
 		//variables para la vista
@@ -180,6 +180,9 @@ public class Primario implements Runnable {
 					this.logger.guardar(e);
 				} catch (InterruptedException e) {
 					//tampoco importa si es interrumpido
+				}catch(Exception e){
+					this.logger.guardar(e);
+					
 				}
 			}
 			this.logger.guardar("Servidor", "Dejo de esperar conexiones.");
@@ -243,14 +246,20 @@ public class Primario implements Runnable {
 
 		@Override
 		public void run() {
-			//para el servicio UDP
-			this.servicioUDP= new BusquedaUDP(Integer.valueOf(puerto),this.logger);
-			Thread hiloServicioUDP = new Thread(this.servicioUDP);
-			hiloServicioUDP.start();
+			try{
+				//para el servicio UDP
+				this.servicioUDP= new BusquedaUDP(Integer.valueOf(puerto),this.logger);
+				Thread hiloServicioUDP = new Thread(this.servicioUDP);
+				hiloServicioUDP.start();
+				
+				this.CrearReplicador();
+				this.crearGUI2();
+				this.esperarClientes();
+			}catch(Exception e){
+				this.logger.guardar(e);
+				this.desconectarse();
+			}
 			
-			this.CrearReplicador();
-			this.crearGUI2();
-			this.esperarClientes();
 		}
 
 		public void eliminarHiloConexion(HiloConexionPrimario hiloConexionPrimario) {

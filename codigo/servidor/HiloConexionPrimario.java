@@ -85,14 +85,20 @@ public class HiloConexionPrimario extends Observable implements Runnable, Watchd
 
 	@Override
 	public void run() {
-		//hago el logeo
-		if(this.clienteLogeo() ){
-			//si el cliente se logra autenticar comienzo al intercambiar mensajes, enviando tareas, y recibiendo respuestas
-			this.intercambioDeTarea();
-		}else{
+		try{
+			//hago el logeo
+			if(this.clienteLogeo() ){
+				//si el cliente se logra autenticar comienzo al intercambiar mensajes, enviando tareas, y recibiendo respuestas
+				this.intercambioDeTarea();
+			}else{
+				this.cerrarConexion();
+				this.morir();
+			}
+		}catch(Exception e){
 			this.cerrarConexion();
 			this.morir();
 		}
+		
 		
 	}
 	
