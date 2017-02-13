@@ -134,7 +134,7 @@ public class HiloConexion extends Observable implements Runnable {
 					//System.out.println("socket abierto todavia");
 				}
 			}catch(IOException | ClassNotFoundException e){
-				e.printStackTrace(); //TODO hay q borrar
+				//e.printStackTrace(); //TODO hay q borrar
 				setChanged();
 				notifyObservers("Desconexion");
 			}
